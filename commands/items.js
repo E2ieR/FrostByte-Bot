@@ -11,7 +11,6 @@ const shopSessions = new Map();
 // ─── inventory page sessions (memory) ─────────────────────────────────────
 const invSessions = new Map();
 
-const PAGE_SIZE = 5;
 
 function typeEmoji(item, itemTypes = []) {
     if (item.itemEmoji) return item.itemEmoji;
@@ -70,41 +69,93 @@ function marketTag(item) {
 }
 
 function buildShopEmbed(items, page, guild, config) {
-    const start      = page * PAGE_SIZE;
-    const pageItems  = items.slice(start, start + PAGE_SIZE);
-    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+    const item   = items[page];
+    const total  = items.length;
+    const price  = getEffectivePrice(item);
+    const mTag   = marketTag(item);
+    const tEmoji = typeEmoji(item, config.storeItemTypes || []);
+    const cur    = config.currencyEmoji || '💰';
 
-    const lines = pageItems.map((item, i) => {
-        const price = getEffectivePrice(item);
-        const stock = item.unlimitedStock ? '♾️' : `📦${item.stock}`;
-        const desc  = (item.description || '').substring(0, 50);
-        const cat   = item.category ? `[${item.category}] ` : '';
-        const mTag  = marketTag(item);
-        const tEmoji = typeEmoji(item, config.storeItemTypes || []);
-        return `**${start + i + 1}. ${tEmoji} ${item.itemName}** — ${price.toLocaleString()} ${config.currencyEmoji || '💰'}${mTag}\n　${cat}${stock}${desc ? ` · ${desc}` : ''}`;
-    });
+    const stockVal = item.unlimitedStock ? '♾️ ไม่จำกัด' : `${item.stock} ชิ้น`;
+    const typeVal  = item.itemType ? `${tEmoji} ${item.itemType}` : null;
+    const catVal   = item.category || null;
 
-    return new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setColor(0x5865F2)
-        .setTitle(`🛒 ร้านค้า — หน้า ${page + 1}/${totalPages}`)
-        .setDescription(lines.join('\n\n') || 'ไม่มีสินค้า')
-        .setFooter({ text: `สินค้าทั้งหมด ${items.length} ชิ้น · ใช้ /buy <ชื่อ> เพื่อซื้อ` });
+        .setTitle(`${tEmoji} ${item.itemName}`)
+        .setFooter({ text: `สินค้า ${page + 1} / ${total}  ·  ${guild.name}` });
+
+    if (item.description) embed.setDescription(item.description);
+
+    embed.addFields(
+        { name: `${cur} ราคา`, value: `**${price.toLocaleString()}** ${cur}${mTag}`, inline: true },
+        { name: '📦 คลัง',    value: stockVal, inline: true }
+    );
+
+    if (typeVal || catVal) {
+        const extra = [typeVal && `🏷️ ${item.itemType}`, catVal && `🗂️ ${item.category}`].filter(Boolean).join('  ·  ');
+        embed.addFields({ name: '​', value: extra, inline: false });
+    }
+
+    if (item.marketEnabled) {
+        const base = item.basePrice || item.price;
+        const cur2 = item.currentPrice || base;
+        const pct  = Math.round((cur2 - base) / base * 100);
+        embed.addFields({
+            name:  '📊 ราคาตลาด',
+            value: `ฐาน **${base.toLocaleString()}** → ปัจจุบัน **${cur2.toLocaleString()}** (${pct >= 0 ? '+' : ''}${pct}%)`,
+            inline: false
+        });
+    }
+
+    if (item.itemImage) embed.setThumbnail(item.itemImage);
+
+    return embed;
 }
 
-function buildShopRow(items, page, userId) {
-    const totalPages = Math.ceil(items.length / PAGE_SIZE);
-    return new ActionRowBuilder().addComponents(
+function buildShopComponents(items, page, userId) {
+    const item  = items[page];
+    const total = items.length;
+    const price = getEffectivePrice(item);
+    const avail = item.unlimitedStock ? Infinity : item.stock;
+
+    const navRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`shop_prev_${userId}`)
-            .setLabel('◀ หน้าก่อน')
+            .setEmoji('◀️')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(page === 0),
         new ButtonBuilder()
-            .setCustomId(`shop_next_${userId}`)
-            .setLabel('หน้าถัดไป ▶')
+            .setCustomId(`shop_pg_${userId}`)
+            .setLabel(`${page + 1} / ${total}`)
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(page >= totalPages - 1)
+            .setDisabled(true),
+        new ButtonBuilder()
+            .setCustomId(`shop_next_${userId}`)
+            .setEmoji('▶️')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page >= total - 1)
     );
+
+    const buyRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`shop_buy1_${userId}`)
+            .setLabel(`🛒 ซื้อ x1  (${price.toLocaleString()})`)
+            .setStyle(ButtonStyle.Success)
+            .setDisabled(avail < 1),
+        new ButtonBuilder()
+            .setCustomId(`shop_buy5_${userId}`)
+            .setLabel(`x5  (${(price * 5).toLocaleString()})`)
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(avail < 5),
+        new ButtonBuilder()
+            .setCustomId(`shop_buy10_${userId}`)
+            .setLabel(`x10  (${(price * 10).toLocaleString()})`)
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(avail < 10)
+    );
+
+    return [navRow, buyRow];
 }
 
 // ─── /shop ─────────────────────────────────────────────────────────────────
@@ -118,18 +169,18 @@ const shop = {
         if (!items.length) return interaction.reply({ content: '🛒 ร้านค้ายังว่างเปล่า', ephemeral: true });
 
         const page = 0;
-        shopSessions.set(`${userId}-${guildId}`, { page, items: items.map(i => ({ ...i._doc || i })), guildId });
+        shopSessions.set(`${userId}-${guildId}`, { page, items: items.map(i => i._doc ? { ...i._doc } : { ...i }), config: { currencyEmoji: config.currencyEmoji, storeItemTypes: config.storeItemTypes } });
 
         return interaction.reply({
             embeds:     [buildShopEmbed(items, page, interaction.guild, config)],
-            components: [buildShopRow(items, page, userId)]
+            components: buildShopComponents(items, page, userId)
         });
     }
 };
 
-// ─── shop button handler — export แยกให้ index.js เรียก ───────────────────
+// ─── shop button handler ───────────────────────────────────────────────────
 async function handleShopButton(interaction) {
-    const parts   = interaction.customId.split('_'); // shop_prev/next_userId
+    const parts   = interaction.customId.split('_'); // shop_prev/next/buy1/buy5/buy10/pg_userId
     const action  = parts[1];
     const ownerId = parts[2];
 
@@ -140,22 +191,93 @@ async function handleShopButton(interaction) {
     const { id: guildId } = interaction.guild;
     const key     = `${userId}-${guildId}`;
     const session = shopSessions.get(key);
-    if (!session) return interaction.reply({ content: '❌ Session หมดอายุ ใช้ /shop ใหม่ครับ', ephemeral: true });
+    if (!session) return interaction.reply({ content: '❌ Session หมดอายุ ใช้ /shop ใหม่', ephemeral: true });
 
-    const config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
     let { page, items } = session;
 
-    const totalPages = Math.ceil(items.length / PAGE_SIZE);
-    if (action === 'prev') page = Math.max(0, page - 1);
-    if (action === 'next') page = Math.min(totalPages - 1, page + 1);
+    // ─── เลื่อนดูสินค้า ────────────────────────────────────────────────────
+    if (action === 'prev' || action === 'next') {
+        if (action === 'prev') page = Math.max(0, page - 1);
+        if (action === 'next') page = Math.min(items.length - 1, page + 1);
+        session.page = page;
+        shopSessions.set(key, session);
 
-    session.page = page;
-    shopSessions.set(key, session);
+        const config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+        return interaction.update({
+            embeds:     [buildShopEmbed(items, page, interaction.guild, config)],
+            components: buildShopComponents(items, page, userId)
+        });
+    }
 
-    return interaction.update({
-        embeds:     [buildShopEmbed(items, page, interaction.guild, config)],
-        components: [buildShopRow(items, page, userId)]
-    });
+    // ─── ซื้อสินค้า ────────────────────────────────────────────────────────
+    if (action.startsWith('buy')) {
+        const qty = parseInt(action.replace('buy', '')) || 1;
+        await interaction.deferReply({ ephemeral: true });
+
+        try {
+            const config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+            const sessionItem = items[page];
+            const item = config.storeItems.find(i => i.itemName === sessionItem.itemName && i.listedInStore);
+            if (!item) return interaction.editReply({ content: '❌ ไม่พบสินค้านี้แล้ว' });
+
+            if (!item.unlimitedStock && item.stock < qty)
+                return interaction.editReply({ content: `❌ สินค้าเหลือไม่พอ (เหลือ ${item.stock} ชิ้น)` });
+
+            const unitPrice = getEffectivePrice(item);
+            const total     = unitPrice * qty;
+            let user = await User.findOne({ userId, guildId }) || new User({ userId, guildId });
+
+            if (item.maxPerUser > 0) {
+                const owned = user.inventory.find(i => i.itemName === item.itemName)?.quantity || 0;
+                if (owned + qty > item.maxPerUser)
+                    return interaction.editReply({ content: `❌ ซื้อได้สูงสุด **${item.maxPerUser}** ชิ้น (มีแล้ว ${owned} ชิ้น)` });
+            }
+
+            if (user.coins < total)
+                return interaction.editReply({ content: `❌ เงินไม่พอ\nต้องการ **${total.toLocaleString()}** · มี **${user.coins.toLocaleString()}** ${config.currencyEmoji || '💰'}` });
+
+            user.coins -= total;
+            if (item.inventoryItem !== false) {
+                const inv = user.inventory.find(i => i.itemName === item.itemName);
+                if (inv) inv.quantity += qty;
+                else user.inventory.push({ itemName: item.itemName, quantity: qty });
+            }
+            if (!item.unlimitedStock) item.stock -= qty;
+            applyTradePriceChange(item, 'buy', qty);
+            config.markModified('storeItems');
+            await Promise.all([user.save(), config.save()]);
+
+            if (item.roleReward) {
+                try { const m = await interaction.guild.members.fetch(userId); await m.roles.add(item.roleReward).catch(() => {}); } catch (_) {}
+            }
+
+            // อัพ session item ให้ตรงกับสต็อก/ราคาใหม่
+            if (!item.unlimitedStock) sessionItem.stock = item.stock;
+            if (item.marketEnabled)   sessionItem.currentPrice = item.currentPrice;
+            session.page = page;
+            shopSessions.set(key, session);
+
+            const cur = config.currencyEmoji || '💰';
+            const mTag = marketTag(item);
+            const e = new EmbedBuilder().setColor(0x57F287).setTitle('✅ ซื้อสำเร็จ!')
+                .addFields(
+                    { name: '🛍️ ไอเทม',  value: `${item.itemName} x${qty}`, inline: true },
+                    { name: `💸 ราคา${mTag}`, value: `${total.toLocaleString()} ${cur}`, inline: true },
+                    { name: '👛 คงเหลือ', value: `${user.coins.toLocaleString()} ${cur}`, inline: true }
+                );
+            if (item.itemImage) e.setThumbnail(item.itemImage);
+            await interaction.editReply({ embeds: [e] });
+
+            // อัพ shop embed ให้แสดงสต็อก/ราคาใหม่
+            await interaction.message.edit({
+                embeds:     [buildShopEmbed(items, page, interaction.guild, config)],
+                components: buildShopComponents(items, page, userId)
+            }).catch(() => {});
+        } catch (err) {
+            console.error('[ShopBuy]', err);
+            await interaction.editReply({ content: '❌ เกิดข้อผิดพลาด กรุณาลองใหม่' });
+        }
+    }
 }
 
 // ─── inventory helpers ─────────────────────────────────────────────────────
