@@ -31,31 +31,58 @@ function calcLevel(totalXp) {
 }
 
 // ── Rank Card ─────────────────────────────────────────────────────────────
-async function generateRankCard({ username, avatarURL, xp, level, rank, currentLevelXp, neededForNext, accentColor = '#5865F2' }) {
+async function generateRankCard({
+    username, avatarURL, xp, level, rank, currentLevelXp, neededForNext,
+    accentColor = '#5865F2',
+    bg1 = '#0f0f17', bg2 = '#1a1a2e',
+    bgImage = '',
+    footerText = ''
+}) {
     let canvas, createCanvas, loadImage, GlobalFonts;
     try {
         ({ createCanvas, loadImage, GlobalFonts } = require('@napi-rs/canvas'));
     } catch {
-        return null; // ยังไม่ได้ติดตั้ง
+        return null;
     }
 
-    const W = 934, H = 282;
+    const W = 934, H = footerText ? 310 : 282;
     const cv = createCanvas(W, H);
     const ctx = cv.getContext('2d');
 
     // ── Background ─────────────────────────────────────────
-    const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, '#0f0f17');
-    bg.addColorStop(1, '#1a1a2e');
-    ctx.fillStyle = bg;
+    ctx.save();
     roundRect(ctx, 0, 0, W, H, 20);
-    ctx.fill();
+    ctx.clip();
+
+    if (bgImage) {
+        try {
+            const imgBg = await loadImage(bgImage);
+            ctx.drawImage(imgBg, 0, 0, W, H);
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, 0, W, H);
+        } catch {
+            const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+            bgGrad.addColorStop(0, bg1);
+            bgGrad.addColorStop(1, bg2);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+        }
+    } else {
+        const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+        bgGrad.addColorStop(0, bg1);
+        bgGrad.addColorStop(1, bg2);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+    }
+    ctx.restore();
 
     // ── Subtle grid overlay ────────────────────────────────
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    if (!bgImage) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+        for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    }
 
     // ── Accent bar (left edge) ─────────────────────────────
     const accentGrad = ctx.createLinearGradient(0, 0, 0, H);
@@ -176,6 +203,18 @@ async function generateRankCard({ username, avatarURL, xp, level, rank, currentL
     ctx.font = '15px sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.fillText(`Total XP: ${xp.toLocaleString()}`, textX, barY + barH + 22);
+
+    // ── Footer text ───────────────────────────────────────
+    if (footerText) {
+        const fy = 282 + 20;
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fillRect(0, 282, W, 28);
+        ctx.font = '13px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.textAlign = 'center';
+        ctx.fillText(footerText, W / 2, fy);
+        ctx.textAlign = 'left';
+    }
 
     return cv.toBuffer('image/png');
 }

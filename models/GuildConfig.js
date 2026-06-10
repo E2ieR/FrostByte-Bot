@@ -122,7 +122,8 @@ const guildConfigSchema = new mongoose.Schema({
     levelIgnoreRoles:    { type: [String], default: [] },
     // Notifications
     levelUpChannelId:   { type: String,  default: '' },
-    levelUpMessage:     { type: String,  default: '🎉 {user} เลื่อนระดับเป็น **Level {level}** แล้ว!' },
+    levelUpTitle:       { type: String,  default: '🎉 Level Up!' },
+    levelUpMessage:     { type: String,  default: '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!' },
     // Level Roles
     levelRoles: [{
         level:    { type: Number, required: true },
@@ -130,10 +131,20 @@ const guildConfigSchema = new mongoose.Schema({
         roleName: { type: String, default: '' }
     }],
     // Rank Card
+    rankCardEnabled: { type: Boolean, default: true },
     rankCardBg:      { type: String, default: '#0f0f17' },
     rankCardBg2:     { type: String, default: '#1a1a2e' },
-    rankCardAccent:  { type: String, default: '' },  // ว่าง = ใช้สี top role
+    rankCardAccent:  { type: String, default: '' },
     rankCardBgImage: { type: String, default: '' },
+    rankCardFooter:  { type: String, default: '' },
+    rankCardRoleStyles: [{
+        roleId:      { type: String, required: true },
+        roleName:    { type: String, default: '' },
+        accentColor: { type: String, default: '' },
+        bgColor:     { type: String, default: '' },
+        bg2Color:    { type: String, default: '' },
+        bgImage:     { type: String, default: '' }
+    }],
 
     // ─── Auto Roles ───────────────────────────────────────
     joinRoles: [{

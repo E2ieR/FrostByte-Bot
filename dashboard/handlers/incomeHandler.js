@@ -1,9 +1,10 @@
 // dashboard/handlers/incomeHandler.js
 // ─── Active Bonus / Seniority Bonus / Daily Quests / Level System ─────────
 
+const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const GuildConfig = require('../../models/GuildConfig');
 const User        = require('../../models/User');
-const { calcLevel } = require('../../utils/rankCard');
+const { calcLevel, generateRankCard } = require('../../utils/rankCard');
 
 // ── helper: รีเซ็ต daily counter ถ้าเป็นวันใหม่ ────────────────────────────
 function resetIfNewDay(user, dateField, ...countFields) {
@@ -210,12 +211,13 @@ function isIgnored(channelId, memberRoles, config) {
     return false;
 }
 
-// level up notification + role reward (shared across XP sources)
-async function handleLevelUp(guild, userId, username, newLevel, config) {
-    // Role rewards
+// level up notification + role reward + rank card (shared across XP sources)
+async function handleLevelUp(guild, userId, username, newLevel, config, sourceChannelOrInteraction = null) {
+    // ── Role rewards ──────────────────────────────────────
+    let member = null;
     if (config.levelRoles?.length) {
         try {
-            const member = await guild.members.fetch(userId);
+            member = await guild.members.fetch(userId);
             for (const lr of config.levelRoles) {
                 if (lr.level === newLevel) {
                     const role = guild.roles.cache.get(lr.roleId)
@@ -225,17 +227,96 @@ async function handleLevelUp(guild, userId, username, newLevel, config) {
             }
         } catch {}
     }
-    // Notification
-    const tmpl = config.levelUpMessage || '🎉 {user} เลื่อนระดับเป็น **Level {level}** แล้ว!';
-    const content = tmpl
-        .replace('{user}', `<@${userId}>`)
-        .replace('{level}', String(newLevel))
+
+    // ── Build notification embed ──────────────────────────
+    const title   = (config.levelUpTitle || '🎉 Level Up!').replace('{level}', String(newLevel)).replace('{username}', username);
+    const msgTmpl = config.levelUpMessage || '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!';
+    const desc    = msgTmpl
+        .replace('{user}',     `<@${userId}>`)
+        .replace('{level}',    String(newLevel))
         .replace('{username}', username);
-    const channel = config.levelUpChannelId
+
+    const embed = new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(desc)
+        .setColor(config.rankCardAccent || '#5865F2')
+        .setTimestamp();
+
+    // ── Rank card ─────────────────────────────────────────
+    let files = [];
+    if (config.rankCardEnabled !== false) {
+        try {
+            if (!member) member = await guild.members.fetch(userId).catch(() => null);
+
+            // หา role style ที่กำหนดไว้ (ตามยศสูงสุดของ member)
+            let cardAccent  = config.rankCardAccent  || null;
+            let cardBg1     = config.rankCardBg      || '#0f0f17';
+            let cardBg2     = config.rankCardBg2     || '#1a1a2e';
+            let cardBgImage = config.rankCardBgImage || '';
+            let cardFooter  = config.rankCardFooter  || '';
+
+            if (member && config.rankCardRoleStyles?.length) {
+                const sortedRoles = member.roles.cache
+                    .filter(r => r.id !== guild.id)
+                    .sort((a, b) => b.position - a.position);
+                for (const [, role] of sortedRoles) {
+                    const style = config.rankCardRoleStyles.find(s => s.roleId === role.id);
+                    if (style) {
+                        if (style.accentColor) cardAccent  = style.accentColor;
+                        if (style.bgColor)     cardBg1     = style.bgColor;
+                        if (style.bg2Color)    cardBg2     = style.bg2Color;
+                        if (style.bgImage)     cardBgImage = style.bgImage;
+                        break;
+                    }
+                }
+            }
+
+            // ถ้ายังไม่มี accent ให้ใช้สี top role
+            if (!cardAccent && member) {
+                const topRole = member.roles.cache
+                    .filter(r => r.color !== 0)
+                    .sort((a, b) => b.position - a.position)
+                    .first();
+                if (topRole) cardAccent = `#${topRole.color.toString(16).padStart(6, '0')}`;
+            }
+            cardAccent = cardAccent || '#5865F2';
+
+            // ดึง XP/rank ของ user
+            const dbUser   = await User.findOne({ userId, guildId: guild.id }).lean();
+            const totalXp  = dbUser?.xp || 0;
+            const { currentLevelXp, neededForNext } = calcLevel(totalXp);
+            const allUsers = await User.find({ guildId: guild.id }).sort({ xp: -1 }).lean();
+            const rank     = allUsers.findIndex(u => u.userId === userId) + 1 || '—';
+            const avatarURL = (await guild.client.users.fetch(userId).catch(() => null))
+                ?.displayAvatarURL({ extension: 'png', size: 256 }) || '';
+
+            const buffer = await generateRankCard({
+                username, avatarURL,
+                xp: totalXp, level: newLevel, rank,
+                currentLevelXp, neededForNext,
+                accentColor: cardAccent,
+                bg1: cardBg1, bg2: cardBg2,
+                bgImage: cardBgImage,
+                footerText: cardFooter
+            });
+
+            if (buffer) {
+                embed.setImage('attachment://rank.png');
+                files = [new AttachmentBuilder(buffer, { name: 'rank.png' })];
+            }
+        } catch (e) { console.error('[LevelUp rankcard]', e.message); }
+    }
+
+    // ── ส่งแจ้งเตือน ─────────────────────────────────────
+    const notifChannel = config.levelUpChannelId
         ? guild.channels.cache.get(config.levelUpChannelId)
-        : null;
-    if (channel) await channel.send({ content }).catch(() => {});
-    return content; // คืนกลับไปให้ caller ส่งใน channel ต้นทางถ้าไม่มี channel กำหนด
+        : (sourceChannelOrInteraction?.channel || sourceChannelOrInteraction || null);
+
+    const payload = { embeds: [embed], files };
+    if (notifChannel) {
+        await notifChannel.send(payload).catch(() => {});
+    }
+    return desc; // ส่งกลับให้ caller ใช้ถ้าต้องการ
 }
 
 // ─── Message XP ───────────────────────────────────────────────────────────
@@ -270,8 +351,7 @@ async function handleXpGain(message) {
         await user.save();
 
         if (newLevel > oldLevel) {
-            const notifContent = await handleLevelUp(message.guild, userId, message.author.username, newLevel, config);
-            if (!config.levelUpChannelId) await message.channel.send({ content: notifContent }).catch(() => {});
+            await handleLevelUp(message.guild, userId, message.author.username, newLevel, config, message.channel);
         }
     } catch (err) { console.error('[XP Gain] error:', err.message); }
 }
@@ -307,11 +387,8 @@ async function handleCommandXp(interaction) {
         await user.save();
 
         if (newLevel > oldLevel) {
-            const notifContent = await handleLevelUp(interaction.guild, userId, interaction.user.username, newLevel, config);
-            if (!config.levelUpChannelId) {
-                const ch = interaction.channel || interaction.guild.channels.cache.get(interaction.channelId);
-                if (ch) await ch.send({ content: notifContent }).catch(() => {});
-            }
+            const ch = interaction.channel || interaction.guild.channels.cache.get(interaction.channelId);
+            await handleLevelUp(interaction.guild, userId, interaction.user.username, newLevel, config, ch);
         }
     } catch (err) { console.error('[Command XP] error:', err.message); }
 }
@@ -347,7 +424,7 @@ async function handleReactionXp(reaction, user) {
         await dbUser.save();
 
         if (newLevel > oldLevel) {
-            await handleLevelUp(guild, userId, user.username, newLevel, config);
+            await handleLevelUp(guild, userId, user.username, newLevel, config, reaction.message.channel);
         }
     } catch (err) { console.error('[Reaction XP] error:', err.message); }
 }
@@ -398,7 +475,7 @@ async function handleVoiceXp(oldState, newState) {
             await dbUser.save();
 
             if (newLevel > oldLevel) {
-                await handleLevelUp(guild, userId, member?.user?.username || userId, newLevel, config);
+                await handleLevelUp(guild, userId, member?.user?.username || userId, newLevel, config, null);
             }
         }
     } catch (err) { console.error('[Voice XP] error:', err.message); }

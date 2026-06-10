@@ -182,8 +182,9 @@ router.post('/api/:guildId/level', async (req, res) => {
         config.markModified('levelIgnoreChannels');
         config.markModified('levelIgnoreRoles');
         // Notifications
-        config.levelUpChannelId       = b.levelUpChannelId || '';
-        config.levelUpMessage         = b.levelUpMessage   || '🎉 {user} เลื่อนระดับเป็น **Level {level}** แล้ว!';
+        config.levelUpChannelId = b.levelUpChannelId || '';
+        config.levelUpTitle     = b.levelUpTitle     || '🎉 Level Up!';
+        config.levelUpMessage   = b.levelUpMessage   || '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!';
         // Level roles
         if (Array.isArray(b.levelRoles)) {
             config.levelRoles = b.levelRoles
@@ -192,10 +193,25 @@ router.post('/api/:guildId/level', async (req, res) => {
             config.markModified('levelRoles');
         }
         // Rank Card
+        config.rankCardEnabled = b.rankCardEnabled !== false && b.rankCardEnabled !== 'false';
         config.rankCardBg      = b.rankCardBg      || '#0f0f17';
         config.rankCardBg2     = b.rankCardBg2     || '#1a1a2e';
         config.rankCardAccent  = b.rankCardAccent  || '';
         config.rankCardBgImage = b.rankCardBgImage || '';
+        config.rankCardFooter  = b.rankCardFooter  || '';
+        if (Array.isArray(b.rankCardRoleStyles)) {
+            config.rankCardRoleStyles = b.rankCardRoleStyles
+                .filter(s => s.roleId)
+                .map(s => ({
+                    roleId:      s.roleId,
+                    roleName:    s.roleName    || '',
+                    accentColor: s.accentColor || '',
+                    bgColor:     s.bgColor     || '',
+                    bg2Color:    s.bg2Color    || '',
+                    bgImage:     s.bgImage     || ''
+                }));
+            config.markModified('rankCardRoleStyles');
+        }
 
         await config.save();
         res.json({ success: true });

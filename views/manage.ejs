@@ -1023,9 +1023,14 @@
                             <option value="">— แจ้งในช่องที่พิมพ์ข้อความ —</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">หัวข้อแจ้งเตือน (Embed Title)</label>
+                        <input type="text" class="form-input" id="lv-up-title" value="<%= config.levelUpTitle || '🎉 Level Up!' %>">
+                        <div class="form-hint"><code>{level}</code> level ใหม่ &nbsp;·&nbsp; <code>{username}</code> ชื่อ</div>
+                    </div>
                     <div class="form-group" style="margin:0">
-                        <label class="form-label">ข้อความแจ้งเตือน</label>
-                        <input type="text" class="form-input" id="lv-up-msg" value="<%= config.levelUpMessage || '🎉 {user} เลื่อนระดับเป็น **Level {level}** แล้ว!' %>">
+                        <label class="form-label">ข้อความแจ้งเตือน (Embed Description)</label>
+                        <input type="text" class="form-input" id="lv-up-msg" value="<%= config.levelUpMessage || '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!' %>">
                         <div class="form-hint"><code>{user}</code> mention &nbsp;·&nbsp; <code>{level}</code> level ใหม่ &nbsp;·&nbsp; <code>{username}</code> ชื่อ</div>
                     </div>
                 </div>
@@ -1035,6 +1040,11 @@
             <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">Rank Card</div>
             <div class="card" style="margin-bottom:20px">
                 <div class="card-body">
+                    <!-- toggle -->
+                    <div class="toggle-row" style="margin-bottom:16px">
+                        <div><div class="toggle-label">ส่ง Rank Card เมื่อ Level Up</div><div style="font-size:12px;color:var(--muted)">แนบรูป rank card ไปพร้อม embed แจ้งเตือน</div></div>
+                        <label class="switch"><input type="checkbox" id="rc-enabled" <%= config.rankCardEnabled !== false ? 'checked' : '' %>><span class="slider"></span></label>
+                    </div>
                     <div style="display:flex;gap:24px;flex-wrap:wrap">
                         <!-- Preview -->
                         <div style="flex:0 0 auto">
@@ -1043,17 +1053,20 @@
                                 <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:<%= config.rankCardAccent||'#5865F2' %>;border-radius:12px 0 0 12px"></div>
                                 <div style="width:52px;height:52px;border-radius:50%;border:3px solid <%= config.rankCardAccent||'#5865F2' %>;background:#2b2d31;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">😊</div>
                                 <div style="flex:1;min-width:0">
-                                    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Username#0000</div>
-                                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:8px">XP: 1,250 / 2,100 &nbsp;·&nbsp; Level 5</div>
+                                    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Username</div>
+                                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:8px">XP: 1,250 / 2,100 · Level 5</div>
                                     <div style="height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden">
-                                        <div style="height:100%;width:60%;background:<%= config.rankCardAccent||'#5865F2' %>;border-radius:4px"></div>
+                                        <div id="rc-bar" style="height:100%;width:60%;background:<%= config.rankCardAccent||'#5865F2' %>;border-radius:4px"></div>
                                     </div>
                                 </div>
                                 <div style="flex-shrink:0;text-align:right">
                                     <div style="font-size:10px;color:rgba(255,255,255,.4)">RANK</div>
-                                    <div style="font-size:20px;font-weight:700;color:<%= config.rankCardAccent||'#5865F2' %>">#3</div>
+                                    <div id="rc-rank-num" style="font-size:20px;font-weight:700;color:<%= config.rankCardAccent||'#5865F2' %>">#3</div>
                                 </div>
                             </div>
+                            <% if (config.rankCardFooter) { %>
+                            <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px"><%= config.rankCardFooter %></div>
+                            <% } %>
                         </div>
                         <!-- Controls -->
                         <div style="flex:1;min-width:220px">
@@ -1073,7 +1086,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group" style="flex:1;min-width:130px;margin:0">
-                                    <label class="form-label" style="font-size:11px">Accent Color</label>
+                                    <label class="form-label" style="font-size:11px">Accent Color <span style="color:var(--muted)">(ว่าง = สี top role)</span></label>
                                     <div style="display:flex;gap:8px;align-items:center">
                                         <input type="color" id="rc-accent" value="<%= config.rankCardAccent||'#5865F2' %>" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0" oninput="updateRcPreview()">
                                         <input type="text" class="form-input" id="rc-accent-text" value="<%= config.rankCardAccent||'#5865F2' %>" style="flex:1" oninput="syncColorPicker('rc-accent','rc-accent-text');updateRcPreview()">
@@ -1081,11 +1094,86 @@
                                 </div>
                             </div>
                             <div class="form-group" style="margin:10px 0 0">
-                                <label class="form-label" style="font-size:11px">Background Image URL <span style="color:var(--muted)">(ไม่บังคับ)</span></label>
+                                <label class="form-label" style="font-size:11px">Background Image URL <span style="color:var(--muted)">(ถ้ามีจะทับสี)</span></label>
                                 <input type="url" class="form-input" id="rc-bgimg" placeholder="https://..." value="<%= config.rankCardBgImage||'' %>">
+                            </div>
+                            <div class="form-group" style="margin:10px 0 0">
+                                <label class="form-label" style="font-size:11px">ข้อความท้ายการ์ด (Footer)</label>
+                                <input type="text" class="form-input" id="rc-footer" placeholder="เช่น: FrostByte Server" value="<%= config.rankCardFooter||'' %>">
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ─── Rank Card Role Styles ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">Rank Card ตามยศ</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <div class="card-title">🎨 ปรับสี Rank Card ตามยศ</div>
+                    <div style="font-size:12px;color:var(--muted)">ยศที่สูงกว่าจะ override ค่าเริ่มต้นด้านบน</div>
+                </div>
+                <div class="card-body">
+                    <div id="rc-role-styles-list">
+                        <% (config.rankCardRoleStyles || []).forEach((s, i) => { %>
+                        <div class="list-item" id="rc-rs-<%= i %>" style="flex-wrap:wrap;gap:8px;align-items:flex-start">
+                            <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:200px">
+                                <div class="list-item-icon">🎨</div>
+                                <div>
+                                    <div class="list-item-name"><%= s.roleName || s.roleId %></div>
+                                    <div class="list-item-meta" style="display:flex;gap:6px;margin-top:4px">
+                                        <% if (s.accentColor) { %><span style="width:14px;height:14px;border-radius:50%;background:<%= s.accentColor %>;display:inline-block;border:1px solid rgba(255,255,255,.2)"></span><% } %>
+                                        <% if (s.bgColor) { %><span style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,<%= s.bgColor %>,<%= s.bg2Color||s.bgColor %>);display:inline-block;border:1px solid rgba(255,255,255,.2)"></span><% } %>
+                                        <% if (s.bgImage) { %><span style="font-size:11px;color:var(--muted)">🖼️ BG</span><% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRcRoleStyle(<%= i %>)">ลบ</button>
+                        </div>
+                        <% }) %>
+                        <% if (!(config.rankCardRoleStyles || []).length) { %>
+                        <div class="empty-state" id="rc-rs-empty"><div class="e-icon">🎨</div>ยังไม่มีการตั้งค่าตามยศ</div>
+                        <% } %>
+                    </div>
+                    <hr class="divider" style="margin:16px 0">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:12px">เพิ่มสไตล์ตามยศ</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>ยศ</label>
+                            <select id="rc-rs-role">
+                                <option value="">— เลือกยศ —</option>
+                                <% if (typeof discordRoles !== 'undefined') { discordRoles.forEach(r => { %>
+                                    <option value="<%= r.id %>" data-name="<%= r.name %>"><%= r.name %></option>
+                                <% }) } %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Accent Color</label>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input type="color" id="rc-rs-accent" value="#5865F2" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0">
+                                <input type="text" class="form-input" id="rc-rs-accent-text" value="#5865F2" style="flex:1" oninput="document.getElementById('rc-rs-accent').value=this.value">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>BG สี 1</label>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input type="color" id="rc-rs-bg1" value="#0f0f17" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0">
+                                <input type="text" class="form-input" id="rc-rs-bg1-text" value="#0f0f17" style="flex:1" oninput="document.getElementById('rc-rs-bg1').value=this.value">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>BG สี 2</label>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input type="color" id="rc-rs-bg2" value="#1a1a2e" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0">
+                                <input type="text" class="form-input" id="rc-rs-bg2-text" value="#1a1a2e" style="flex:1" oninput="document.getElementById('rc-rs-bg2').value=this.value">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Background Image URL <span style="color:var(--muted)">(ไม่บังคับ)</span></label>
+                        <input type="url" class="form-input" id="rc-rs-bgimg" placeholder="https://...">
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm" onclick="addRcRoleStyle()">➕ เพิ่มสไตล์ยศ</button>
                 </div>
             </div>
 
@@ -2445,6 +2533,56 @@
         if (/^#[0-9a-fA-F]{6}$/.test(txt)) document.getElementById(pickerId).value = txt;
     }
 
+    // ── Rank Card Role Styles ────────────────────────────
+    let rcRoleStyles = <%- JSON.stringify(config.rankCardRoleStyles || []) %>;
+
+    function getRcRoleStyles() { return rcRoleStyles; }
+
+    function renderRcRoleStyles() {
+        const list = document.getElementById('rc-role-styles-list');
+        if (!list) return;
+        if (!rcRoleStyles.length) {
+            list.innerHTML = '<div class="empty-state" id="rc-rs-empty"><div class="e-icon">🎨</div>ยังไม่มีการตั้งค่าตามยศ</div>';
+            return;
+        }
+        list.innerHTML = rcRoleStyles.map((s, i) => `
+            <div class="list-item" style="flex-wrap:wrap;gap:8px;align-items:flex-start">
+                <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:200px">
+                    <div class="list-item-icon">🎨</div>
+                    <div>
+                        <div class="list-item-name">${s.roleName || s.roleId}</div>
+                        <div class="list-item-meta" style="display:flex;gap:6px;margin-top:4px">
+                            ${s.accentColor ? `<span style="width:14px;height:14px;border-radius:50%;background:${s.accentColor};display:inline-block;border:1px solid rgba(255,255,255,.2)"></span>` : ''}
+                            ${s.bgColor ? `<span style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,${s.bgColor},${s.bg2Color||s.bgColor});display:inline-block;border:1px solid rgba(255,255,255,.2)"></span>` : ''}
+                            ${s.bgImage ? `<span style="font-size:11px;color:var(--muted)">🖼️ BG</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeRcRoleStyle(${i})">ลบ</button>
+            </div>`).join('');
+    }
+
+    function addRcRoleStyle() {
+        const roleEl = document.getElementById('rc-rs-role');
+        const roleId = roleEl?.value;
+        if (!roleId) return alert('กรุณาเลือกยศ');
+        const roleName = roleEl.options[roleEl.selectedIndex]?.dataset?.name || roleId;
+        rcRoleStyles.push({
+            roleId,
+            roleName,
+            accentColor: document.getElementById('rc-rs-accent')?.value || '',
+            bgColor:     document.getElementById('rc-rs-bg1')?.value    || '',
+            bg2Color:    document.getElementById('rc-rs-bg2')?.value    || '',
+            bgImage:     document.getElementById('rc-rs-bgimg')?.value  || ''
+        });
+        renderRcRoleStyles();
+    }
+
+    function removeRcRoleStyle(i) {
+        rcRoleStyles.splice(i, 1);
+        renderRcRoleStyles();
+    }
+
     // ── Collect + AJAX save ──────────────────────────────
     async function saveLevelSettings(btn) {
         const status = document.getElementById('lv-save-status');
@@ -2483,12 +2621,16 @@
             reactionXpCooldownSeconds:document.getElementById('lv-react-cd')?.value,
             levelResetOnLeave:        document.getElementById('lv-reset-leave')?.checked,
             levelResetOnBan:          document.getElementById('lv-reset-ban')?.checked,
-            levelUpChannelId:         document.getElementById('level-channel-select')?.value,
-            levelUpMessage:           document.getElementById('lv-up-msg')?.value,
-            rankCardBg:               document.getElementById('rc-bg1')?.value,
-            rankCardBg2:              document.getElementById('rc-bg2')?.value,
-            rankCardAccent:           document.getElementById('rc-accent')?.value,
-            rankCardBgImage:          document.getElementById('rc-bgimg')?.value || '',
+            levelUpChannelId:   document.getElementById('level-channel-select')?.value,
+            levelUpTitle:       document.getElementById('lv-up-title')?.value,
+            levelUpMessage:     document.getElementById('lv-up-msg')?.value,
+            rankCardEnabled:    document.getElementById('rc-enabled')?.checked,
+            rankCardBg:         document.getElementById('rc-bg1')?.value,
+            rankCardBg2:        document.getElementById('rc-bg2')?.value,
+            rankCardAccent:     document.getElementById('rc-accent')?.value,
+            rankCardBgImage:    document.getElementById('rc-bgimg')?.value || '',
+            rankCardFooter:     document.getElementById('rc-footer')?.value  || '',
+            rankCardRoleStyles: getRcRoleStyles(),
             levelRoles, xpMultiplierRoles, levelIgnoreChannels, levelIgnoreRoles
         };
 
