@@ -573,7 +573,7 @@
                     <span class="badge badge-blurple"><%= (config.workSituations || []).length %> ข้อความ</span>
                 </div>
                 <div class="card-body">
-                    <form action="/manage/<%= guildId %>/add-reply" method="POST" style="margin-bottom:16px">
+                    <form action="/<%= guildId %>/add-reply" method="POST" style="margin-bottom:16px">
                         <div class="form-group" style="margin-bottom:10px">
                             <label>ข้อความใหม่ (ใช้ {amount} แทนจำนวนเงิน)</label>
                             <textarea name="newReply" placeholder="คุณทำงานหนักและได้รับ {amount} เหรียญ!" required></textarea>
@@ -589,7 +589,7 @@
                                     <div style="font-size:13px;line-height:1.5;word-break:break-word"><%= sit %></div>
                                 </div>
                             </div>
-                            <a href="/manage/<%= guildId %>/delete-reply/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบข้อความนี้?')">ลบ</a>
+                            <a href="/<%= guildId %>/delete-reply/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบข้อความนี้?')">ลบ</a>
                         </div>
                         <% }) %>
                     <% } else { %>
