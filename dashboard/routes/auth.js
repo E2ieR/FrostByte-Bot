@@ -6,7 +6,8 @@ const GuildConfig = require('../../models/GuildConfig');
 // หน้าแรก — Login
 router.get('/', (req, res) => {
     if (req.session.user) return res.redirect('/selector');
-    const authorizeUrl = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${encodeURIComponent('http://localhost:3000/auth/discord/callback')}&response_type=code&scope=identify%20guilds`;
+    const redirectUri = `${process.env.BASE_URL || 'http://localhost:3000'}/auth/discord/callback`;
+    const authorizeUrl = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20guilds`;
     res.render('login', { authorizeUrl });
 });
 
@@ -63,7 +64,7 @@ router.get('/auth/discord/callback', async (req, res) => {
             client_secret: process.env.CLIENT_SECRET,
             code: code,
             grant_type: 'authorization_code',
-            redirect_uri: 'http://localhost:3000/auth/discord/callback',
+            redirect_uri: `${process.env.BASE_URL || 'http://localhost:3000'}/auth/discord/callback`,
             scope: 'identify guilds'
         }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
