@@ -13,10 +13,60 @@ const invSessions = new Map();
 
 const PAGE_SIZE = 5;
 
-function typeEmoji(itemType) {
-    if (itemType === 'role') return '🎭';
-    if (itemType === 'consumable') return '⚡';
+function typeEmoji(item) {
+    if (item.itemEmoji) return item.itemEmoji;
+    if (item.itemType === 'role') return '🎭';
+    if (item.itemType === 'consumable') return '⚡';
     return '🎁';
+}
+
+// ─── Market helpers ────────────────────────────────────────────────────────
+function applyTimeDecay(item) {
+    if (!item.marketEnabled || !item.lastTradeAt || !item.basePrice) return;
+    const hoursElapsed = (Date.now() - new Date(item.lastTradeAt).getTime()) / 3600000;
+    if (hoursElapsed < 0.005) return;
+    const diff = (item.currentPrice || item.basePrice) - item.basePrice;
+    const decayFactor = Math.pow(0.82, hoursElapsed); // -18% diff per hour
+    item.currentPrice = Math.round(item.basePrice + diff * decayFactor);
+}
+
+function applyTradePriceChange(item, direction, qty = 1) {
+    if (!item.marketEnabled) return;
+    applyTimeDecay(item);
+    const base       = item.basePrice || item.price;
+    const changeRate = ((item.volatility || 10) / 100) * 0.18 * qty;
+    const current    = item.currentPrice || base;
+
+    item.currentPrice = direction === 'buy'
+        ? Math.round(current * (1 + changeRate))
+        : Math.round(current * (1 - changeRate));
+
+    // Clamp 10% – 800% of base
+    item.currentPrice = Math.max(Math.round(base * 0.1), Math.min(Math.round(base * 8), item.currentPrice));
+
+    if (direction === 'buy') item.totalBought = (item.totalBought || 0) + qty;
+    else                     item.totalSold   = (item.totalSold   || 0) + qty;
+
+    if (!item.priceHistory) item.priceHistory = [];
+    item.priceHistory.push({ price: item.currentPrice, date: new Date() });
+    if (item.priceHistory.length > 48) item.priceHistory.shift();
+    item.lastTradeAt = new Date();
+}
+
+function getEffectivePrice(item) {
+    if (!item.marketEnabled) return item.price;
+    applyTimeDecay(item);
+    return item.currentPrice || item.basePrice || item.price;
+}
+
+function marketTag(item) {
+    if (!item.marketEnabled) return '';
+    const base    = item.basePrice || item.price;
+    const current = item.currentPrice || base;
+    const pct     = Math.round(((current - base) / base) * 100);
+    const arrow   = pct > 3 ? '📈' : pct < -3 ? '📉' : '➡️';
+    const sign    = pct >= 0 ? '+' : '';
+    return ` ${arrow}${sign}${pct}%`;
 }
 
 function buildShopEmbed(items, page, guild, config) {
@@ -25,10 +75,12 @@ function buildShopEmbed(items, page, guild, config) {
     const totalPages = Math.ceil(items.length / PAGE_SIZE);
 
     const lines = pageItems.map((item, i) => {
+        const price = getEffectivePrice(item);
         const stock = item.unlimitedStock ? '♾️' : `📦${item.stock}`;
         const desc  = (item.description || '').substring(0, 50);
         const cat   = item.category ? `[${item.category}] ` : '';
-        return `**${start + i + 1}. ${typeEmoji(item.itemType)} ${item.itemName}** — ${item.price.toLocaleString()} ${config.currencyEmoji || '💰'}\n　${cat}${stock}${desc ? ` · ${desc}` : ''}`;
+        const mTag  = marketTag(item);
+        return `**${start + i + 1}. ${typeEmoji(item)} ${item.itemName}** — ${price.toLocaleString()} ${config.currencyEmoji || '💰'}${mTag}\n　${cat}${stock}${desc ? ` · ${desc}` : ''}`;
     });
 
     return new EmbedBuilder()
@@ -110,7 +162,7 @@ function buildInvEmbed(invItems, page, targetUsername, targetAvatar, config, sto
     const item      = invItems[page];
     const storeItem = storeItems.find(s => s.itemName === item.itemName && s.sellable);
     const sellRate  = storeItem ? (storeItem.sellPercent || 50) : null;
-    const sellPrice = storeItem ? Math.floor(storeItem.price * (sellRate / 100)) : null;
+    const sellPrice = storeItem ? Math.floor(getEffectivePrice(storeItem) * (sellRate / 100)) : null;
 
     const e = new EmbedBuilder()
         .setColor(0x5865F2)
@@ -172,7 +224,8 @@ const buy = {
             if (!item.unlimitedStock && item.stock < qty)
                 return interaction.reply({ content: `❌ สินค้าเหลือไม่พอ (เหลือ ${item.stock})`, ephemeral: true });
 
-            const total = item.price * qty;
+            const unitPrice = getEffectivePrice(item);
+            const total     = unitPrice * qty;
             let user = await User.findOne({ userId, guildId }) || new User({ userId, guildId });
 
             // maxPerUser check
@@ -192,6 +245,7 @@ const buy = {
                 else user.inventory.push({ itemName: item.itemName, quantity: qty });
             }
             if (!item.unlimitedStock) item.stock -= qty;
+            applyTradePriceChange(item, 'buy', qty);
             config.markModified('storeItems');
             await Promise.all([user.save(), config.save()]);
 
@@ -203,10 +257,11 @@ const buy = {
                 } catch (e) { /* ignore role errors */ }
             }
 
+            const mTag = marketTag(item);
             const e = new EmbedBuilder().setColor(0x57F287).setTitle('✅ ซื้อสำเร็จ')
                 .addFields(
                     { name: '🛍️ ไอเทม',  value: `${item.itemName} x${qty}`, inline: true },
-                    { name: '💸 ราคา',    value: `${total.toLocaleString()} ${config.currencyEmoji}`, inline: true },
+                    { name: `💸 ราคา${mTag}`, value: `${total.toLocaleString()} ${config.currencyEmoji}`, inline: true },
                     { name: '👛 คงเหลือ', value: `${user.coins.toLocaleString()} ${config.currencyEmoji}`, inline: true }
                 );
             if (item.itemImage) e.setThumbnail(item.itemImage);
@@ -276,12 +331,14 @@ const sell = {
             const invItem = user.inventory.find(i => i.itemName === storeItem.itemName);
             if (!invItem || invItem.quantity < qty)
                 return interaction.reply({ content: '❌ คุณมีไอเทมนี้ไม่พอ', ephemeral: true });
-            const refundRate = (storeItem.sellPercent || 50) / 100;
-            const refund     = Math.floor(storeItem.price * refundRate) * qty;
+            const refundRate  = (storeItem.sellPercent || 50) / 100;
+            const refund      = Math.floor(getEffectivePrice(storeItem) * refundRate) * qty;
             invItem.quantity -= qty;
             if (invItem.quantity <= 0) user.inventory = user.inventory.filter(i => i.itemName !== storeItem.itemName);
             user.coins += refund;
-            await user.save();
+            applyTradePriceChange(storeItem, 'sell', qty);
+            config.markModified('storeItems');
+            await Promise.all([user.save(), config.save()]);
             const e = new EmbedBuilder().setColor(0xFEE75C).setTitle('💰 ขายสำเร็จ')
                 .addFields(
                     { name: '📦 ไอเทม',   value: `${storeItem.itemName} x${qty}`, inline: true },
@@ -386,13 +443,15 @@ async function handleInvButton(interaction) {
 
         const qty        = action === 'sellall' ? dbItem.quantity : 1;
         const refundRate = (storeItem.sellPercent || 50) / 100;
-        const refund     = Math.floor(storeItem.price * refundRate) * qty;
+        const refund     = Math.floor(getEffectivePrice(storeItem) * refundRate) * qty;
 
         dbItem.quantity -= qty;
         if (dbItem.quantity <= 0)
             user.inventory = user.inventory.filter(i => i.itemName !== invItem.itemName);
         user.coins += refund;
-        await user.save();
+        applyTradePriceChange(storeItem, 'sell', qty);
+        config.markModified('storeItems');
+        await Promise.all([user.save(), config.save()]);
 
         // อัพ session
         invItem.quantity -= qty;

@@ -1,68 +1,112 @@
-const express = require('express');
-const router = express.Router();
+const express  = require('express');
+const router   = express.Router();
 const GuildConfig = require('../../models/GuildConfig');
 
-router.post('/:guildId/add-store-item', async (req, res) => {
-    let config = await GuildConfig.findOne({ guildId: req.params.guildId }) || new GuildConfig({ guildId: req.params.guildId });
-    const itemData = {
-        itemName:       req.body.itemName,
-        price:          parseInt(req.body.price) || 0,
-        itemImage:      req.body.itemImage,
-        description:    req.body.description,
-        unlimitedStock: req.body.unlimitedStock === 'true',
-        stock:          req.body.unlimitedStock === 'true' ? 0 : parseInt(req.body.stock),
-        listedInStore:  req.body.listedInStore === 'true',
-        inventoryItem:  req.body.inventoryItem === 'true',
-        usable:         req.body.usable === 'true',
-        sellable:       req.body.sellable === 'true',
-        expiryDate:     req.body.expiryDate ? new Date(req.body.expiryDate) : null,
-        itemType:       req.body.itemType || 'item',
-        roleReward:     req.body.roleReward || '',
-        sellPercent:    parseInt(req.body.sellPercent) || 50,
-        maxPerUser:     parseInt(req.body.maxPerUser) || 0,
-        category:       req.body.category || '',
-        useMessage:     req.body.useMessage || ''
+// ── helper: parse item fields from req.body ──────────────────────────────────
+function parseItemBody(b) {
+    return {
+        itemName:      b.itemName,
+        price:         parseInt(b.price)       || 0,
+        itemImage:     b.itemImage             || '',
+        itemEmoji:     b.itemEmoji             || '',
+        description:   b.description           || '',
+        unlimitedStock:b.unlimitedStock === 'true',
+        stock:         b.unlimitedStock === 'true' ? 0 : (parseInt(b.stock) || 0),
+        listedInStore: b.listedInStore  === 'true',
+        inventoryItem: b.inventoryItem  === 'true',
+        usable:        b.usable         === 'true',
+        sellable:      b.sellable       === 'true',
+        expiryDate:    b.expiryDate ? new Date(b.expiryDate) : null,
+        itemType:      b.itemType       || 'item',
+        roleReward:    b.roleReward     || '',
+        sellPercent:   parseInt(b.sellPercent)  || 50,
+        maxPerUser:    parseInt(b.maxPerUser)    || 0,
+        category:      b.category       || '',
+        useMessage:    b.useMessage     || '',
+        // Market
+        marketEnabled: b.marketEnabled  === 'true',
+        volatility:    parseInt(b.volatility)   || 10
     };
-    config.storeItems.push(itemData);
+}
+
+// ─── Add item ────────────────────────────────────────────────────────────────
+router.post('/:guildId/add-store-item', async (req, res) => {
+    const { guildId } = req.params;
+    let config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+    const data = parseItemBody(req.body);
+    if (data.marketEnabled) {
+        data.basePrice    = data.price;
+        data.currentPrice = data.price;
+        data.priceHistory = [{ price: data.price, date: new Date() }];
+    }
+    config.storeItems.push(data);
     await config.save();
-    res.redirect(`/manage/${req.params.guildId}?tab=store&success=true`);
+    res.redirect(`/manage/${guildId}?tab=store&success=true`);
 });
 
+// ─── Delete item ─────────────────────────────────────────────────────────────
 router.get('/:guildId/delete-store-item/:itemId', async (req, res) => {
-    let config = await GuildConfig.findOne({ guildId: req.params.guildId });
-    config.storeItems = config.storeItems.filter(item => (item.itemId || item._id).toString() !== req.params.itemId.toString());
+    const { guildId, itemId } = req.params;
+    let config = await GuildConfig.findOne({ guildId });
+    if (!config) return res.redirect(`/manage/${guildId}?tab=store`);
+    config.storeItems = config.storeItems.filter(
+        i => (i.itemId || i._id).toString() !== itemId.toString()
+    );
     config.markModified('storeItems');
     await config.save();
-    res.redirect(`/manage/${req.params.guildId}?tab=store&delete_success=true`);
+    res.redirect(`/manage/${guildId}?tab=store&delete_success=true`);
 });
 
+// ─── Update item ─────────────────────────────────────────────────────────────
 router.post('/:guildId/update-store-item/:itemId', async (req, res) => {
-    let config = await GuildConfig.findOne({ guildId: req.params.guildId });
-    if (!config) return res.redirect(`/manage/${req.params.guildId}?tab=store`);
-    const item = config.storeItems.find(i => (i.itemId || i._id).toString() === req.params.itemId.toString());
-    if (!item) return res.redirect(`/manage/${req.params.guildId}?tab=store`);
+    const { guildId, itemId } = req.params;
+    let config = await GuildConfig.findOne({ guildId });
+    if (!config) return res.redirect(`/manage/${guildId}?tab=store`);
+    const item = config.storeItems.find(
+        i => (i.itemId || i._id).toString() === itemId.toString()
+    );
+    if (!item) return res.redirect(`/manage/${guildId}?tab=store`);
 
-    item.itemName       = req.body.itemName || item.itemName;
-    item.price          = parseInt(req.body.price) || 0;
-    item.itemImage      = req.body.itemImage || '';
-    item.description    = req.body.description || '';
-    item.unlimitedStock = req.body.unlimitedStock === 'true';
-    item.stock          = req.body.unlimitedStock === 'true' ? 0 : parseInt(req.body.stock) || 0;
-    item.listedInStore  = req.body.listedInStore === 'true';
-    item.inventoryItem  = req.body.inventoryItem === 'true';
-    item.usable         = req.body.usable === 'true';
-    item.sellable       = req.body.sellable === 'true';
-    item.expiryDate     = req.body.expiryDate ? new Date(req.body.expiryDate) : null;
-    item.itemType       = req.body.itemType || 'item';
-    item.roleReward     = req.body.roleReward || '';
-    item.sellPercent    = parseInt(req.body.sellPercent) || 50;
-    item.maxPerUser     = parseInt(req.body.maxPerUser) || 0;
-    item.category       = req.body.category || '';
-    item.useMessage     = req.body.useMessage || '';
+    const data = parseItemBody(req.body);
+    Object.assign(item, data);
 
+    // If market just enabled, init prices
+    if (data.marketEnabled && !item.basePrice) {
+        item.basePrice    = data.price;
+        item.currentPrice = data.price;
+        if (!item.priceHistory?.length)
+            item.priceHistory = [{ price: data.price, date: new Date() }];
+    }
     config.markModified('storeItems');
     await config.save();
-    res.redirect(`/manage/${req.params.guildId}?tab=store&success=true`);
+    res.redirect(`/manage/${guildId}?tab=store&success=true`);
+});
+
+// ─── Add category ────────────────────────────────────────────────────────────
+router.post('/:guildId/add-store-category', async (req, res) => {
+    const { guildId } = req.params;
+    let config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+    if (!req.body.name) return res.redirect(`/manage/${guildId}?tab=store`);
+    config.storeCategories.push({
+        name:  req.body.name.trim(),
+        emoji: req.body.emoji?.trim() || '📦'
+    });
+    config.markModified('storeCategories');
+    await config.save();
+    res.redirect(`/manage/${guildId}?tab=store&success=true`);
+});
+
+// ─── Delete category ─────────────────────────────────────────────────────────
+router.get('/:guildId/delete-store-category/:catId', async (req, res) => {
+    const { guildId, catId } = req.params;
+    let config = await GuildConfig.findOne({ guildId });
+    if (!config) return res.redirect(`/manage/${guildId}?tab=store`);
+    config.storeCategories = config.storeCategories.filter(
+        c => c.catId.toString() !== catId.toString()
+    );
+    config.markModified('storeCategories');
+    await config.save();
+    res.redirect(`/manage/${guildId}?tab=store&delete_success=true`);
 });
 
 module.exports = router;

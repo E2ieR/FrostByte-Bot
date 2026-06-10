@@ -682,6 +682,34 @@
              TAB: ร้านค้า
         ═══════════════════════════════ -->
         <div id="tab-store" class="tab-panel">
+
+            <!-- ─── Category Management ─── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🗂️ หมวดหมู่สินค้า</div>
+                    <span class="badge badge-blue"><%= (config.storeCategories || []).length %> หมวด</span>
+                </div>
+                <div class="card-body">
+                    <form action="/<%= guildId %>/add-store-category" method="POST" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+                        <input type="text" name="emoji" placeholder="📦" style="width:64px;text-align:center" maxlength="8">
+                        <input type="text" name="name" placeholder="ชื่อหมวดหมู่ เช่น VIP" required style="flex:1;min-width:140px">
+                        <button type="submit" class="btn btn-success btn-sm">+ เพิ่ม</button>
+                    </form>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <% (config.storeCategories || []).forEach(cat => { %>
+                        <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:13px">
+                            <span><%= cat.emoji %></span>
+                            <span><%= cat.name %></span>
+                            <a href="/<%= guildId %>/delete-store-category/<%= cat.catId || cat._id %>" onclick="return confirm('ลบหมวด <%= cat.name %>?')" style="color:var(--danger);font-size:16px;line-height:1;text-decoration:none;margin-left:4px">×</a>
+                        </div>
+                        <% }) %>
+                        <% if (!(config.storeCategories || []).length) { %>
+                            <div style="color:var(--muted);font-size:13px">ยังไม่มีหมวดหมู่ — เพิ่มด้านบนเพื่อจัดกลุ่มสินค้า</div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">🛒 เพิ่มสินค้า</div>
@@ -703,7 +731,12 @@
                             </div>
                             <div class="form-group">
                                 <label>หมวดหมู่ (category)</label>
-                                <input type="text" name="category" placeholder="เช่น VIP, ของตกแต่ง">
+                                <select name="category">
+                                    <option value="">— ไม่มีหมวดหมู่ —</option>
+                                    <% (config.storeCategories || []).forEach(cat => { %>
+                                        <option value="<%= cat.name %>"><%= cat.emoji %> <%= cat.name %></option>
+                                    <% }) %>
+                                </select>
                             </div>
                         </div>
                         <div id="store-role-reward-wrap" style="display:none;margin-bottom:12px">
@@ -727,11 +760,41 @@
                                 <input type="text" name="useMessage" placeholder="ใช้ {user} เพื่อแสดงชื่อผู้ใช้">
                             </div>
                         </div>
-                        <div class="form-group" style="margin-bottom:12px">
-                            <label>ลิงก์รูปภาพ (URL)</label>
-                            <input type="url" name="itemImage" placeholder="https://i.imgur.com/abc.jpg" oninput="previewStoreImg(this)">
-                            <div style="font-size:11px;color:var(--muted);margin-top:4px">⚠️ ต้องเป็น URL รูปภาพ (https://...) เท่านั้น — ไม่รองรับการ upload ไฟล์โดยตรง</div>
-                            <img id="store-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                        <div class="form-grid" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label>ไอคอน Emoji (แทนรูปภาพ)</label>
+                                <input type="text" name="itemEmoji" placeholder="🎁 หรือ <:custom:id>" maxlength="100">
+                                <div style="font-size:11px;color:var(--muted);margin-top:3px">ถ้ากรอก Emoji จะแสดงแทนรูปภาพใน /shop</div>
+                            </div>
+                            <div class="form-group">
+                                <label>หรือลิงก์รูปภาพ (URL)</label>
+                                <input type="text" name="itemImage" placeholder="https://i.imgur.com/abc.jpg หรือ GIF/PNG/WebP" oninput="previewStoreImg(this)">
+                                <img id="store-img-preview" src="" style="display:none;margin-top:6px;width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                            </div>
+                        </div>
+
+                        <!-- Market settings -->
+                        <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+                            <div class="toggle-row" style="margin:0 0 10px 0">
+                                <div>
+                                    <div class="toggle-label">📈 ระบบราคาตลาด (Supply & Demand)</div>
+                                    <div class="toggle-desc">ราคาขึ้น/ลงตามการซื้อ-ขาย</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" name="marketEnabled" id="store-market-switch" value="true" onchange="toggleStoreMarket()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div id="store-market-wrap" style="display:none">
+                                <div class="form-group" style="margin:0">
+                                    <label>ความผันผวน (Volatility) <span style="color:var(--muted)">1–100, default 10</span></label>
+                                    <div style="display:flex;align-items:center;gap:10px">
+                                        <input type="range" name="volatility" id="store-vol-range" min="1" max="100" value="10" style="flex:1" oninput="document.getElementById('store-vol-val').textContent=this.value">
+                                        <span id="store-vol-val" style="min-width:28px;text-align:right;font-weight:700">10</span>
+                                    </div>
+                                    <div style="font-size:11px;color:var(--muted);margin-top:3px">ค่าสูง = ราคาเปลี่ยนแปลงมาก | ค่าต่ำ = ราคาเสถียร</div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-grid" style="margin-bottom:12px">
                             <div class="form-group">
@@ -793,16 +856,24 @@
                 </div>
                 <div class="card-body">
                     <% if (config.storeItems && config.storeItems.length > 0) { %>
-                        <% config.storeItems.forEach((item, index) => { %>
+                        <% config.storeItems.forEach((item, index) => {
+                            const effPrice = item.marketEnabled && item.currentPrice ? item.currentPrice : item.price;
+                            const baseP    = item.basePrice || item.price;
+                            const mPct     = item.marketEnabled ? Math.round((effPrice - baseP) / baseP * 100) : 0;
+                            const mArrow   = item.marketEnabled ? (mPct > 3 ? '📈' : mPct < -3 ? '📉' : '➡️') : '';
+                        %>
                         <div class="list-item">
                             <div class="list-item-left">
-                                <div class="list-item-icon">
-                                    <% if (item.itemImage) { %><img src="<%= item.itemImage %>" alt=""><% } else { %><%= item.itemType === 'role' ? '🎭' : item.itemType === 'consumable' ? '⚡' : '🎁' %><% } %>
+                                <div class="list-item-icon" style="font-size:22px;display:flex;align-items:center;justify-content:center">
+                                    <% if (item.itemEmoji) { %><%= item.itemEmoji
+                                    %><% } else if (item.itemImage) { %><img src="<%= item.itemImage %>" alt="" style="width:36px;height:36px;border-radius:6px;object-fit:cover">
+                                    <% } else { %><%= item.itemType === 'role' ? '🎭' : item.itemType === 'consumable' ? '⚡' : '🎁' %><% } %>
                                 </div>
                                 <div>
                                     <div class="list-item-name"><%= item.itemName %></div>
                                     <div class="list-item-meta">
-                                        <span class="badge badge-yellow"><%= item.price.toLocaleString() %> <%= config.currencyEmoji || '🪙' %></span>
+                                        <span class="badge badge-yellow"><%= effPrice.toLocaleString() %> <%= config.currencyEmoji || '🪙' %></span>
+                                        <% if (item.marketEnabled) { %>&nbsp;<span class="badge" style="background:#1a2a1a;color:#57F287"><%= mArrow %><%= mPct >= 0 ? '+' : '' %><%= mPct %>% ตลาด</span><% } %>
                                         &nbsp;<span class="badge badge-blue"><%= item.itemType === 'role' ? '🎭 ยศ' : item.itemType === 'consumable' ? '⚡ consumable' : '🎁 ไอเทม' %></span>
                                         <% if (item.category) { %>&nbsp;<span class="badge" style="background:var(--border);color:var(--text)">[<%= item.category %>]</span><% } %>
                                         &nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>
@@ -812,7 +883,7 @@
                                 </div>
                             </div>
                             <div style="display:flex;gap:6px;flex-shrink:0">
-                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem,usable:item.usable,itemType:item.itemType||'item',roleReward:item.roleReward||'',sellPercent:item.sellPercent||50,maxPerUser:item.maxPerUser||0,category:item.category||'',useMessage:item.useMessage||''}).replace(/"/g,'&quot;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
+                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',emoji:item.itemEmoji||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem,usable:item.usable,itemType:item.itemType||'item',roleReward:item.roleReward||'',sellPercent:item.sellPercent||50,maxPerUser:item.maxPerUser||0,category:item.category||'',useMessage:item.useMessage||'',marketEnabled:!!item.marketEnabled,basePrice:item.basePrice||item.price,currentPrice:item.currentPrice||item.price,volatility:item.volatility||10}).replace(/"/g,'&quot;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
                                 <a href="/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบสินค้านี้?')">🗑️ ลบ</a>
                             </div>
                         </div>
@@ -2250,7 +2321,12 @@
                 </div>
                 <div class="form-group">
                     <label>หมวดหมู่ (category)</label>
-                    <input type="text" id="edit-item-category" name="category" placeholder="เช่น VIP">
+                    <select id="edit-item-category" name="category">
+                        <option value="">— ไม่มีหมวดหมู่ —</option>
+                        <% (config.storeCategories || []).forEach(cat => { %>
+                            <option value="<%= cat.name %>"><%= cat.emoji %> <%= cat.name %></option>
+                        <% }) %>
+                    </select>
                 </div>
             </div>
             <div id="edit-role-reward-wrap" style="display:none;margin-bottom:12px">
@@ -2274,10 +2350,39 @@
                     <input type="text" id="edit-item-use-message" name="useMessage" placeholder="ใช้ {user} เพื่อแสดงชื่อผู้ใช้">
                 </div>
             </div>
-            <div class="form-group" style="margin-bottom:14px">
-                <label>ลิงก์รูปภาพ (URL)</label>
-                <input type="url" id="edit-item-img" name="itemImage" placeholder="https://..." oninput="previewEditImg(this.value)">
-                <img id="edit-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+            <div class="form-grid" style="margin-bottom:14px">
+                <div class="form-group">
+                    <label>ไอคอน Emoji</label>
+                    <input type="text" id="edit-item-emoji" name="itemEmoji" placeholder="🎁 หรือ <:custom:id>" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>ลิงก์รูปภาพ (URL / GIF / WebP)</label>
+                    <input type="text" id="edit-item-img" name="itemImage" placeholder="https://..." oninput="previewEditImg(this.value)">
+                    <img id="edit-img-preview" src="" style="display:none;margin-top:6px;width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                </div>
+            </div>
+
+            <!-- Market settings edit -->
+            <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+                <div class="toggle-row" style="margin:0 0 8px 0">
+                    <div>
+                        <div class="toggle-label">📈 ระบบราคาตลาด</div>
+                        <div id="edit-market-cur-price" style="font-size:11px;color:var(--muted)"></div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="edit-item-market" onchange="toggleEditMarket()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="edit-market-wrap" style="display:none">
+                    <div class="form-group" style="margin:0">
+                        <label>ความผันผวน (Volatility) 1–100</label>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <input type="range" id="edit-item-vol-range" min="1" max="100" value="10" style="flex:1" oninput="document.getElementById('edit-vol-val').textContent=this.value">
+                            <span id="edit-vol-val" style="min-width:28px;text-align:right;font-weight:700">10</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="form-grid" style="margin-bottom:12px">
                 <div class="form-group">
@@ -2927,6 +3032,7 @@
         document.getElementById('edit-item-price').value           = d.price;
         document.getElementById('edit-item-desc').value            = d.desc;
         document.getElementById('edit-item-img').value             = d.img;
+        document.getElementById('edit-item-emoji').value           = d.emoji || '';
         document.getElementById('edit-item-unlimited').checked     = !!d.unlimited;
         document.getElementById('edit-item-stock').value           = d.stock;
         document.getElementById('edit-item-listed').checked        = !!d.listed;
@@ -2938,6 +3044,20 @@
         document.getElementById('edit-item-category').value        = d.category || '';
         document.getElementById('edit-item-use-message').value     = d.useMessage || '';
 
+        // Market
+        document.getElementById('edit-item-market').checked = !!d.marketEnabled;
+        const volRange = document.getElementById('edit-item-vol-range');
+        volRange.value = d.volatility || 10;
+        document.getElementById('edit-vol-val').textContent = d.volatility || 10;
+        const curPriceEl = document.getElementById('edit-market-cur-price');
+        if (d.marketEnabled) {
+            const pct = d.basePrice ? Math.round((d.currentPrice - d.basePrice) / d.basePrice * 100) : 0;
+            curPriceEl.textContent = `ราคาปัจจุบัน: ${(d.currentPrice || d.price).toLocaleString()} (ฐาน ${(d.basePrice || d.price).toLocaleString()}, ${pct >= 0 ? '+' : ''}${pct}%)`;
+        } else {
+            curPriceEl.textContent = '';
+        }
+        toggleEditMarket();
+
         const typeEl = document.getElementById('edit-item-type');
         typeEl.value = d.itemType || 'item';
 
@@ -2948,15 +3068,10 @@
         toggleEditStock();
 
         const prev = document.getElementById('edit-img-preview');
-        if (d.img && (d.img.startsWith('http://') || d.img.startsWith('https://'))) {
-            prev.src = d.img; prev.style.display = 'block';
-        } else {
-            prev.style.display = 'none';
-        }
+        if (d.img) { prev.src = d.img; prev.style.display = 'block'; }
+        else        { prev.style.display = 'none'; }
 
-        // Set form action to POST update route
         document.getElementById('store-edit-form').action = '/' + GUILD_ID + '/update-store-item/' + d.id;
-
         document.getElementById('modal-store-item').style.display = 'flex';
     }
 
@@ -2970,6 +3085,16 @@
         const val = document.getElementById('store-item-type').value;
         document.getElementById('store-role-reward-wrap').style.display = val === 'role'       ? 'block' : 'none';
         document.getElementById('store-usable-wrap').style.display      = val === 'consumable' ? 'block' : 'none';
+    }
+
+    function toggleStoreMarket() {
+        const on = document.getElementById('store-market-switch').checked;
+        document.getElementById('store-market-wrap').style.display = on ? 'block' : 'none';
+    }
+
+    function toggleEditMarket() {
+        const on = document.getElementById('edit-item-market').checked;
+        document.getElementById('edit-market-wrap').style.display = on ? 'block' : 'none';
     }
 
     function toggleEditStock() {
@@ -3002,6 +3127,8 @@
         setHidden('inventoryItem',  String(document.getElementById('edit-item-inventory').checked));
         setHidden('sellable',       String(document.getElementById('edit-item-sellable').checked));
         setHidden('usable',         String(document.getElementById('edit-item-usable').checked));
+        setHidden('marketEnabled',  String(document.getElementById('edit-item-market').checked));
+        setHidden('volatility',     document.getElementById('edit-item-vol-range').value);
         form.submit();
     }
 

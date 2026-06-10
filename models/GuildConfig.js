@@ -76,13 +76,21 @@ const guildConfigSchema = new mongoose.Schema({
         startDate:     { type: Date, default: Date.now }
     }],
 
+    // ─── Store Categories ─────────────────────────────────
+    storeCategories: [{
+        catId: { type: String, default: () => new mongoose.Types.ObjectId().toString() },
+        name:  { type: String, required: true },
+        emoji: { type: String, default: '📦' }
+    }],
+
     // ─── Store ────────────────────────────────────────────
     storeItems: [{
         itemId:        { type: String, default: () => new mongoose.Types.ObjectId().toString() },
         itemName:      { type: String, required: true },
         price:         { type: Number, required: true },
         description:   { type: String, default: '' },
-        itemImage:     { type: String, default: null },
+        itemImage:     { type: String, default: '' },
+        itemEmoji:     { type: String, default: '' },
         unlimitedStock:{ type: Boolean, default: true },
         stock:         { type: Number, default: 0 },
         listedInStore: { type: Boolean, default: true },
@@ -95,7 +103,16 @@ const guildConfigSchema = new mongoose.Schema({
         sellPercent:   { type: Number, default: 50 },
         maxPerUser:    { type: Number, default: 0 },
         category:      { type: String, default: '' },
-        useMessage:    { type: String, default: '' }
+        useMessage:    { type: String, default: '' },
+        // ─── Market (Supply & Demand) ───────────────────
+        marketEnabled: { type: Boolean, default: false },
+        basePrice:     { type: Number, default: 0 },
+        currentPrice:  { type: Number, default: 0 },
+        volatility:    { type: Number, default: 10 },
+        totalBought:   { type: Number, default: 0 },
+        totalSold:     { type: Number, default: 0 },
+        lastTradeAt:   { type: Date,   default: null },
+        priceHistory:  [{ price: { type: Number }, date: { type: Date } }]
     }],
 
     // ─── Level System ─────────────────────────────────────
