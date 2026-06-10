@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกเซิร์ฟเวอร์ — ICKEz Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #0e0f13;
+            --surface:  #16181f;
+            --surface2: #1c1f28;
+            --border:   #2a2d38;
+            --blurple:  #5865F2;
+            --blurple-h:#4752C4;
+            --green:    #57F287;
+            --text:     #e8eaf0;
+            --muted:    #7b7f8e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* top nav */
+        nav {
+            position: sticky; top: 0; z-index: 10;
+            background: rgba(14,15,19,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700; font-size: 16px;
+        }
+        .nav-brand .dot {
+            width: 32px; height: 32px;
+            background: var(--blurple);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        .nav-user {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 13px; color: var(--muted);
+        }
+        .nav-user img {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+        }
+        .nav-user strong { color: var(--text); }
+        .nav-user a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 12px;
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            transition: border-color 0.15s;
+        }
+        .nav-user a:hover { border-color: var(--muted); }
+
+        /* main */
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }
+        .page-header p { color: var(--muted); font-size: 14px; }
+
+        /* search */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-wrap input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 11px 16px 11px 40px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .search-wrap input:focus { border-color: var(--blurple); }
+        .search-wrap input::placeholder { color: var(--muted); }
+        .search-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--muted); font-size: 14px; pointer-events: none;
+        }
+
+        /* tabs */
+        .tabs {
+            display: flex; gap: 4px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            background: none; border: 1px solid var(--border);
+            color: var(--muted); padding: 7px 14px;
+            border-radius: 8px; font-size: 13px; font-family: inherit;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--surface); color: var(--text);
+            border-color: #3d4152;
+        }
+
+        /* guild list */
+        .guild-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .guild-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .guild-card:hover { border-color: #3d4152; background: var(--surface2); }
+
+        .guild-icon {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            background: var(--surface2);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 18px; color: var(--blurple);
+            flex-shrink: 0; overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .guild-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+        .guild-info { flex: 1; min-width: 0; }
+        .guild-info strong {
+            display: block; font-size: 15px; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .guild-info small {
+            font-size: 12px; color: var(--muted);
+        }
+
+        .guild-status {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 11px; font-weight: 600;
+            padding: 3px 8px; border-radius: 20px;
+            margin-top: 4px;
+        }
+        .status-active { background: rgba(87,242,135,0.12); color: #57F287; }
+        .status-inactive { background: rgba(255,255,255,0.05); color: var(--muted); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .guild-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 16px; border-radius: 8px;
+            font-size: 13px; font-weight: 600;
+            text-decoration: none; border: none; cursor: pointer;
+            font-family: inherit; transition: all 0.15s;
+        }
+        .btn-primary { background: var(--blurple); color: #fff; }
+        .btn-primary:hover { background: var(--blurple-h); }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { border-color: var(--blurple); color: var(--blurple); }
+        .btn-invite { background: rgba(87,242,135,0.1); color: var(--green); border: 1px solid rgba(87,242,135,0.2); }
+        .btn-invite:hover { background: rgba(87,242,135,0.18); }
+
+        .empty {
+            text-align: center; padding: 60px 20px;
+            color: var(--muted); font-size: 14px;
+        }
+        .empty .icon { font-size: 40px; margin-bottom: 12px; }
+
+        .count-badge {
+            font-size: 12px; color: var(--muted); margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">
+            <div class="dot">🤖</div>
+            ICKEz Dashboard
+        </div>
+        <div class="nav-user">
+            <% if (user.avatar) { %>
+                <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="">
+            <% } %>
+            <span>สวัสดี, <strong><%= user.username %></strong></span>
+            <a href="/logout">ออกจากระบบ</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>🏰 เลือกเซิร์ฟเวอร์</h1>
+            <p>เซิร์ฟเวอร์ที่คุณมีสิทธิ์ผู้ดูแลระบบ</p>
+        </div>
+
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="ค้นหาเซิร์ฟเวอร์..." oninput="filterGuilds()">
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="filterTab(this,'all')">ทั้งหมด (<%= guilds.length %>)</button>
+            <button class="tab-btn" onclick="filterTab(this,'active')">บอทอยู่แล้ว (<%= guilds.filter(g=>g.hasBot).length %>)</button>
+            <button class="tab-btn" onclick="filterTab(this,'inactive')">ยังไม่มีบอท (<%= guilds.filter(g=>!g.hasBot).length %>)</button>
+        </div>
+
+        <div id="guild-list" class="guild-list">
+            <% guilds.forEach(guild => { %>
+            <div class="guild-card" data-name="<%= guild.name.toLowerCase() %>" data-status="<%= guild.hasBot ? 'active' : 'inactive' %>">
+                <div class="guild-icon">
+                    <% if (guild.icon) { %>
+                        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=64" alt="<%= guild.name %>">
+                    <% } else { %>
+                        <%= guild.name.charAt(0).toUpperCase() %>
+                    <% } %>
+                </div>
+                <div class="guild-info">
+                    <strong><%= guild.name %></strong>
+                    <small>ID: <%= guild.id %></small>
+                    <div>
+                        <% if (guild.hasBot) { %>
+                            <span class="guild-status status-active"><span class="status-dot"></span>บอทออนไลน์</span>
+                        <% } else { %>
+                            <span class="guild-status status-inactive"><span class="status-dot"></span>ยังไม่มีบอท</span>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="guild-actions">
+                    <% if (guild.hasBot) { %>
+                        <a href="/manage/<%= guild.id %>" class="btn btn-primary">⚙️ จัดการ</a>
+                    <% } else { %>
+                        <a href="https://discord.com/api/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands&guild_id=<%= guild.id %>&disable_guild_select=true" target="_blank" class="btn btn-invite">➕ เชิญบอท</a>
+                    <% } %>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <div id="empty-state" class="empty" style="display:none;">
+            <div class="icon">🔍</div>
+            <div>ไม่พบเซิร์ฟเวอร์ที่ค้นหา</div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'all';
+
+        function filterGuilds() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const cards = document.querySelectorAll('.guild-card');
+            let visible = 0;
+            cards.forEach(card => {
+                const nameMatch = card.dataset.name.includes(q);
+                const tabMatch = currentTab === 'all' || card.dataset.status === currentTab;
+                const show = nameMatch && tabMatch;
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            document.getElementById('empty-state').style.display = visible === 0 ? '' : 'none';
+        }
+
+        function filterTab(btn, tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterGuilds();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,3062 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= guild.name %> — ICKEz Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #0e0f13;
+            --surface:  #16181f;
+            --surface2: #1c1f28;
+            --border:   #2a2d38;
+            --border2:  #383d50;
+            --blurple:  #5865F2;
+            --blurple-h:#4752C4;
+            --green:    #57F287;
+            --yellow:   #FEE75C;
+            --red:      #ED4245;
+            --text:     #e8eaf0;
+            --muted:    #7b7f8e;
+            --sidebar-w: 240px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-top {
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .server-info {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .server-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: var(--blurple);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; flex-shrink: 0;
+            overflow: hidden;
+        }
+        .server-icon img { width:100%; height:100%; object-fit:cover; }
+        .server-name { font-weight: 600; font-size: 13px; line-height: 1.3; }
+        .server-id { font-size: 11px; color: var(--muted); }
+
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 8px; }
+
+        .nav-section {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 12px 8px 4px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 10px;
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.12s;
+            margin-bottom: 1px;
+        }
+        .nav-item:hover { background: var(--surface2); color: var(--text); }
+        .nav-item.active { background: rgba(88,101,242,0.15); color: var(--blurple); }
+        .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 12px 8px;
+            border-top: 1px solid var(--border);
+        }
+        .user-row {
+            display: flex; align-items: center; gap: 9px;
+            padding: 8px 10px; border-radius: 8px;
+        }
+        .user-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--blurple); flex-shrink: 0; overflow: hidden;
+        }
+        .user-avatar img { width:100%; height:100%; object-fit:cover; }
+        .user-name { font-size: 12px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-logout { color: var(--muted); font-size: 11px; text-decoration: none; }
+        .user-logout:hover { color: var(--red); }
+
+        /* ─── MAIN ─── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            height: 56px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px;
+            flex-shrink: 0;
+        }
+        .topbar-title { font-weight: 600; font-size: 15px; }
+        .topbar-breadcrumb {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--muted);
+        }
+        .topbar-breadcrumb a { color: var(--muted); text-decoration: none; }
+        .topbar-breadcrumb a:hover { color: var(--text); }
+        .topbar-breadcrumb span { color: var(--border2); }
+
+        /* success/error toast */
+        .toast {
+            position: fixed; top: 20px; right: 20px; z-index: 999;
+            padding: 12px 18px; border-radius: 10px;
+            font-size: 13px; font-weight: 500;
+            display: none; align-items: center; gap: 8px;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success { background: rgba(87,242,135,0.15); border: 1px solid rgba(87,242,135,0.3); color: var(--green); display: flex; }
+        .toast.error   { background: rgba(237,66,69,0.15);  border: 1px solid rgba(237,66,69,0.3);  color: var(--red);   display: flex; }
+        @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+        /* content area */
+        .content-area {
+            flex: 1; overflow-y: auto;
+            padding: 28px 32px;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 18px 22px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .card-title {
+            font-size: 15px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .card-body { padding: 22px; }
+
+        /* section heading inside card */
+        .section-label {
+            font-size: 11px; font-weight: 700;
+            color: var(--muted); text-transform: uppercase;
+            letter-spacing: 0.6px; margin-bottom: 10px;
+        }
+
+        /* ─── FORM ─── */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .form-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+        label {
+            font-size: 11px; font-weight: 600;
+            color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px;
+        }
+
+        input[type=text], input[type=number], input[type=url], textarea, select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--blurple); }
+        textarea { resize: vertical; min-height: 80px; }
+        select option { background: var(--surface2); }
+
+        /* ─── BUTTONS ─── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; border-radius: 8px;
+            font-size: 13px; font-weight: 600;
+            border: none; cursor: pointer; font-family: inherit;
+            text-decoration: none; transition: all 0.15s;
+        }
+        .btn-primary { background: var(--blurple); color: #fff; }
+        .btn-primary:hover { background: var(--blurple-h); }
+        .btn-success { background: rgba(87,242,135,0.15); color: var(--green); border: 1px solid rgba(87,242,135,0.25); }
+        .btn-success:hover { background: rgba(87,242,135,0.25); }
+        .btn-danger { background: rgba(237,66,69,0.12); color: var(--red); border: 1px solid rgba(237,66,69,0.2); }
+        .btn-danger:hover { background: rgba(237,66,69,0.22); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        /* ─── TOGGLE ─── */
+        .toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 10px;
+        }
+        .toggle-label { font-size: 13px; }
+        .toggle-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #3d4152; border-radius: 22px; transition: .2s; }
+        .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+        input:checked + .slider { background: var(--blurple); }
+        input:checked + .slider::before { transform: translateX(18px); }
+
+        /* ─── LIST ITEMS ─── */
+        .list-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 8px;
+            gap: 12px;
+        }
+        .list-item-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .list-item-icon { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .list-item-icon img { width:100%; height:100%; object-fit:cover; }
+        .list-item-name { font-size: 14px; font-weight: 600; }
+        .list-item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .badge-blurple { background: rgba(88,101,242,0.15); color: #7b8df8; }
+        .badge-green   { background: rgba(87,242,135,0.12); color: var(--green); }
+        .badge-yellow  { background: rgba(254,231,92,0.12); color: var(--yellow); }
+        .badge-red     { background: rgba(237,66,69,0.12); color: var(--red); }
+
+        .empty-state {
+            text-align: center; padding: 36px 20px;
+            color: var(--muted); font-size: 13px;
+        }
+        .empty-state .e-icon { font-size: 32px; margin-bottom: 10px; }
+
+        /* ─── POOL BAR ─── */
+        .pool-bar {
+            height: 10px; border-radius: 20px; overflow: hidden;
+            display: flex;
+        }
+        .pool-bar-a { height: 100%; background: linear-gradient(90deg,#5865F2,#7b8df8); transition: width 0.6s ease; }
+        .pool-bar-b { height: 100%; background: linear-gradient(90deg,#c0392b,#ed4245); transition: width 0.6s ease; flex: 1; }
+
+        /* stats row */
+        .stat-row {
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-value { font-size: 20px; font-weight: 700; }
+
+        hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+        /* ─── BETTING SIDE CARDS ─── */
+        .bet-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .bet-side-a { background: rgba(88,101,242,0.06); border: 1px solid rgba(88,101,242,0.25); border-radius: 12px; padding: 18px; }
+        .bet-side-b { background: rgba(237,66,69,0.06);  border: 1px solid rgba(237,66,69,0.25);  border-radius: 12px; padding: 18px; }
+        .bet-side-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .bet-side-a .bet-side-label { color: #7b8df8; }
+        .bet-side-b .bet-side-label { color: #f28f8f; }
+        .bet-img-preview { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; display: block; margin-bottom: 8px; border: 2px solid var(--border); }
+        .bet-img-placeholder { width: 72px; height: 72px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 8px; }
+        .bet-side-a .bet-img-placeholder { background: rgba(88,101,242,0.12); border: 2px solid rgba(88,101,242,0.3); }
+        .bet-side-b .bet-img-placeholder { background: rgba(237,66,69,0.12);  border: 2px solid rgba(237,66,69,0.3); }
+
+        /* countdown */
+        #bet-countdown { font-variant-numeric: tabular-nums; }
+
+        /* ─── MEMBERS TABLE ─── */
+        .members-table { width: 100%; border-collapse: collapse; }
+        .members-table th {
+            padding: 10px 14px; text-align: left;
+            font-size: 11px; font-weight: 700; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .members-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px; vertical-align: middle;
+        }
+        .members-table tr:last-child td { border-bottom: none; }
+        .members-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .member-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            object-fit: cover; vertical-align: middle; margin-right: 8px;
+        }
+        .role-chip {
+            display: inline-block; padding: 2px 7px;
+            border-radius: 20px; font-size: 11px; font-weight: 600;
+            margin: 2px; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .pagination { display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap; }
+        .page-btn {
+            padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--surface2); color: var(--text); font-size: 12px;
+            cursor: pointer; transition: all 0.12s; font-family: inherit;
+        }
+        .page-btn:hover { background: var(--border); }
+        .page-btn.active { background: var(--blurple); border-color: var(--blurple); color: #fff; }
+        .page-btn:disabled { opacity: 0.4; cursor: default; }
+
+        /* ─── MODAL ─── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 500;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            width: 100%; max-width: 520px;
+            max-height: 90vh; display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .modal-box.wide { max-width: 680px; }
+        .modal-header {
+            padding: 18px 22px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 15px; font-weight: 600; flex-shrink: 0;
+        }
+        .modal-close {
+            background: none; border: none; color: var(--muted);
+            font-size: 18px; cursor: pointer; padding: 4px 8px;
+            border-radius: 6px; transition: all 0.12s;
+        }
+        .modal-close:hover { background: var(--surface2); color: var(--text); }
+        .modal-body { padding: 22px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+        }
+        .inv-list { margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+        .level-role-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .level-role-row:last-child { border-bottom: none; }
+        .inv-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 13px;
+        }
+        .inv-row-name { font-weight: 500; }
+        .inv-row-right { display: flex; align-items: center; gap: 8px; }
+    </style>
+</head>
+<body>
+
+<!-- ─── TOAST ─── -->
+<% const qs = (typeof query !== 'undefined') ? query : {}; %>
+<% if (typeof success !== 'undefined' || (typeof query !== 'undefined' && query.success)) { %>
+<div class="toast success">✅ บันทึกการตั้งค่าเรียบร้อยแล้ว</div>
+<% } %>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+    <div class="sidebar-top">
+        <div class="server-info">
+            <div class="server-icon">
+                <% if (guild.icon) { %>
+                    <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=64">
+                <% } else { %>
+                    <%= guild.name.charAt(0) %>
+                <% } %>
+            </div>
+            <div>
+                <div class="server-name"><%= guild.name %></div>
+                <div class="server-id">ID: <%= guild.id %></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">ระบบเศรษฐกิจ</div>
+        <div id="btn-currency" class="nav-item active" onclick="switchTab('currency','btn-currency')">
+            <span class="icon">🪙</span> สกุลเงิน
+        </div>
+        <div id="btn-work" class="nav-item" onclick="switchTab('work','btn-work')">
+            <span class="icon">💼</span> คำสั่ง /work
+        </div>
+        <div id="btn-rob" class="nav-item" onclick="switchTab('rob','btn-rob')">
+            <span class="icon">🥷</span> คำสั่ง /rob
+        </div>
+
+        <div class="nav-section">ระบบรายได้</div>
+        <div id="btn-role-income" class="nav-item" onclick="switchTab('role-income','btn-role-income')">
+            <span class="icon">👑</span> รายได้จากยศ
+        </div>
+        <div id="btn-active-bonus" class="nav-item" onclick="switchTab('active-bonus','btn-active-bonus')">
+            <span class="icon">💬</span> Active Bonus
+        </div>
+        <div id="btn-seniority" class="nav-item" onclick="switchTab('seniority','btn-seniority')">
+            <span class="icon">🏅</span> Seniority Bonus
+        </div>
+        <div id="btn-daily-quests" class="nav-item" onclick="switchTab('daily-quests','btn-daily-quests')">
+            <span class="icon">📋</span> Daily Quests
+        </div>
+
+        <div id="btn-level" class="nav-item" onclick="switchTab('level','btn-level')">
+            <span class="icon">🎖️</span> ระบบ Level
+        </div>
+        <div id="btn-autorole" class="nav-item" onclick="switchTab('autorole','btn-autorole')">
+            <span class="icon">🎭</span> Auto Role
+        </div>
+
+        <div class="nav-section">ระบบไอเทม</div>
+        <div id="btn-store" class="nav-item" onclick="switchTab('store','btn-store')">
+            <span class="icon">🛒</span> ร้านค้า
+        </div>
+
+        <div class="nav-section">ข้อมูล</div>
+        <div id="btn-members" class="nav-item" onclick="switchTab('members','btn-members')">
+            <span class="icon">👥</span> สมาชิก
+        </div>
+
+        <div class="nav-section">มินิเกม</div>
+        <div id="btn-betting" class="nav-item" onclick="switchTab('betting','btn-betting')">
+            <span class="icon">🎲</span> ระบบเดิมพัน
+        </div>
+
+        <div class="nav-section">ระบบ</div>
+        <div id="btn-commands" class="nav-item" onclick="switchTab('commands','btn-commands')">
+            <span class="icon">⚙️</span> คำสั่ง /
+        </div>
+
+        <div class="nav-section">กีฬา & Esports</div>
+        <div id="btn-sports" class="nav-item" onclick="switchTab('sports','btn-sports')">
+            <span class="icon">🏆</span> แจ้งเตือนกีฬา
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-row">
+            <div class="user-avatar">
+                <% if (user.avatar) { %>
+                    <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png">
+                <% } %>
+            </div>
+            <div class="user-name"><%= user.username %></div>
+            <a href="/logout" class="user-logout" title="ออกจากระบบ">✕</a>
+        </div>
+        <a href="/selector" style="display:flex;align-items:center;gap:6px;padding:7px 10px;color:var(--muted);font-size:12px;text-decoration:none;border-radius:6px;transition:color .15s;" onmouseover="this.style.color='#e8eaf0'" onmouseout="this.style.color='var(--muted)'">
+            ← กลับหน้าเลือกเซิร์ฟ
+        </a>
+    </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-breadcrumb">
+            <a href="/selector">หน้าหลัก</a>
+            <span>›</span>
+            <span style="color:var(--text)"><%= guild.name %></span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">ICKEz Dashboard</div>
+    </div>
+
+    <div class="content-area">
+
+        <!-- ═══════════════════════════════
+             TAB: สกุลเงิน
+        ═══════════════════════════════ -->
+        <div id="tab-currency" class="tab-panel active">
+            <form action="/save-settings/<%= guildId %>?tab=currency" method="POST">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🪙 ตั้งค่าสกุลเงิน</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>ชื่อสกุลเงิน</label>
+                                <input type="text" name="currencyName" value="<%= config.currencyName || '' %>" placeholder="เช่น Coins, Baht, Gems">
+                            </div>
+                            <div class="form-group">
+                                <label>อีโมจิสกุลเงิน</label>
+                                <input type="text" name="currencyEmoji" value="<%= config.currencyEmoji || '' %>" placeholder="🪙">
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>เงินตั้งต้น (Cash)</label>
+                                <input type="number" name="startCoins" value="<%= config.startCoins || 0 %>" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>เงินตั้งต้น (Bank)</label>
+                                <input type="number" name="startBank" value="<%= config.startBank || 0 %>" min="0">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่า</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: /work
+        ═══════════════════════════════ -->
+        <div id="tab-work" class="tab-panel">
+            <form action="/save-settings/<%= guildId %>?tab=work" method="POST">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⏱️ Cooldown และเรทเงิน</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="section-label">เวลา Cooldown</div>
+                        <div class="form-grid-4">
+                            <div class="form-group"><label>วัน</label><input type="number" name="cooldownDays"    value="<%= config.cooldownDays    || 0 %>" min="0"></div>
+                            <div class="form-group"><label>ชั่วโมง</label><input type="number" name="cooldownHours"   value="<%= config.cooldownHours   || 0 %>" min="0"></div>
+                            <div class="form-group"><label>นาที</label><input type="number" name="cooldownMinutes" value="<%= config.cooldownMinutes || 0 %>" min="0"></div>
+                            <div class="form-group"><label>วินาที</label><input type="number" name="cooldownSeconds" value="<%= config.cooldownSeconds || 0 %>" min="0"></div>
+                        </div>
+                        <div class="section-label" style="margin-top:8px">เรทเงิน</div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>ขั้นต่ำ</label><input type="number" name="minWorkGain" value="<%= config.minWorkGain || 0 %>" min="0"></div>
+                            <div class="form-group"><label>สูงสุด</label><input type="number" name="maxWorkGain" value="<%= config.maxWorkGain || 0 %>" min="0"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่า</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📝 ข้อความสุ่ม /work</div>
+                    <span class="badge badge-blurple"><%= (config.workSituations || []).length %> ข้อความ</span>
+                </div>
+                <div class="card-body">
+                    <form action="/manage/<%= guildId %>/add-reply" method="POST" style="margin-bottom:16px">
+                        <div class="form-group" style="margin-bottom:10px">
+                            <label>ข้อความใหม่ (ใช้ {amount} แทนจำนวนเงิน)</label>
+                            <textarea name="newReply" placeholder="คุณทำงานหนักและได้รับ {amount} เหรียญ!" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">➕ เพิ่มข้อความ</button>
+                    </form>
+                    <% if (config.workSituations && config.workSituations.length > 0) { %>
+                        <% config.workSituations.forEach((sit, index) => { %>
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-icon">💬</div>
+                                <div style="min-width:0">
+                                    <div style="font-size:13px;line-height:1.5;word-break:break-word"><%= sit %></div>
+                                </div>
+                            </div>
+                            <a href="/manage/<%= guildId %>/delete-reply/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบข้อความนี้?')">ลบ</a>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="empty-state"><div class="e-icon">📭</div>ยังไม่มีข้อความสุ่ม</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: รายได้จากยศ
+        ═══════════════════════════════ -->
+        <div id="tab-role-income" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">👑 เพิ่มรายได้ยศ</div>
+                </div>
+                <div class="card-body">
+                    <form action="/manage/<%= guildId %>/add-role-income" method="POST">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>ยศ</label>
+                                <select name="roleId" required>
+                                    <option value="">— เลือกยศ —</option>
+                                    <% if (typeof discordRoles !== 'undefined') { discordRoles.forEach(role => { %>
+                                        <option value="<%= role.id %>"><%= role.name %></option>
+                                    <% }) } %>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>จำนวนเงินต่อรอบ</label>
+                                <input type="number" name="amount" placeholder="500" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>ทุกๆ (ตัวเลข)</label>
+                                <input type="number" name="intervalValue" placeholder="1" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>หน่วยเวลา</label>
+                                <select name="intervalType">
+                                    <option value="hours">ชั่วโมง</option>
+                                    <option value="days">วัน</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block">➕ เพิ่มรายได้ยศ</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📋 รายการยศที่มีรายได้</div>
+                    <span class="badge badge-green"><%= (config.roleIncomes || []).length %> ยศ</span>
+                </div>
+                <div class="card-body">
+                    <% if (config.roleIncomes && config.roleIncomes.length > 0) { %>
+                        <% config.roleIncomes.forEach((role, index) => { %>
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-icon">👑</div>
+                                <div>
+                                    <div class="list-item-name"><%= role.roleName || 'ไม่ทราบชื่อ' %></div>
+                                    <div class="list-item-meta">
+                                        <span class="badge badge-yellow"><%= role.amount ? role.amount.toLocaleString() : 0 %> <%= config.currencyEmoji || '🪙' %></span>
+                                        ทุกๆ <%= role.intervalValue %> ชั่วโมง
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="/manage/<%= guildId %>/delete-role-income/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ยกเลิกรายได้ยศนี้?')">ลบ</a>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="empty-state"><div class="e-icon">👑</div>ยังไม่มีการตั้งค่ารายได้ยศ</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: ร้านค้า
+        ═══════════════════════════════ -->
+        <div id="tab-store" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🛒 เพิ่มสินค้า</div>
+                </div>
+                <div class="card-body">
+                    <form action="/manage/<%= guildId %>/add-store-item" method="POST">
+                        <div class="form-grid">
+                            <div class="form-group"><label>ชื่อสินค้า</label><input type="text" name="itemName" required placeholder="VIP Pass"></div>
+                            <div class="form-group"><label>ราคา</label><input type="number" name="price" required min="0" placeholder="1000"></div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label>คำอธิบาย</label>
+                            <textarea name="description" placeholder="คำอธิบายสินค้า..."></textarea>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label>ลิงก์รูปภาพ (URL)</label>
+                            <input type="url" name="itemImage" placeholder="https://i.imgur.com/abc.jpg" oninput="previewStoreImg(this)">
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px">⚠️ ต้องเป็น URL รูปภาพ (https://...) เท่านั้น — ไม่รองรับการ upload ไฟล์โดยตรง</div>
+                        <img id="store-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                        </div>
+
+                        <div class="toggle-row">
+                            <div>
+                                <div class="toggle-label">สินค้าไม่จำกัด</div>
+                                <div class="toggle-desc">ปิดเพื่อกำหนดจำนวนในคลัง</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="unlimitedStock" id="unlimited-switch" value="true" checked onchange="toggleStock()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div id="stock-wrap" style="display:none;margin-bottom:12px">
+                            <div class="form-group">
+                                <label>จำนวนในคลัง</label>
+                                <input type="number" name="stock" id="stock-amount" value="1" min="1">
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="listedInStore" value="true">
+                        <input type="hidden" name="inventoryItem" value="true">
+                        <input type="hidden" name="usable" value="true">
+                        <input type="hidden" name="sellable" value="true">
+
+                        <button type="submit" class="btn btn-success btn-block">💾 เพิ่มสินค้าในร้าน</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📦 สินค้าในร้านปัจจุบัน</div>
+                    <span class="badge badge-yellow"><%= (config.storeItems || []).length %> รายการ</span>
+                </div>
+                <div class="card-body">
+                    <% if (config.storeItems && config.storeItems.length > 0) { %>
+                        <% config.storeItems.forEach((item, index) => { %>
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-icon">
+                                    <% if (item.itemImage) { %><img src="<%= item.itemImage %>" alt=""><% } else { %>🎁<% } %>
+                                </div>
+                                <div>
+                                    <div class="list-item-name"><%= item.itemName %></div>
+                                    <div class="list-item-meta">
+                                        <span class="badge badge-yellow"><%= item.price.toLocaleString() %> <%= config.currencyEmoji || '🪙' %></span>
+                                        &nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:6px;flex-shrink:0">
+                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem}).replace(/"/g,'&quot;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
+                                <a href="/manage/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบสินค้านี้?')">🗑️ ลบ</a>
+                            </div>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="empty-state"><div class="e-icon">🛒</div>ยังไม่มีสินค้าในร้าน</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: ระบบ Level
+        ═══════════════════════════════ -->
+        <div id="tab-level" class="tab-panel">
+
+            <!-- ─── Header: Enable toggle ─── -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header" style="padding:18px 22px">
+                    <div>
+                        <div style="font-size:16px;font-weight:700">🎖️ ระบบ Level</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:2px">ให้ XP และ Level จากการใช้งาน Discord</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="lv-enabled" <%= config.levelEnabled ? 'checked' : '' %>>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ─── XP Sources grid ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">แหล่ง XP</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:20px">
+
+                <!-- Message XP -->
+                <div class="card" style="margin:0">
+                    <div class="card-header" style="padding:14px 16px">
+                        <span style="font-size:14px">💬 Message XP</span>
+                        <label class="switch"><input type="checkbox" id="lv-msg-enabled" checked disabled><span class="slider"></span></label>
+                    </div>
+                    <div class="card-body" style="padding:12px 16px">
+                        <div class="form-row" style="gap:8px">
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label class="form-label" style="font-size:11px">Min XP</label>
+                                <input type="number" class="form-input" id="lv-xp-min" min="1" max="1000" value="<%= config.xpPerMessageMin ?? 15 %>">
+                            </div>
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label class="form-label" style="font-size:11px">Max XP</label>
+                                <input type="number" class="form-input" id="lv-xp-max" min="1" max="1000" value="<%= config.xpPerMessageMax ?? 25 %>">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:8px 0 0">
+                            <label class="form-label" style="font-size:11px">Cooldown (วินาที)</label>
+                            <input type="number" class="form-input" id="lv-xp-cd" min="1" value="<%= config.xpCooldownSeconds ?? 60 %>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice XP -->
+                <div class="card" style="margin:0">
+                    <div class="card-header" style="padding:14px 16px">
+                        <span style="font-size:14px">🎙️ Voice XP</span>
+                        <label class="switch"><input type="checkbox" id="lv-voice-enabled" <%= config.voiceXpEnabled ? 'checked' : '' %>><span class="slider"></span></label>
+                    </div>
+                    <div class="card-body" style="padding:12px 16px">
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="font-size:11px">XP ต่อนาที</label>
+                            <input type="number" class="form-input" id="lv-voice-xpm" min="1" value="<%= config.voiceXpPerMinute ?? 5 %>">
+                        </div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:6px">ให้ XP ตามเวลาที่อยู่ใน voice channel</div>
+                    </div>
+                </div>
+
+                <!-- Command XP -->
+                <div class="card" style="margin:0">
+                    <div class="card-header" style="padding:14px 16px">
+                        <span style="font-size:14px">⚡ Command XP</span>
+                        <label class="switch"><input type="checkbox" id="lv-cmd-enabled" <%= config.commandXpEnabled ? 'checked' : '' %>><span class="slider"></span></label>
+                    </div>
+                    <div class="card-body" style="padding:12px 16px">
+                        <div class="form-row" style="gap:8px">
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label class="form-label" style="font-size:11px">Min XP</label>
+                                <input type="number" class="form-input" id="lv-cmd-min" min="1" value="<%= config.commandXpMin ?? 5 %>">
+                            </div>
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label class="form-label" style="font-size:11px">Max XP</label>
+                                <input type="number" class="form-input" id="lv-cmd-max" min="1" value="<%= config.commandXpMax ?? 15 %>">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:8px 0 0">
+                            <label class="form-label" style="font-size:11px">Cooldown (วินาที)</label>
+                            <input type="number" class="form-input" id="lv-cmd-cd" min="1" value="<%= config.commandXpCooldownSeconds ?? 30 %>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reaction XP -->
+                <div class="card" style="margin:0">
+                    <div class="card-header" style="padding:14px 16px">
+                        <span style="font-size:14px">💜 Reaction XP</span>
+                        <label class="switch"><input type="checkbox" id="lv-react-enabled" <%= config.reactionXpEnabled ? 'checked' : '' %>><span class="slider"></span></label>
+                    </div>
+                    <div class="card-body" style="padding:12px 16px">
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="font-size:11px">XP ต่อ Reaction</label>
+                            <input type="number" class="form-input" id="lv-react-xp" min="1" value="<%= config.reactionXpAmount ?? 5 %>">
+                        </div>
+                        <div class="form-group" style="margin:8px 0 0">
+                            <label class="form-label" style="font-size:11px">Cooldown (วินาที)</label>
+                            <input type="number" class="form-input" id="lv-react-cd" min="1" value="<%= config.reactionXpCooldownSeconds ?? 120 %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── XP Options ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">XP Options</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-body">
+                    <div style="display:flex;flex-wrap:wrap;gap:24px">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+                            <label class="switch" style="flex-shrink:0">
+                                <input type="checkbox" id="lv-reset-leave" <%= config.levelResetOnLeave ? 'checked' : '' %>>
+                                <span class="slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-size:13px;font-weight:600">Reset XP on Leave</div>
+                                <div style="font-size:11px;color:var(--muted)">ล้าง XP เมื่อสมาชิกออกจากเซิร์ฟ</div>
+                            </div>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+                            <label class="switch" style="flex-shrink:0">
+                                <input type="checkbox" id="lv-reset-ban" <%= config.levelResetOnBan ? 'checked' : '' %>>
+                                <span class="slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-size:13px;font-weight:600">Reset XP on Ban</div>
+                                <div style="font-size:11px;color:var(--muted)">ล้าง XP เมื่อสมาชิกถูก ban</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── XP Multiplier Roles ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">XP Multiplier</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <span>⚡ Multiplier ตาม Role</span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addMultiplierRow()">+ เพิ่ม</button>
+                </div>
+                <div class="card-body" id="lv-multiplier-list">
+                    <% if (!config.xpMultiplierRoles || !config.xpMultiplierRoles.length) { %>
+                        <div id="lv-mult-empty" style="color:var(--muted);font-size:13px;padding:4px 0">ยังไม่มี — กด "เพิ่ม" เพื่อตั้งค่า role ที่ได้ XP เพิ่ม</div>
+                    <% } else { %>
+                        <% config.xpMultiplierRoles.forEach(mr => { %>
+                        <div class="level-role-row lv-mult-row">
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label class="form-label" style="font-size:11px">Role</label>
+                                <select class="form-input lv-mult-role">
+                                    <% discordRoles.forEach(r => { %>
+                                        <option value="<%- r.id %>" data-name="<%- r.name.replace(/"/g,'&quot;') %>" <%= r.id === mr.roleId ? 'selected' : '' %>>
+                                            <%- r.name %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex:0 0 110px;margin:0">
+                                <label class="form-label" style="font-size:11px">Multiplier</label>
+                                <input type="number" class="form-input lv-mult-val" min="1.1" max="10" step="0.1" value="<%= mr.multiplier || 2 %>">
+                            </div>
+                            <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeMultRow(this)">🗑️</button>
+                            </div>
+                        </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- ─── Level Roles ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">Level Roles</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <span>👑 รางวัล Role เมื่อถึง Level</span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addLevelRoleRow()">+ เพิ่ม</button>
+                </div>
+                <div class="card-body" id="level-roles-list">
+                    <% if (!config.levelRoles || !config.levelRoles.length) { %>
+                        <div id="level-roles-empty" style="color:var(--muted);font-size:13px;padding:4px 0">ยังไม่มี Role รางวัล — กด "เพิ่ม" เพื่อเพิ่ม</div>
+                    <% } else { %>
+                        <% config.levelRoles.slice().sort((a,b)=>a.level-b.level).forEach(lr => { %>
+                        <div class="level-role-row lv-role-row">
+                            <div class="form-group" style="flex:0 0 90px;margin:0">
+                                <label class="form-label" style="font-size:11px">Level</label>
+                                <input type="number" class="form-input lv-role-level" min="1" value="<%= lr.level %>">
+                            </div>
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label class="form-label" style="font-size:11px">Role</label>
+                                <select class="form-input lv-role-select">
+                                    <option value="">— เลือก Role —</option>
+                                    <% discordRoles.forEach(r => { %>
+                                        <option value="<%- r.id %>" data-name="<%- r.name.replace(/"/g,'&quot;') %>" <%= r.id === lr.roleId ? 'selected' : '' %>>
+                                            <%- r.name %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeLvRoleRow(this)">🗑️</button>
+                            </div>
+                        </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- ─── Restrictions ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">Restrictions</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-body">
+                    <div class="form-row" style="gap:20px;flex-wrap:wrap">
+                        <div class="form-group" style="flex:1;min-width:200px;margin:0">
+                            <label class="form-label">🚫 Ignore Channels</label>
+                            <select class="form-input" id="lv-ignore-ch-add" style="margin-bottom:8px">
+                                <option value="">— เลือก channel —</option>
+                            </select>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addIgnoreChannel()">+ เพิ่ม</button>
+                            <div id="lv-ignore-channels" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                                <% (config.levelIgnoreChannels||[]).forEach(chId => { %>
+                                    <span class="role-chip lv-ignore-chip" data-id="<%= chId %>">
+                                        #<%= chId %> <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:4px;opacity:.7">✕</span>
+                                    </span>
+                                <% }) %>
+                            </div>
+                        </div>
+                        <div class="form-group" style="flex:1;min-width:200px;margin:0">
+                            <label class="form-label">🚫 Ignore Roles</label>
+                            <select class="form-input" id="lv-ignore-role-add" style="margin-bottom:8px">
+                                <option value="">— เลือก role —</option>
+                                <% discordRoles.forEach(r => { %>
+                                    <option value="<%= r.id %>" data-name="<%= r.name %>"><%= r.name %></option>
+                                <% }) %>
+                            </select>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addIgnoreRole()">+ เพิ่ม</button>
+                            <div id="lv-ignore-roles" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                                <% (config.levelIgnoreRoles||[]).forEach(rId => { %>
+                                    <% const dr = discordRoles.find(r=>r.id===rId); %>
+                                    <span class="role-chip lv-ignore-chip" data-id="<%= rId %>">
+                                        <%= dr ? dr.name : rId %> <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:4px;opacity:.7">✕</span>
+                                    </span>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Level Up Notification ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">Notification</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">ช่องแจ้งเตือน Level Up</label>
+                        <select class="form-input" id="level-channel-select">
+                            <option value="">— แจ้งในช่องที่พิมพ์ข้อความ —</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0">
+                        <label class="form-label">ข้อความแจ้งเตือน</label>
+                        <input type="text" class="form-input" id="lv-up-msg" value="<%= config.levelUpMessage || '🎉 {user} เลื่อนระดับเป็น **Level {level}** แล้ว!' %>">
+                        <div class="form-hint"><code>{user}</code> mention &nbsp;·&nbsp; <code>{level}</code> level ใหม่ &nbsp;·&nbsp; <code>{username}</code> ชื่อ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Rank Card ─── -->
+            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase">Rank Card</div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-body">
+                    <div style="display:flex;gap:24px;flex-wrap:wrap">
+                        <!-- Preview -->
+                        <div style="flex:0 0 auto">
+                            <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Preview</div>
+                            <div id="rc-preview" style="width:320px;height:96px;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;background:linear-gradient(135deg,<%= config.rankCardBg||'#0f0f17' %>,<%= config.rankCardBg2||'#1a1a2e' %>)">
+                                <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:<%= config.rankCardAccent||'#5865F2' %>;border-radius:12px 0 0 12px"></div>
+                                <div style="width:52px;height:52px;border-radius:50%;border:3px solid <%= config.rankCardAccent||'#5865F2' %>;background:#2b2d31;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px">😊</div>
+                                <div style="flex:1;min-width:0">
+                                    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px">Username#0000</div>
+                                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:8px">XP: 1,250 / 2,100 &nbsp;·&nbsp; Level 5</div>
+                                    <div style="height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden">
+                                        <div style="height:100%;width:60%;background:<%= config.rankCardAccent||'#5865F2' %>;border-radius:4px"></div>
+                                    </div>
+                                </div>
+                                <div style="flex-shrink:0;text-align:right">
+                                    <div style="font-size:10px;color:rgba(255,255,255,.4)">RANK</div>
+                                    <div style="font-size:20px;font-weight:700;color:<%= config.rankCardAccent||'#5865F2' %>">#3</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Controls -->
+                        <div style="flex:1;min-width:220px">
+                            <div class="form-row" style="gap:12px;flex-wrap:wrap">
+                                <div class="form-group" style="flex:1;min-width:130px;margin:0">
+                                    <label class="form-label" style="font-size:11px">Background สี 1</label>
+                                    <div style="display:flex;gap:8px;align-items:center">
+                                        <input type="color" id="rc-bg1" value="<%= config.rankCardBg||'#0f0f17' %>" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0" oninput="updateRcPreview()">
+                                        <input type="text" class="form-input" id="rc-bg1-text" value="<%= config.rankCardBg||'#0f0f17' %>" style="flex:1" oninput="syncColorPicker('rc-bg1','rc-bg1-text');updateRcPreview()">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="flex:1;min-width:130px;margin:0">
+                                    <label class="form-label" style="font-size:11px">Background สี 2 (gradient)</label>
+                                    <div style="display:flex;gap:8px;align-items:center">
+                                        <input type="color" id="rc-bg2" value="<%= config.rankCardBg2||'#1a1a2e' %>" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0" oninput="updateRcPreview()">
+                                        <input type="text" class="form-input" id="rc-bg2-text" value="<%= config.rankCardBg2||'#1a1a2e' %>" style="flex:1" oninput="syncColorPicker('rc-bg2','rc-bg2-text');updateRcPreview()">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="flex:1;min-width:130px;margin:0">
+                                    <label class="form-label" style="font-size:11px">Accent Color</label>
+                                    <div style="display:flex;gap:8px;align-items:center">
+                                        <input type="color" id="rc-accent" value="<%= config.rankCardAccent||'#5865F2' %>" style="width:36px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0" oninput="updateRcPreview()">
+                                        <input type="text" class="form-input" id="rc-accent-text" value="<%= config.rankCardAccent||'#5865F2' %>" style="flex:1" oninput="syncColorPicker('rc-accent','rc-accent-text');updateRcPreview()">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin:10px 0 0">
+                                <label class="form-label" style="font-size:11px">Background Image URL <span style="color:var(--muted)">(ไม่บังคับ)</span></label>
+                                <input type="url" class="form-input" id="rc-bgimg" placeholder="https://..." value="<%= config.rankCardBgImage||'' %>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Save button ─── -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
+                <button class="btn btn-primary" style="min-width:140px" onclick="saveLevelSettings(this)">
+                    💾 บันทึกทั้งหมด
+                </button>
+                <span id="lv-save-status" style="font-size:13px;color:var(--muted)"></span>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: Auto Role
+        ═══════════════════════════════ -->
+        <div id="tab-autorole" class="tab-panel">
+
+            <!-- ─── Join Roles ─── -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <div class="card-title">👋 Join Roles</div>
+                    <div style="font-size:12px;color:var(--muted)">มอบ role อัตโนมัติเมื่อสมาชิกเข้าเซิร์ฟ</div>
+                </div>
+                <div class="card-body" style="padding-bottom:8px">
+
+                    <!-- Sticky Roles toggle -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:16px">
+                        <div>
+                            <div style="font-weight:600;font-size:13px">📌 Sticky Roles</div>
+                            <div style="font-size:12px;color:var(--muted);margin-top:2px">คืน role ให้สมาชิกเมื่อกลับเข้าเซิร์ฟ</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ar-sticky" <%- config.stickyRolesEnabled ? 'checked' : '' %>>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Join role rows -->
+                    <div style="font-weight:600;font-size:13px;margin-bottom:8px">Role สำหรับสมาชิกใหม่</div>
+                    <div id="join-roles-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+                        <% (config.joinRoles || []).forEach(jr => { %>
+                        <div class="level-role-row" style="align-items:center">
+                            <select class="form-input jr-role" style="flex:1">
+                                <option value="">— เลือก Role —</option>
+                                <% (discordRoles || []).forEach(r => { %>
+                                <option value="<%- r.id %>" <%- r.id === jr.roleId ? 'selected' : '' %>><%- r.name %></option>
+                                <% }) %>
+                            </select>
+                            <div style="display:flex;align-items:center;gap:6px">
+                                <span style="font-size:12px;color:var(--muted)">หน่วงเวลา</span>
+                                <input type="number" class="form-input jr-delay" value="<%- jr.delaySeconds || 0 %>" min="0" style="width:70px;text-align:center" placeholder="วินาที">
+                                <span style="font-size:12px;color:var(--muted)">วิ</span>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="this.closest('.level-role-row').remove()">✕</button>
+                        </div>
+                        <% }) %>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="addJoinRoleRow()">+ เพิ่ม Role</button>
+
+                    <hr style="border-color:var(--border);margin:16px 0">
+
+                    <!-- Bot join roles -->
+                    <div style="font-weight:600;font-size:13px;margin-bottom:8px">Role สำหรับบอท</div>
+                    <div id="bot-join-roles-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+                        <% (config.botJoinRoles || []).forEach(jr => { %>
+                        <div class="level-role-row">
+                            <select class="form-input bjr-role" style="flex:1">
+                                <option value="">— เลือก Role —</option>
+                                <% (discordRoles || []).forEach(r => { %>
+                                <option value="<%- r.id %>" <%- r.id === jr.roleId ? 'selected' : '' %>><%- r.name %></option>
+                                <% }) %>
+                            </select>
+                            <button class="btn btn-danger btn-sm" onclick="this.closest('.level-role-row').remove()">✕</button>
+                        </div>
+                        <% }) %>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="addBotJoinRoleRow()">+ เพิ่ม Role บอท</button>
+
+                    <div style="display:flex;align-items:center;gap:12px;margin-top:20px">
+                        <button class="btn btn-primary" style="min-width:130px" onclick="saveJoinRoles(this)">💾 บันทึก Join Roles</button>
+                        <span id="jr-save-status" style="font-size:13px;color:var(--muted)"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Reaction Role Groups ─── -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <div class="card-title">🎭 Reaction Role Groups</div>
+                    <div style="font-size:12px;color:var(--muted)">สมาชิกกด react เพื่อรับ role ที่ต้องการ</div>
+                </div>
+                <div class="card-body">
+
+                    <!-- Existing groups -->
+                    <div id="rr-groups-list" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+                        <% if (!(config.reactionRoleGroups || []).length) { %>
+                        <div class="empty-state" style="padding:24px"><div class="e-icon">🎭</div>ยังไม่มี Reaction Role Group</div>
+                        <% } else { %>
+                        <% config.reactionRoleGroups.forEach(grp => { %>
+                        <div class="card" style="background:var(--surface2);border:1px solid var(--border2)" data-group-id="<%- grp.groupId %>">
+                            <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+                                <div>
+                                    <div style="font-weight:600;font-size:14px"><%- grp.title %></div>
+                                    <div style="font-size:12px;color:var(--muted);margin-top:2px">
+                                        Mode: <span style="color:var(--blurple)"><%- grp.mode %></span>
+                                        &nbsp;·&nbsp; <%- grp.roles.length %> roles
+                                        &nbsp;·&nbsp; Message: <code style="font-size:11px"><%- grp.messageId || 'ไม่พบ' %></code>
+                                    </div>
+                                </div>
+                                <div style="display:flex;gap:8px">
+                                    <button class="btn btn-ghost btn-sm" onclick="resendGroup('<%- grp.groupId %>')">🔄 Resend</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteGroup('<%- grp.groupId %>')">🗑️ ลบ</button>
+                                </div>
+                            </div>
+                            <div style="padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:6px">
+                                <% grp.roles.forEach(r => { %>
+                                <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px">
+                                    <%- r.emoji %> <%- r.roleName || r.roleId %>
+                                </span>
+                                <% }) %>
+                            </div>
+                        </div>
+                        <% }) %>
+                        <% } %>
+                    </div>
+
+                    <hr style="border-color:var(--border);margin-bottom:20px">
+
+                    <!-- Create new group form -->
+                    <div style="font-weight:700;font-size:14px;margin-bottom:14px">➕ สร้าง Group ใหม่</div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">ชื่อกลุ่ม</label>
+                            <input type="text" id="rr-title" class="form-input" placeholder="เช่น เลือกเกมที่เล่น">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Channel</label>
+                            <select id="rr-channel" class="form-input">
+                                <option value="">— เลือก Channel —</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;margin-bottom:12px">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">คำอธิบาย (ไม่บังคับ)</label>
+                            <input type="text" id="rr-desc" class="form-input" placeholder="กด react เพื่อรับ role">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Mode</label>
+                            <select id="rr-mode" class="form-input">
+                                <option value="toggle">Toggle — react รับ / un-react ถอน</option>
+                                <option value="unique">Unique — เลือกได้แค่ 1</option>
+                                <option value="verify">Verify — react แล้วถอนไม่ได้</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">สี Embed</label>
+                            <input type="color" id="rr-color" class="form-input" value="#5865F2" style="height:38px;padding:2px 4px;cursor:pointer">
+                        </div>
+                    </div>
+
+                    <!-- Role rows -->
+                    <div style="font-weight:600;font-size:13px;margin:12px 0 8px">Roles ในกลุ่ม</div>
+                    <div id="rr-roles-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+                        <!-- rows added dynamically -->
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="addRrRoleRow()" style="margin-bottom:16px">+ เพิ่ม Role</button>
+
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <button class="btn btn-primary" style="min-width:160px" onclick="createReactionGroup(this)">📢 สร้างและส่ง Embed</button>
+                        <span id="rr-save-status" style="font-size:13px;color:var(--muted)"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: ระบบเดิมพัน
+        ═══════════════════════════════ -->
+        <div id="tab-betting" class="tab-panel">
+            <%
+                const bet = config.betting || {};
+                const poolA = bet.poolA || 0;
+                const poolB = bet.poolB || 0;
+                const totalPool = poolA + poolB;
+                const pctA = totalPool > 0 ? Math.round((poolA / totalPool) * 100) : 50;
+                const pctB = 100 - pctA;
+                const oddsA = poolA > 0 ? (totalPool / poolA).toFixed(2) : '—';
+                const oddsB = poolB > 0 ? (totalPool / poolB).toFixed(2) : '—';
+            %>
+
+            <!-- ─── สถิติ live (แสดงเมื่อมีกิจกรรม) ─── -->
+            <% if (bet.title) { %>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-label">Pool รวม</div>
+                    <div class="stat-value" style="font-size:18px"><%= totalPool.toLocaleString() %> <span style="font-size:12px;color:var(--muted)"><%= config.currencyEmoji||'🪙' %></span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">ผู้เดิมพัน</div>
+                    <div class="stat-value" style="font-size:18px"><%= (bet.bets||[]).length %> <span style="font-size:12px;color:var(--muted)">คน</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Odds A / B</div>
+                    <div class="stat-value" style="font-size:16px"><%= oddsA %>x <span style="color:var(--muted);font-size:12px">/</span> <%= oddsB %>x</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">สถานะ</div>
+                    <div style="margin-top:6px">
+                        <% if (bet.winner) { %>
+                            <span class="badge badge-yellow" style="font-size:12px;padding:4px 10px">🏆 จบแล้ว</span>
+                        <% } else if (bet.isOpen) { %>
+                            <span class="badge badge-green" style="font-size:12px;padding:4px 10px">🟢 เปิดรับ</span>
+                        <% } else { %>
+                            <span class="badge badge-red" style="font-size:12px;padding:4px 10px">🔴 ปิด</span>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── การ์ดกิจกรรมปัจจุบัน ─── -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <div class="card-title">🎯 <%= bet.title %></div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <% if (bet.channelId) { %>
+                        <span style="font-size:11px;color:var(--muted)">📢 #<%= bet.channelId %></span>
+                        <% } %>
+                        <% if (!bet.winner) { %>
+                        <form action="/<%= guildId %>/toggle-bet" method="POST" style="margin:0">
+                            <button class="btn btn-sm <%= bet.isOpen ? 'btn-danger' : 'btn-success' %>">
+                                <%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>
+                            </button>
+                        </form>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <!-- รูป + ชื่อฝ่าย -->
+                    <div style="display:grid;grid-template-columns:1fr 48px 1fr;gap:12px;align-items:center;margin-bottom:20px">
+                        <div style="text-align:center">
+                            <% if (bet.imageA) { %>
+                                <img src="<%= bet.imageA %>" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:2px solid #5865F2;margin-bottom:8px">
+                            <% } else { %>
+                                <div style="width:88px;height:88px;border-radius:12px;background:rgba(88,101,242,0.12);border:2px solid rgba(88,101,242,0.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 8px">🔵</div>
+                            <% } %>
+                            <div style="font-weight:700;font-size:15px;color:#7b8df8"><%= bet.optionA||'ฝ่าย A' %></div>
+                            <div style="font-size:12px;color:var(--muted);margin-top:3px"><%= poolA.toLocaleString() %> <%= config.currencyEmoji||'🪙' %></div>
+                            <div style="font-size:11px;color:#7b8df8;margin-top:2px">Odds <%= oddsA %>x</div>
+                        </div>
+                        <div style="text-align:center;font-size:18px;font-weight:700;color:var(--muted)">VS</div>
+                        <div style="text-align:center">
+                            <% if (bet.imageB) { %>
+                                <img src="<%= bet.imageB %>" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:2px solid #ed4245;margin-bottom:8px">
+                            <% } else { %>
+                                <div style="width:88px;height:88px;border-radius:12px;background:rgba(237,66,69,0.12);border:2px solid rgba(237,66,69,0.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 8px">🔴</div>
+                            <% } %>
+                            <div style="font-weight:700;font-size:15px;color:#f28f8f"><%= bet.optionB||'ฝ่าย B' %></div>
+                            <div style="font-size:12px;color:var(--muted);margin-top:3px"><%= poolB.toLocaleString() %> <%= config.currencyEmoji||'🪙' %></div>
+                            <div style="font-size:11px;color:#f28f8f;margin-top:2px">Odds <%= oddsB %>x</div>
+                        </div>
+                    </div>
+
+                    <!-- Pool bar สองสี -->
+                    <div style="margin-bottom:6px;display:flex;justify-content:space-between;font-size:12px">
+                        <span style="color:#7b8df8;font-weight:600"><%= pctA %>%</span>
+                        <span style="color:var(--muted)">pool split</span>
+                        <span style="color:#f28f8f;font-weight:600"><%= pctB %>%</span>
+                    </div>
+                    <div class="pool-bar" style="margin-bottom:16px">
+                        <div class="pool-bar-a" style="width:<%= pctA %>%"></div>
+                        <div class="pool-bar-b" style="width:<%= pctB %>%"></div>
+                    </div>
+
+                    <!-- countdown -->
+                    <% if (bet.expiresAt) { %>
+                    <div style="background:rgba(254,231,92,0.07);border:1px solid rgba(254,231,92,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px">
+                        <span>⏰</span>
+                        <span style="color:var(--muted)">หมดเวลา <%= new Date(bet.expiresAt).toLocaleString('th-TH') %></span>
+                        <span id="bet-countdown" style="margin-left:auto;font-weight:700;color:var(--yellow)"></span>
+                    </div>
+                    <% } %>
+
+                    <!-- ประกาศผล / winner banner -->
+                    <% if (bet.winner) { %>
+                    <div style="text-align:center;padding:18px;background:rgba(254,231,92,0.07);border:1px solid rgba(254,231,92,0.25);border-radius:10px">
+                        <div style="font-size:28px;margin-bottom:6px">🏆</div>
+                        <div style="font-weight:700;font-size:16px;color:var(--yellow)">
+                            ผู้ชนะ: <%= bet.winner==='A' ? (bet.optionA||'ฝ่าย A') : (bet.optionB||'ฝ่าย B') %>
+                        </div>
+                    </div>
+                    <% } else { %>
+                    <hr class="divider">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">ประกาศผลผู้ชนะ — ระบบจะปิดรับและส่ง embed ผลลัพธ์เข้า channel อัตโนมัติ</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                        <form action="/<%= guildId %>/settle-bet" method="POST" style="margin:0">
+                            <input type="hidden" name="winner" value="A">
+                            <button type="submit" class="btn btn-block" style="background:rgba(88,101,242,0.18);color:#7b8df8;border:1px solid rgba(88,101,242,0.35)" onclick="return confirm('ประกาศ <%= (bet.optionA||'ฝ่าย A').replace(/'/g, '') %> ชนะ?')">
+                                🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ
+                            </button>
+                        </form>
+                        <form action="/<%= guildId %>/settle-bet" method="POST" style="margin:0">
+                            <input type="hidden" name="winner" value="B">
+                            <button type="submit" class="btn btn-block" style="background:rgba(237,66,69,0.15);color:#f28f8f;border:1px solid rgba(237,66,69,0.35)" onclick="return confirm('ประกาศ <%= (bet.optionB||'ฝ่าย B').replace(/'/g, '') %> ชนะ?')">
+                                🏆 <%= bet.optionB||'ฝ่าย B' %> ชนะ
+                            </button>
+                        </form>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- ─── รายการผู้เดิมพัน ─── -->
+            <% if (bet.bets && bet.bets.length > 0) { %>
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <div class="card-title">👥 รายการผู้เดิมพัน</div>
+                    <span class="badge badge-blurple"><%= bet.bets.length %> คน</span>
+                </div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <% bet.bets.forEach(b => { %>
+                        <div class="list-item" style="border-left:3px solid <%= b.option==='A' ? '#5865F2' : '#ed4245' %>">
+                            <div class="list-item-left">
+                                <div class="list-item-icon" style="background:<%= b.option==='A' ? 'rgba(88,101,242,0.15)' : 'rgba(237,66,69,0.15)' %>">
+                                    <%= b.option==='A' ? '🔵' : '🔴' %>
+                                </div>
+                                <div>
+                                    <div class="list-item-name" style="font-size:13px"><%= b.username %></div>
+                                    <div class="list-item-meta">
+                                        <span class="badge <%= b.option==='A' ? 'badge-blurple' : 'badge-red' %>"><%= b.option==='A'?(bet.optionA||'A'):(bet.optionB||'B') %></span>
+                                        &nbsp;<strong><%= b.amount.toLocaleString() %></strong> <%= config.currencyEmoji||'🪙' %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+            <% } %>
+
+            <!-- ─── ฟอร์มตั้งค่าใหม่ ─── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">⚙️ <%= bet.title ? 'แก้ไข / รีเซ็ต' : 'สร้าง' %>การเดิมพัน</div>
+                </div>
+                <div class="card-body">
+                    <form action="/<%= guildId %>/setup-bet" method="POST">
+
+                        <!-- หัวข้อ -->
+                        <div class="form-group" style="margin-bottom:14px">
+                            <label>หัวข้อการเดิมพัน</label>
+                            <input type="text" name="title" value="<%= bet.title||'' %>" placeholder="เช่น ใครจะชนะ Season นี้?" required>
+                        </div>
+
+                        <!-- สองฝ่าย -->
+                        <div class="bet-sides">
+                            <!-- ฝ่าย A -->
+                            <div class="bet-side-a">
+                                <div class="bet-side-label">🔵 ฝ่าย A</div>
+                                <div class="form-group" style="margin-bottom:10px">
+                                    <label>ชื่อฝ่าย A</label>
+                                    <input type="text" name="optionA" value="<%= bet.optionA||'' %>" placeholder="ฝ่าย A">
+                                </div>
+                                <div class="form-group">
+                                    <label>รูปฝ่าย A (URL)</label>
+                                    <input type="url" name="imageA" id="imgA" value="<%= bet.imageA||'' %>" placeholder="https://i.imgur.com/..." oninput="previewImg('imgA','previewA','placeholderA')">
+                                    <% if (bet.imageA) { %>
+                                        <img id="previewA" class="bet-img-preview" src="<%= bet.imageA %>" style="margin-top:8px">
+                                        <div id="placeholderA" class="bet-img-placeholder" style="display:none">🔵</div>
+                                    <% } else { %>
+                                        <img id="previewA" class="bet-img-preview" src="" style="display:none;margin-top:8px">
+                                        <div id="placeholderA" class="bet-img-placeholder" style="margin-top:8px">🔵</div>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <!-- ฝ่าย B -->
+                            <div class="bet-side-b">
+                                <div class="bet-side-label">🔴 ฝ่าย B</div>
+                                <div class="form-group" style="margin-bottom:10px">
+                                    <label>ชื่อฝ่าย B</label>
+                                    <input type="text" name="optionB" value="<%= bet.optionB||'' %>" placeholder="ฝ่าย B">
+                                </div>
+                                <div class="form-group">
+                                    <label>รูปฝ่าย B (URL)</label>
+                                    <input type="url" name="imageB" id="imgB" value="<%= bet.imageB||'' %>" placeholder="https://i.imgur.com/..." oninput="previewImg('imgB','previewB','placeholderB')">
+                                    <% if (bet.imageB) { %>
+                                        <img id="previewB" class="bet-img-preview" src="<%= bet.imageB %>" style="margin-top:8px">
+                                        <div id="placeholderB" class="bet-img-placeholder" style="display:none">🔴</div>
+                                    <% } else { %>
+                                        <img id="previewB" class="bet-img-preview" src="" style="display:none;margin-top:8px">
+                                        <div id="placeholderB" class="bet-img-placeholder" style="margin-top:8px">🔴</div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ช่องข้อความ Discord -->
+                        <div class="form-group" style="margin-bottom:14px">
+                            <label>ช่องข้อความ Discord (embed จะถูกโพสต์ที่นี่)</label>
+                            <select name="channelId" id="channel-select" required>
+                                <option value="">⏳ กำลังโหลดช่องข้อความ...</option>
+                            </select>
+                        </div>
+
+                        <!-- เวลาหมดกิจกรรม -->
+                        <div class="form-grid" style="margin-bottom:14px">
+                            <div class="form-group">
+                                <label>หมดเวลาใน (นาที)</label>
+                                <input type="number" name="expiryMinutes" min="1" placeholder="เช่น 60 = 1 ชั่วโมง  (เว้นว่าง = ไม่กำหนด)">
+                            </div>
+                            <div class="form-group">
+                                <label>เงินเดิมพันขั้นต่ำ</label>
+                                <input type="number" name="minBet" value="<%= bet.minBet||1 %>" min="1" placeholder="1">
+                            </div>
+                        </div>
+
+                        <!-- toggle เปิดรับ -->
+                        <div class="toggle-row" style="margin-bottom:16px">
+                            <div>
+                                <div class="toggle-label">เปิดรับเดิมพันทันที</div>
+                                <div class="toggle-desc">ปิดเพื่อสร้างเป็น draft ก่อนโพสต์</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="isOpen" value="true" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" style="font-size:14px;padding:12px">
+                            🚀 <%= bet.title ? 'รีเซ็ตและสร้างกิจกรรมใหม่' : 'สร้างกิจกรรมเดิมพัน' %>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ═══ TAB: /rob ═══ -->
+        <div id="tab-rob" class="tab-panel">
+            <form action="/save-settings/<%= guildId %>?tab=rob" method="POST">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">🥷 ตั้งค่าระบบ /rob</div></div>
+                    <div class="card-body">
+                        <div class="toggle-row" style="margin-bottom:16px">
+                            <div><div class="toggle-label">เปิดใช้ระบบปล้น</div><div class="toggle-desc">ปิดเพื่อปิดการใช้คำสั่ง /rob ทั้งหมด</div></div>
+                            <label class="switch"><input type="checkbox" name="robEnabled" value="true" <%= config.robEnabled !== false ? 'checked' : '' %>><span class="slider"></span></label>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Cooldown (นาที)</label><input type="number" name="robCooldownMin" value="<%= config.robCooldownMin||30 %>" min="1"></div>
+                            <div class="form-group"><label>โอกาสสำเร็จ (%)</label><input type="number" name="robSuccessChance" value="<%= config.robSuccessChance||50 %>" min="1" max="99"></div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>เหยื่อต้องมีเงินขั้นต่ำ</label><input type="number" name="robMinCoins" value="<%= config.robMinCoins||50 %>" min="1"></div>
+                            <div class="form-group"><label>ค่าปรับเมื่อปล้นพลาด</label><input type="number" name="robPenalty" value="<%= config.robPenalty||100 %>" min="0"></div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>ปล้นได้ขั้นต่ำ (%)</label><input type="number" name="robMinPercent" value="<%= config.robMinPercent||20 %>" min="1" max="99"></div>
+                            <div class="form-group"><label>ปล้นได้สูงสุด (%)</label><input type="number" name="robMaxPercent" value="<%= config.robMaxPercent||50 %>" min="1" max="99"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่า</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ═══ TAB: Active Bonus ═══ -->
+        <div id="tab-active-bonus" class="tab-panel">
+            <form action="/save-settings/<%= guildId %>?tab=active-bonus" method="POST">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">💬 Active Bonus — โบนัสคนพิมพ์บ่อย</div></div>
+                    <div class="card-body">
+                        <div style="background:rgba(88,101,242,0.07);border:1px solid rgba(88,101,242,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--muted)">
+                            💡 เมื่อสมาชิกส่งข้อความครบตามจำนวนที่กำหนดในวันเดียว จะได้รับเงินโบนัสอัตโนมัติ (จ่ายครั้งเดียวต่อวัน)
+                        </div>
+                        <div class="toggle-row" style="margin-bottom:16px">
+                            <div><div class="toggle-label">เปิดใช้ Active Bonus</div></div>
+                            <label class="switch"><input type="checkbox" name="activeBonusEnabled" value="true" <%= config.activeBonusEnabled !== false ? 'checked' : '' %>><span class="slider"></span></label>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>ต้องส่งกี่ข้อความ/วัน</label><input type="number" name="activeBonusThreshold" value="<%= config.activeBonusThreshold||20 %>" min="1"></div>
+                            <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="activeBonusAmount" value="<%= config.activeBonusAmount||100 %>" min="1"></div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:16px">
+                            <label>นับเฉพาะช่องนี้ (ว่าง = ทุกช่อง)</label>
+                            <select name="activeBonusChannelId" id="active-channel-select">
+                                <option value="">— ทุกช่องข้อความ —</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่า</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ═══ TAB: Seniority Bonus ═══ -->
+        <div id="tab-seniority" class="tab-panel">
+            <div class="card">
+                <div class="card-header"><div class="card-title">🏅 Seniority Bonus — โบนัสความอาวุโส</div></div>
+                <div class="card-body">
+                    <div style="background:rgba(254,231,92,0.07);border:1px solid rgba(254,231,92,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--muted)">
+                        💡 สมาชิกที่อยู่ในเซิร์ฟนานกว่ากำหนดจะได้รับเงินเพิ่มเมื่อใช้คำสั่ง <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">/daily</code>
+                    </div>
+                    <form action="/save-settings/<%= guildId %>?tab=seniority" method="POST" style="margin-bottom:20px">
+                        <div class="toggle-row">
+                            <div><div class="toggle-label">เปิดใช้ Seniority Bonus</div></div>
+                            <label class="switch"><input type="checkbox" name="seniorityBonusEnabled" value="true" <%= config.seniorityBonusEnabled !== false ? 'checked' : '' %>><span class="slider"></span></label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:10px">💾 บันทึก</button>
+                    </form>
+                    <hr class="divider">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:12px">เพิ่ม Tier ใหม่</div>
+                    <form action="/<%= guildId %>/add-seniority-tier" method="POST">
+                        <div class="form-grid" style="margin-bottom:12px">
+                            <div class="form-group"><label>อยู่มาอย่างน้อย (วัน)</label><input type="number" name="minDays" min="0" placeholder="30" required></div>
+                            <div class="form-group"><label>เงินโบนัสต่อวัน</label><input type="number" name="amount" min="1" placeholder="500" required></div>
+                        </div>
+                        <button type="submit" class="btn btn-success">➕ เพิ่ม Tier</button>
+                    </form>
+                    <hr class="divider">
+                    <% if (config.seniorityTiers && config.seniorityTiers.length > 0) { %>
+                        <% const sorted = [...config.seniorityTiers].sort((a,b) => a.minDays - b.minDays); %>
+                        <% sorted.forEach((tier, i) => { %>
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-icon">🏅</div>
+                                <div>
+                                    <div class="list-item-name">อยู่มา <%= tier.minDays %> วันขึ้นไป</div>
+                                    <div class="list-item-meta"><span class="badge badge-yellow">+<%= tier.amount.toLocaleString() %> <%= config.currencyEmoji||'💰' %> /วัน</span></div>
+                                </div>
+                            </div>
+                            <a href="/<%= guildId %>/delete-seniority-tier/<%= i %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบ tier นี้?')">ลบ</a>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="empty-state"><div class="e-icon">🏅</div>ยังไม่มี Tier — เพิ่มได้เลย</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TAB: Daily Quests ═══ -->
+        <div id="tab-daily-quests" class="tab-panel">
+            <div class="card">
+                <div class="card-header"><div class="card-title">📋 Daily Quests — ภารกิจประจำวัน</div></div>
+                <div class="card-body">
+                    <div style="background:rgba(87,242,135,0.07);border:1px solid rgba(87,242,135,0.15);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--muted)">
+                        💡 ทุกวันระบบจะสุ่มภารกิจจาก Pool ให้สมาชิก ใช้ <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">/daily</code> เพื่อดูและรับรางวัล
+                    </div>
+                    <form action="/save-settings/<%= guildId %>?tab=daily-quests" method="POST" style="margin-bottom:16px">
+                        <div class="form-grid">
+                            <div style="display:flex;flex-direction:column;gap:10px">
+                                <div class="toggle-row" style="margin-bottom:0">
+                                    <div><div class="toggle-label">เปิดใช้ Daily Quests</div></div>
+                                    <label class="switch"><input type="checkbox" name="dailyQuestsEnabled" value="true" <%= config.dailyQuestsEnabled !== false ? 'checked' : '' %>><span class="slider"></span></label>
+                                </div>
+                            </div>
+                            <div class="form-group"><label>สุ่มกี่ภารกิจต่อวัน</label><input type="number" name="dailyQuestCount" value="<%= config.dailyQuestCount||3 %>" min="1" max="10"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:12px">💾 บันทึก</button>
+                    </form>
+                    <hr class="divider">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:12px">เพิ่มภารกิจใหม่ใน Pool</div>
+                    <form action="/<%= guildId %>/add-quest" method="POST">
+                        <div class="form-group" style="margin-bottom:10px">
+                            <label>คำอธิบายภารกิจ</label>
+                            <input type="text" name="description" placeholder="เช่น ส่งรูปแมวในช่องแชท 1 รูป" required>
+                        </div>
+                        <div class="form-grid" style="margin-bottom:10px">
+                            <div class="form-group">
+                                <label>ประเภทภารกิจ</label>
+                                <select name="type">
+                                    <option value="message_count">ส่งข้อความ X ครั้ง</option>
+                                    <option value="send_image">ส่งรูปภาพ</option>
+                                    <option value="use_command">ใช้คำสั่ง</option>
+                                    <option value="custom">กำหนดเอง</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>เป้าหมาย (จำนวน)</label><input type="number" name="target" value="1" min="1"></div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label>รางวัล (เหรียญ)</label>
+                            <input type="number" name="reward" value="200" min="1">
+                        </div>
+                        <button type="submit" class="btn btn-success">➕ เพิ่มภารกิจ</button>
+                    </form>
+                    <hr class="divider">
+                    <% if (config.questPool && config.questPool.length > 0) { %>
+                        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Pool มีทั้งหมด <%= config.questPool.length %> ภารกิจ</div>
+                        <% config.questPool.forEach(q => { %>
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-icon">📋</div>
+                                <div>
+                                    <div class="list-item-name" style="font-size:13px"><%= q.description %></div>
+                                    <div class="list-item-meta">
+                                        <span class="badge badge-blurple"><%= q.type %></span>
+                                        &nbsp;เป้า <%= q.target %> &nbsp;|&nbsp;
+                                        <span class="badge badge-green">+<%= q.reward.toLocaleString() %> <%= config.currencyEmoji||'💰' %></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="/<%= guildId %>/delete-quest/<%= q.questId %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบภารกิจนี้?')">ลบ</a>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="empty-state"><div class="e-icon">📋</div>ยังไม่มีภารกิจใน Pool</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════
+             TAB: สมาชิก
+        ═══════════════════════════════ -->
+        <div id="tab-members" class="tab-panel">
+
+            <!-- Search bar -->
+            <div class="card" style="margin-bottom:16px">
+                <div class="card-body" style="padding:14px 18px">
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <input type="text" id="member-search" placeholder="🔍 ค้นหาชื่อสมาชิก..."
+                               style="flex:1" oninput="debouncedMemberSearch(this.value)">
+                        <button class="btn btn-primary btn-sm" onclick="loadMembers(1)">🔄 รีเฟรช</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members table card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">👥 รายชื่อสมาชิก</div>
+                    <span id="member-count" class="badge badge-blurple">—</span>
+                </div>
+                <div style="overflow-x:auto">
+                    <div id="member-loading" style="text-align:center;padding:48px;color:var(--muted)">
+                        <div style="font-size:28px;margin-bottom:8px">⏳</div>
+                        กำลังโหลดข้อมูล...
+                    </div>
+                    <table id="member-table" class="members-table" style="display:none">
+                        <thead>
+                            <tr>
+                                <th>สมาชิก</th>
+                                <th>ยศ / ตำแหน่ง</th>
+                                <th style="text-align:right">💰 กระเป๋า</th>
+                                <th style="text-align:right">🏦 ธนาคาร</th>
+                                <th style="text-align:right">🎒 ไอเทม</th>
+                                <th style="text-align:center">แก้ไข</th>
+                            </tr>
+                        </thead>
+                        <tbody id="member-tbody"></tbody>
+                    </table>
+                    <div id="member-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
+                        <div style="font-size:32px;margin-bottom:8px">👥</div>
+                        ไม่พบสมาชิกที่มีข้อมูล
+                    </div>
+                </div>
+                <div id="member-pagination" style="padding:14px 18px;border-top:1px solid var(--border);display:none">
+                    <div class="pagination" id="pagination-buttons"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════
+             TAB: กีฬา & Esports
+        ═══════════════════════════════════════════════ -->
+        <div id="tab-sports" class="tab-panel">
+
+            <%
+                const sn = config.sportsNotifications || {};
+            %>
+
+            <!-- Info banner -->
+            <div class="card" style="margin-bottom:16px;border-color:#5865F2">
+                <div class="card-body" style="padding:14px 18px">
+                    <div style="font-size:13px;color:var(--text)">
+                        🏆 <strong>ระบบแจ้งเตือนกีฬา & Esports</strong> — บอทจะส่งการแจ้งเตือนอัตโนมัติก่อนแมตช์เริ่ม
+                        <br><span style="color:var(--muted);font-size:12px">
+                            📌 คำสั่ง: <code>/esports matches</code> • <code>/f1 schedule</code> • <code>/f1 live</code> • <code>/football matches</code> • <code>/football lineup</code>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── ESPORTS ────────────────────────────────────────── -->
+            <div class="card" style="margin-bottom:16px">
+                <div class="card-header">
+                    <div class="card-title">🎮 Esports (Liquipedia)</div>
+                    <label class="switch">
+                        <input type="checkbox" id="sp-esp-enabled" <%= sn.esportsEnabled ? 'checked' : '' %>>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid" style="margin-bottom:14px">
+                        <div class="form-group">
+                            <label>📢 Channel แจ้งเตือน</label>
+                            <select id="sp-esp-channel" class="form-input">
+                                <option value="">— กำลังโหลด —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>⏰ แจ้งเตือนก่อนแมตช์ (นาที)</label>
+                            <input type="number" id="sp-esp-before" value="<%= sn.esportsNotifyBefore || 30 %>" min="5" max="240">
+                        </div>
+                    </div>
+                    <div class="section-label">เกมที่ต้องการติดตาม</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+                        <% const espGames = sn.esportsGames || ['cs2','valorant','lol','mlbb']; %>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                            <input type="checkbox" class="sp-esp-game" value="cs2" <%= espGames.includes('cs2') ? 'checked' : '' %>> Counter-Strike 2
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                            <input type="checkbox" class="sp-esp-game" value="valorant" <%= espGames.includes('valorant') ? 'checked' : '' %>> VALORANT
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                            <input type="checkbox" class="sp-esp-game" value="lol" <%= espGames.includes('lol') ? 'checked' : '' %>> League of Legends
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                            <input type="checkbox" class="sp-esp-game" value="mlbb" <%= espGames.includes('mlbb') ? 'checked' : '' %>> Mobile Legends
+                        </label>
+                    </div>
+                    <div class="section-label" style="margin-top:14px">ทีมที่ติดตาม (แยกตามเกม)</div>
+                    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">ว่างไว้ = แจ้งทุกแมตช์ของเกมนั้น</div>
+                    <% const trackedTeams = sn.esportsTrackedTeams || {}; %>
+                    <% [['cs2','CS2'],['valorant','VALORANT'],['lol','LoL'],['mlbb','MLBB']].forEach(([code,label]) => { %>
+                    <div class="form-group" style="margin-bottom:10px">
+                        <label><%= label %> — ชื่อทีม (คั่นด้วยคอมม่า)</label>
+                        <input type="text" id="sp-esp-teams-<%= code %>"
+                               placeholder="เช่น NAVI, G2, FaZe"
+                               value="<%= (trackedTeams[code] || []).join(', ') %>">
+                    </div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- ─── F1 ──────────────────────────────────────────────── -->
+            <div class="card" style="margin-bottom:16px">
+                <div class="card-header">
+                    <div class="card-title">🏎️ Formula 1</div>
+                    <label class="switch">
+                        <input type="checkbox" id="sp-f1-enabled" <%= sn.f1Enabled ? 'checked' : '' %>>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid" style="margin-bottom:14px">
+                        <div class="form-group">
+                            <label>📢 Channel แจ้งเตือน</label>
+                            <select id="sp-f1-channel" class="form-input">
+                                <option value="">— กำลังโหลด —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>⏰ แจ้งก่อนแข่ง (นาที)</label>
+                            <input type="number" id="sp-f1-before" value="<%= sn.f1NotifyBefore || 60 %>" min="10" max="480">
+                        </div>
+                    </div>
+                    <div class="toggle-row">
+                        <div>
+                            <div class="toggle-label">แจ้งเตือนเมื่อแข่งเริ่ม (Live)</div>
+                            <div class="toggle-desc">ส่ง notification เมื่อ race session เริ่ม</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="sp-f1-live" <%= sn.f1NotifyLive !== false ? 'checked' : '' %>>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div style="margin-top:10px;padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted)">
+                        📡 ข้อมูล F1 ใช้ API ฟรีจาก <strong>Jolpica (Ergast)</strong> + <strong>OpenF1</strong> — ไม่ต้องใช้ API key
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── FOOTBALL ─────────────────────────────────────────── -->
+            <div class="card" style="margin-bottom:16px">
+                <div class="card-header">
+                    <div class="card-title">⚽ ฟุตบอล</div>
+                    <label class="switch">
+                        <input type="checkbox" id="sp-fb-enabled" <%= sn.footballEnabled ? 'checked' : '' %>>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="card-body">
+                    <div style="margin-bottom:14px;padding:10px 14px;background:rgba(254,231,92,0.08);border:1px solid rgba(254,231,92,0.2);border-radius:8px;font-size:12px">
+                        🔑 ต้องการ <strong>FOOTBALL_API_KEY</strong> ใน .env — รับฟรีที่
+                        <a href="https://www.football-data.org/client/register" target="_blank" style="color:var(--blurple)">football-data.org</a>
+                        (100 req/วัน ใน free tier)
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom:14px">
+                        <div class="form-group">
+                            <label>📢 Channel แจ้งเตือน</label>
+                            <select id="sp-fb-channel" class="form-input">
+                                <option value="">— กำลังโหลด —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>⏰ แจ้งก่อนแมตช์ (นาที)</label>
+                            <input type="number" id="sp-fb-before" value="<%= sn.footballNotifyBefore || 30 %>" min="5" max="240">
+                        </div>
+                    </div>
+
+                    <div class="section-label">ลีกที่ต้องการติดตาม</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+                        <% const fbLeagues = sn.footballLeagues || ['PL']; %>
+                        <% [['PL','🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'],['BL1','🇩🇪 Bundesliga'],['SA','🇮🇹 Serie A'],['PD','🇪🇸 La Liga'],['FL1','🇫🇷 Ligue 1'],['CL','⭐ UCL']].forEach(([code,name]) => { %>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                            <input type="checkbox" class="sp-fb-league" value="<%= code %>" <%= fbLeagues.includes(code) ? 'checked' : '' %>> <%- name %>
+                        </label>
+                        <% }) %>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:14px">
+                        <label>👥 ทีมที่ติดตาม (คั่นด้วยเครื่องหมายคอมม่า)</label>
+                        <input type="text" id="sp-fb-teams" placeholder="เช่น Liverpool, Manchester City, Arsenal"
+                               value="<%= (sn.footballTeams || []).join(', ') %>">
+                        <span style="font-size:11px;color:var(--muted)">เว้นว่างไว้ = แจ้งทุกแมตช์ของลีกที่เลือก</span>
+                    </div>
+
+                    <div class="toggle-row" style="margin-bottom:10px">
+                        <div>
+                            <div class="toggle-label">แจ้งเตือนแมตช์สด</div>
+                            <div class="toggle-desc">ส่ง notification เมื่อ kick-off</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="sp-fb-live" <%= sn.footballNotifyLive !== false ? 'checked' : '' %>>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <div>
+                            <div class="toggle-label">แจ้งเตือน Lineup</div>
+                            <div class="toggle-desc">ส่ง lineup เมื่อประกาศ (ต้องการ API key)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="sp-fb-lineup" <%= sn.footballNotifyLineup !== false ? 'checked' : '' %>>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save button -->
+            <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+                <button class="btn btn-primary" onclick="saveSportsSettings(this)">💾 บันทึกการตั้งค่า</button>
+                <span id="sp-save-status" style="font-size:13px"></span>
+            </div>
+
+        </div><!-- end tab-sports -->
+
+        <!-- COMMANDS TAB -->
+        <div id="tab-commands" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">⚙️ เปิด/ปิดคำสั่ง /</div>
+                    <span style="font-size:12px;color:var(--muted)">ปิดคำสั่งที่ไม่ต้องการในเซิร์ฟนี้</span>
+                </div>
+                <div class="card-body" id="cmd-grid-container">
+                    <div style="text-align:center;padding:32px;color:var(--muted)">⏳ กำลังโหลด...</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+                <button class="btn btn-primary" onclick="saveCommandSettings(this)">💾 บันทึก</button>
+                <span id="cmd-save-status" style="font-size:13px"></span>
+            </div>
+        </div>
+
+    </div><!-- end content-area -->
+</div><!-- end main -->
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: แก้ไขสมาชิก
+═══════════════════════════════════════════════════ -->
+<div id="modal-member" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-member')">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>✏️ แก้ไขข้อมูลสมาชิก</span>
+            <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="modal-member-info" style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+                <img id="modal-member-avatar" src="" style="width:40px;height:40px;border-radius:50%;object-fit:cover">
+                <div>
+                    <div id="modal-member-name" style="font-weight:600;font-size:14px"></div>
+                    <div id="modal-member-roles" style="margin-top:4px"></div>
+                </div>
+            </div>
+            <input type="hidden" id="edit-userId">
+            <div class="form-grid" style="margin-bottom:0">
+                <div class="form-group">
+                    <label>💰 กระเป๋า (Coins)</label>
+                    <input type="number" id="edit-coins" min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>🏦 ธนาคาร (Bank)</label>
+                    <input type="number" id="edit-bank" min="0" placeholder="0">
+                </div>
+            </div>
+            <div id="edit-inventory-section" style="margin-top:16px">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">🎒 ไอเทมในกระเป๋า</div>
+                <div id="edit-inventory-list"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger btn-sm" onclick="closeModal('modal-member')">ยกเลิก</button>
+            <button class="btn btn-primary btn-sm" onclick="saveMember()">💾 บันทึก</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: แก้ไขสินค้า
+═══════════════════════════════════════════════════ -->
+<div id="modal-store-item" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-store-item')">
+    <div class="modal-box wide">
+        <div class="modal-header">
+            <span>✏️ แก้ไขสินค้า</span>
+            <button class="modal-close" onclick="closeModal('modal-store-item')">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-item-id">
+            <div class="form-grid" style="margin-bottom:14px">
+                <div class="form-group">
+                    <label>ชื่อสินค้า</label>
+                    <input type="text" id="edit-item-name">
+                </div>
+                <div class="form-group">
+                    <label>ราคา</label>
+                    <input type="number" id="edit-item-price" min="0">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+                <label>คำอธิบาย</label>
+                <textarea id="edit-item-desc" style="min-height:70px"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:14px">
+                <label>ลิงก์รูปภาพ (URL)</label>
+                <input type="url" id="edit-item-img" placeholder="https://..." oninput="previewEditImg(this.value)">
+                <img id="edit-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+            </div>
+
+            <div class="toggle-row" style="margin-bottom:10px">
+                <div><div class="toggle-label">สินค้าไม่จำกัด</div></div>
+                <label class="switch">
+                    <input type="checkbox" id="edit-item-unlimited" onchange="toggleEditStock()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div id="edit-stock-wrap" style="margin-bottom:12px">
+                <div class="form-group">
+                    <label>จำนวนในคลัง</label>
+                    <input type="number" id="edit-item-stock" min="0">
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                <div class="toggle-row" style="margin:0">
+                    <div><div class="toggle-label" style="font-size:12px">แสดงในร้าน</div></div>
+                    <label class="switch"><input type="checkbox" id="edit-item-listed"><span class="slider"></span></label>
+                </div>
+                <div class="toggle-row" style="margin:0">
+                    <div><div class="toggle-label" style="font-size:12px">ขายคืนได้</div></div>
+                    <label class="switch"><input type="checkbox" id="edit-item-sellable"><span class="slider"></span></label>
+                </div>
+                <div class="toggle-row" style="margin:0">
+                    <div><div class="toggle-label" style="font-size:12px">เก็บใน Inv</div></div>
+                    <label class="switch"><input type="checkbox" id="edit-item-inventory"><span class="slider"></span></label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger btn-sm" onclick="closeModal('modal-store-item')">ยกเลิก</button>
+            <button class="btn btn-primary btn-sm" onclick="saveStoreItem()">💾 บันทึก</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ─── Tab switching ───────────────────────────────────
+    function switchTab(name, btnId) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        document.getElementById(btnId).classList.add('active');
+        if (name === 'betting')  loadChannels();
+        if (name === 'active-bonus') loadActiveChannel();
+        if (name === 'members')  loadMembers(1);
+        if (name === 'level')    loadLevelChannels();
+        if (name === 'autorole') loadArChannels();
+        if (name === 'sports')   loadSportsChannels();
+        if (name === 'commands') loadCommandGrid();
+    }
+
+    // ─── Store stock toggle ───────────────────────────────
+    function toggleStock() {
+        const isUnlimited = document.getElementById('unlimited-switch').checked;
+        document.getElementById('stock-wrap').style.display = isUnlimited ? 'none' : 'block';
+    }
+
+    // ─── Image preview ───────────────────────────────────
+    function previewImg(inputId, previewId, placeholderId) {
+        const url = document.getElementById(inputId).value.trim();
+        const img = document.getElementById(previewId);
+        const ph  = document.getElementById(placeholderId);
+        if (url) {
+            img.src = url;
+            img.style.display = 'block';
+            if (ph) ph.style.display = 'none';
+        } else {
+            img.style.display = 'none';
+            if (ph) ph.style.display = 'flex';
+        }
+    }
+
+    // ─── Load Discord channels via API ────────────────────
+    function loadChannels() {
+        const sel = document.getElementById('channel-select');
+        if (!sel || sel.dataset.loaded) return;
+        fetch('/<%= guildId %>/betting-channels')
+            .then(r => r.json())
+            .then(channels => {
+                const current = '<%= (bet && bet.channelId) ? bet.channelId : "" %>';
+                sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
+                channels.forEach(ch => {
+                    const opt = document.createElement('option');
+                    opt.value = ch.id;
+                    opt.textContent = '# ' + ch.name;
+                    if (ch.id === current) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+                sel.dataset.loaded = '1';
+            })
+            .catch(() => {
+                sel.innerHTML = '<option value="">⚠️ โหลด channels ไม่สำเร็จ — ลองรีเฟรช</option>';
+            });
+    }
+
+    // ─── Store item image preview ────────────────────────
+    function previewStoreImg(input) {
+        const url = input.value.trim();
+        const img = document.getElementById('store-img-preview');
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            img.src = url;
+            img.style.display = 'block';
+        } else {
+            img.style.display = 'none';
+        }
+    }
+
+    // ─── Load channels for Active Bonus ─────────────────
+    function loadActiveChannel() {
+        const sel = document.getElementById('active-channel-select');
+        if (!sel || sel.dataset.loaded) return;
+        fetch('/<%= guildId %>/betting-channels')
+            .then(r => r.json())
+            .then(channels => {
+                const current = '<%= config.activeBonusChannelId || "" %>';
+                sel.innerHTML = '<option value="">— ทุกช่องข้อความ —</option>';
+                channels.forEach(ch => {
+                    const opt = document.createElement('option');
+                    opt.value = ch.id;
+                    opt.textContent = '# ' + ch.name;
+                    if (ch.id === current) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+                sel.dataset.loaded = '1';
+            })
+            .catch(() => {});
+    }
+
+    // ─── Countdown timer ──────────────────────────────────
+    <% if (typeof bet !== 'undefined' && bet && bet.expiresAt) { %>
+    (function() {
+        const el  = document.getElementById('bet-countdown');
+        if (!el) return;
+        const end = new Date('<%= bet.expiresAt %>').getTime();
+        function tick() {
+            const diff = end - Date.now();
+            if (diff <= 0) { el.textContent = '⏰ หมดเวลาแล้ว'; el.style.color = 'var(--red)'; return; }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            el.textContent = h > 0
+                ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} เหลืออยู่`
+                : `${m}:${String(s).padStart(2,'0')} เหลืออยู่`;
+            setTimeout(tick, 1000);
+        }
+        tick();
+    })();
+    <% } %>
+
+    // ─── On load ──────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+        const p = new URLSearchParams(location.search);
+        const tab = p.get('tab');
+        const tabMap = {
+            currency:       'btn-currency',
+            work:           'btn-work',
+            rob:            'btn-rob',
+            'role-income':  'btn-role-income',
+            'active-bonus': 'btn-active-bonus',
+            seniority:      'btn-seniority',
+            'daily-quests': 'btn-daily-quests',
+            store:          'btn-store',
+            level:          'btn-level',
+            autorole:       'btn-autorole',
+            betting:        'btn-betting',
+            members:        'btn-members',
+            sports:         'btn-sports',
+            commands:       'btn-commands',
+        };
+        if (tab && tabMap[tab]) switchTab(tab, tabMap[tab]);
+        if (tab === 'sports') loadSportsChannels();
+
+        // toast notification
+        const toast = document.querySelector('.toast');
+        if (toast && (p.get('success') || p.get('bet_success') || p.get('settle_success') || p.get('delete_success'))) {
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 3500);
+        }
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // LEVEL TAB
+    // ═══════════════════════════════════════════════════════
+    let levelChannelsLoaded = false;
+
+    async function loadLevelChannels() {
+        if (levelChannelsLoaded) return;
+        levelChannelsLoaded = true;
+
+        // ─ level-up notification channel
+        const sel  = document.getElementById('level-channel-select');
+        // ─ ignore channel dropdown
+        const igCh = document.getElementById('lv-ignore-ch-add');
+        if (!sel && !igCh) return;
+
+        try {
+            const res      = await fetch(`/api/${GUILD_ID}/channels`);
+            if (!res.ok) return;
+            const channels = await res.json();
+            const current  = '<%= config.levelUpChannelId || "" %>';
+
+            if (sel) {
+                sel.innerHTML = '<option value="">— แจ้งในช่องที่พิมพ์ข้อความ —</option>';
+                channels.forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id; o.textContent = '#' + c.name;
+                    if (c.id === current) o.selected = true;
+                    sel.appendChild(o);
+                });
+            }
+            if (igCh) {
+                igCh.innerHTML = '<option value="">— เลือก channel —</option>';
+                channels.forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id; o.textContent = '#' + c.name; o.dataset.name = c.name;
+                    igCh.appendChild(o);
+                });
+            }
+        } catch {}
+    }
+
+    const DISCORD_ROLES = <%- JSON.stringify(discordRoles.map(r => ({id: r.id, name: r.name, color: r.color}))) %>;
+
+    // ── Level Role rows ──────────────────────────────────
+    function addLevelRoleRow() {
+        document.getElementById('level-roles-empty')?.remove();
+        const list = document.getElementById('level-roles-list');
+        const row  = document.createElement('div');
+        row.className = 'level-role-row lv-role-row';
+        const opts = DISCORD_ROLES.map(r => `<option value="${r.id}" data-name="${escHtml(r.name)}">${escHtml(r.name)}</option>`).join('');
+        row.innerHTML = `
+            <div class="form-group" style="flex:0 0 90px;margin:0">
+                <label class="form-label" style="font-size:11px">Level</label>
+                <input type="number" class="form-input lv-role-level" min="1" placeholder="5">
+            </div>
+            <div class="form-group" style="flex:1;margin:0">
+                <label class="form-label" style="font-size:11px">Role</label>
+                <select class="form-input lv-role-select">
+                    <option value="">— เลือก Role —</option>${opts}
+                </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeLvRoleRow(this)">🗑️</button>
+            </div>`;
+        list.appendChild(row);
+    }
+
+    function removeLvRoleRow(btn) {
+        btn.closest('.lv-role-row').remove();
+        const list = document.getElementById('level-roles-list');
+        if (!list.querySelector('.lv-role-row')) {
+            list.innerHTML = '<div id="level-roles-empty" style="color:var(--muted);font-size:13px;padding:4px 0">ยังไม่มี Role รางวัล — กด "เพิ่ม" เพื่อเพิ่ม</div>';
+        }
+    }
+
+    // ── Multiplier rows ──────────────────────────────────
+    function addMultiplierRow() {
+        document.getElementById('lv-mult-empty')?.remove();
+        const list = document.getElementById('lv-multiplier-list');
+        const row  = document.createElement('div');
+        row.className = 'level-role-row lv-mult-row';
+        const opts = DISCORD_ROLES.map(r => `<option value="${r.id}" data-name="${escHtml(r.name)}">${escHtml(r.name)}</option>`).join('');
+        row.innerHTML = `
+            <div class="form-group" style="flex:1;margin:0">
+                <label class="form-label" style="font-size:11px">Role</label>
+                <select class="form-input lv-mult-role"><option value="">— เลือก Role —</option>${opts}</select>
+            </div>
+            <div class="form-group" style="flex:0 0 110px;margin:0">
+                <label class="form-label" style="font-size:11px">Multiplier</label>
+                <input type="number" class="form-input lv-mult-val" min="1.1" max="10" step="0.1" value="2">
+            </div>
+            <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeMultRow(this)">🗑️</button>
+            </div>`;
+        list.appendChild(row);
+    }
+
+    function removeMultRow(btn) {
+        btn.closest('.lv-mult-row').remove();
+        const list = document.getElementById('lv-multiplier-list');
+        if (!list.querySelector('.lv-mult-row')) {
+            list.innerHTML = '<div id="lv-mult-empty" style="color:var(--muted);font-size:13px;padding:4px 0">ยังไม่มี — กด "เพิ่ม" เพื่อตั้งค่า role ที่ได้ XP เพิ่ม</div>';
+        }
+    }
+
+    // ── Ignore channels/roles chips ──────────────────────
+    function addIgnoreChannel() {
+        const sel = document.getElementById('lv-ignore-ch-add');
+        const id  = sel.value;
+        const name = sel.options[sel.selectedIndex]?.dataset?.name || id;
+        if (!id) return;
+        if (document.querySelector(`#lv-ignore-channels [data-id="${id}"]`)) return;
+        const chip = document.createElement('span');
+        chip.className = 'role-chip lv-ignore-chip';
+        chip.dataset.id = id;
+        chip.innerHTML = `#${escHtml(name)} <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:4px;opacity:.7">✕</span>`;
+        document.getElementById('lv-ignore-channels').appendChild(chip);
+        sel.value = '';
+    }
+
+    function addIgnoreRole() {
+        const sel  = document.getElementById('lv-ignore-role-add');
+        const id   = sel.value;
+        const name = sel.options[sel.selectedIndex]?.dataset?.name || id;
+        if (!id) return;
+        if (document.querySelector(`#lv-ignore-roles [data-id="${id}"]`)) return;
+        const chip = document.createElement('span');
+        chip.className = 'role-chip lv-ignore-chip';
+        chip.dataset.id = id;
+        chip.innerHTML = `${escHtml(name)} <span onclick="this.parentElement.remove()" style="cursor:pointer;margin-left:4px;opacity:.7">✕</span>`;
+        document.getElementById('lv-ignore-roles').appendChild(chip);
+        sel.value = '';
+    }
+
+    // ── Rank Card preview ────────────────────────────────
+    function updateRcPreview() {
+        const bg1    = document.getElementById('rc-bg1').value;
+        const bg2    = document.getElementById('rc-bg2').value;
+        const accent = document.getElementById('rc-accent').value;
+        const prev   = document.getElementById('rc-preview');
+        if (!prev) return;
+        prev.style.background = `linear-gradient(135deg,${bg1},${bg2})`;
+        prev.querySelector('div[style*="left:0"]').style.background = accent;
+        prev.querySelector('div[style*="border-radius:50%"]').style.borderColor = accent;
+        const bar = prev.querySelector('div[style*="width:60%"]');
+        if (bar) bar.style.background = accent;
+        const rankNum = prev.querySelector('div[style*="font-size:20px;font-weight:707"]') ||
+                        [...prev.querySelectorAll('div')].find(d => d.textContent.trim() === '#3');
+        if (rankNum) rankNum.style.color = accent;
+    }
+
+    function syncColorPicker(pickerId, textId) {
+        const txt = document.getElementById(textId).value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(txt)) document.getElementById(pickerId).value = txt;
+    }
+
+    // ── Collect + AJAX save ──────────────────────────────
+    async function saveLevelSettings(btn) {
+        const status = document.getElementById('lv-save-status');
+        btn.disabled = true;
+        status.textContent = '⏳ กำลังบันทึก...';
+        status.style.color = 'var(--muted)';
+
+        const levelRoles = [...document.querySelectorAll('.lv-role-row')].map(row => ({
+            level:    parseInt(row.querySelector('.lv-role-level')?.value) || 0,
+            roleId:   row.querySelector('.lv-role-select')?.value || '',
+            roleName: row.querySelector('.lv-role-select option:checked')?.dataset?.name || ''
+        })).filter(r => r.level > 0 && r.roleId);
+
+        const xpMultiplierRoles = [...document.querySelectorAll('.lv-mult-row')].map(row => ({
+            roleId:     row.querySelector('.lv-mult-role')?.value || '',
+            roleName:   row.querySelector('.lv-mult-role option:checked')?.dataset?.name || '',
+            multiplier: parseFloat(row.querySelector('.lv-mult-val')?.value) || 2
+        })).filter(r => r.roleId);
+
+        const levelIgnoreChannels = [...document.querySelectorAll('#lv-ignore-channels .lv-ignore-chip')].map(c => c.dataset.id).filter(Boolean);
+        const levelIgnoreRoles    = [...document.querySelectorAll('#lv-ignore-roles .lv-ignore-chip')].map(c => c.dataset.id).filter(Boolean);
+
+        const payload = {
+            levelEnabled:             document.getElementById('lv-enabled')?.checked,
+            xpPerMessageMin:          document.getElementById('lv-xp-min')?.value,
+            xpPerMessageMax:          document.getElementById('lv-xp-max')?.value,
+            xpCooldownSeconds:        document.getElementById('lv-xp-cd')?.value,
+            voiceXpEnabled:           document.getElementById('lv-voice-enabled')?.checked,
+            voiceXpPerMinute:         document.getElementById('lv-voice-xpm')?.value,
+            commandXpEnabled:         document.getElementById('lv-cmd-enabled')?.checked,
+            commandXpMin:             document.getElementById('lv-cmd-min')?.value,
+            commandXpMax:             document.getElementById('lv-cmd-max')?.value,
+            commandXpCooldownSeconds: document.getElementById('lv-cmd-cd')?.value,
+            reactionXpEnabled:        document.getElementById('lv-react-enabled')?.checked,
+            reactionXpAmount:         document.getElementById('lv-react-xp')?.value,
+            reactionXpCooldownSeconds:document.getElementById('lv-react-cd')?.value,
+            levelResetOnLeave:        document.getElementById('lv-reset-leave')?.checked,
+            levelResetOnBan:          document.getElementById('lv-reset-ban')?.checked,
+            levelUpChannelId:         document.getElementById('level-channel-select')?.value,
+            levelUpMessage:           document.getElementById('lv-up-msg')?.value,
+            rankCardBg:               document.getElementById('rc-bg1')?.value,
+            rankCardBg2:              document.getElementById('rc-bg2')?.value,
+            rankCardAccent:           document.getElementById('rc-accent')?.value,
+            rankCardBgImage:          document.getElementById('rc-bgimg')?.value || '',
+            levelRoles, xpMultiplierRoles, levelIgnoreChannels, levelIgnoreRoles
+        };
+
+        try {
+            const res  = await fetch(`/api/${GUILD_ID}/level`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            status.textContent = '✅ บันทึกสำเร็จ';
+            status.style.color = 'var(--green)';
+        } catch (err) {
+            status.textContent = '❌ ' + err.message;
+            status.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+            setTimeout(() => { status.textContent = ''; }, 4000);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // MEMBERS TAB
+    // ═══════════════════════════════════════════════════════
+    const GUILD_ID = '<%= guildId %>';
+    let memberCurrentPage = 1;
+    let memberSearchVal   = '';
+    let memberDebounce    = null;
+
+    function debouncedMemberSearch(val) {
+        clearTimeout(memberDebounce);
+        memberSearchVal = val;
+        memberDebounce = setTimeout(() => loadMembers(1), 400);
+    }
+
+    async function loadMembers(page) {
+        memberCurrentPage = page;
+        const loading = document.getElementById('member-loading');
+        const table   = document.getElementById('member-table');
+        const empty   = document.getElementById('member-empty');
+        const pagination = document.getElementById('member-pagination');
+
+        loading.style.display = 'block';
+        table.style.display   = 'none';
+        empty.style.display   = 'none';
+        pagination.style.display = 'none';
+
+        try {
+            const qs  = new URLSearchParams({ page, search: memberSearchVal });
+            const res = await fetch(`/api/${GUILD_ID}/members?${qs}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'error');
+
+            loading.style.display = 'none';
+            document.getElementById('member-count').textContent = `${data.total} คน`;
+
+            if (!data.members.length) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            // Render rows
+            const tbody = document.getElementById('member-tbody');
+            tbody.innerHTML = data.members.map(m => {
+                const rolesHtml = m.roles.length
+                    ? m.roles.slice(0,4).map(r => {
+                        const hex = r.color ? '#' + r.color.toString(16).padStart(6,'0') : '#7b7f8e';
+                        return `<span class="role-chip" style="color:${hex};border-color:${hex}33;background:${hex}18">${r.name}</span>`;
+                      }).join('') + (m.roles.length > 4 ? `<span class="role-chip">+${m.roles.length-4}</span>` : '')
+                    : '<span style="color:var(--muted);font-size:12px">—</span>';
+
+                const invText = m.inventory.length
+                    ? `${m.inventory.length} ชนิด`
+                    : '<span style="color:var(--muted)">—</span>';
+
+                const memberData = encodeURIComponent(JSON.stringify(m));
+                return `<tr>
+                    <td>
+                        <img class="member-avatar" src="${m.avatar}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                        <span style="font-weight:500">${escHtml(m.username)}</span>
+                    </td>
+                    <td>${rolesHtml}</td>
+                    <td style="text-align:right;font-weight:600">${m.coins.toLocaleString()}</td>
+                    <td style="text-align:right;font-weight:600">${m.bank.toLocaleString()}</td>
+                    <td style="text-align:right">${invText}</td>
+                    <td style="text-align:center">
+                        <button class="btn btn-primary btn-sm" onclick="openMemberModal(decodeURIComponent('${memberData}'))">✏️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            table.style.display = 'table';
+
+            // Pagination
+            if (data.pages > 1) {
+                renderPagination(data.page, data.pages);
+                pagination.style.display = 'block';
+            }
+        } catch (err) {
+            loading.innerHTML = `<div style="color:var(--red)">❌ ${err.message}</div>`;
+        }
+    }
+
+    function renderPagination(current, total) {
+        const btn = document.getElementById('pagination-buttons');
+        let html = `<button class="page-btn" onclick="loadMembers(${current-1})" ${current<=1?'disabled':''}>‹</button>`;
+        for (let i = 1; i <= total; i++) {
+            if (total > 7 && Math.abs(i - current) > 2 && i !== 1 && i !== total) {
+                if (i === current - 3 || i === current + 3) html += `<span style="color:var(--muted);padding:0 4px">…</span>`;
+                continue;
+            }
+            html += `<button class="page-btn ${i===current?'active':''}" onclick="loadMembers(${i})">${i}</button>`;
+        }
+        html += `<button class="page-btn" onclick="loadMembers(${current+1})" ${current>=total?'disabled':''}>›</button>`;
+        btn.innerHTML = html;
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // MEMBER EDIT MODAL
+    // ═══════════════════════════════════════════════════════
+    function openMemberModal(raw) {
+        const m = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+        document.getElementById('edit-userId').value  = m.userId;
+        document.getElementById('edit-coins').value   = m.coins;
+        document.getElementById('edit-bank').value    = m.bank;
+        document.getElementById('modal-member-name').textContent = m.username;
+        document.getElementById('modal-member-avatar').src = m.avatar;
+
+        // Roles
+        const rolesEl = document.getElementById('modal-member-roles');
+        rolesEl.innerHTML = m.roles.slice(0,6).map(r => {
+            const hex = r.color ? '#' + r.color.toString(16).padStart(6,'0') : '#7b7f8e';
+            return `<span class="role-chip" style="color:${hex};border-color:${hex}33;background:${hex}18">${escHtml(r.name)}</span>`;
+        }).join('');
+
+        // Inventory
+        const invEl = document.getElementById('edit-inventory-list');
+        if (!m.inventory.length) {
+            invEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">ไม่มีไอเทม</div>';
+        } else {
+            invEl.innerHTML = '<div class="inv-list">' + m.inventory.map(i =>
+                `<div class="inv-row">
+                    <span class="inv-row-name">${escHtml(i.itemName)}</span>
+                    <span class="inv-row-right"><span class="badge badge-blurple">x${i.quantity}</span></span>
+                 </div>`
+            ).join('') + '</div>';
+        }
+
+        document.getElementById('modal-member').style.display = 'flex';
+    }
+
+    async function saveMember() {
+        const userId = document.getElementById('edit-userId').value;
+        const coins  = parseInt(document.getElementById('edit-coins').value);
+        const bank   = parseInt(document.getElementById('edit-bank').value);
+
+        if (isNaN(coins) || isNaN(bank) || coins < 0 || bank < 0)
+            return alert('กรุณากรอกตัวเลขที่ถูกต้อง (≥ 0)');
+
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/member/${userId}/edit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ coins, bank })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            closeModal('modal-member');
+            loadMembers(memberCurrentPage);
+            showToastMsg('✅ บันทึกข้อมูลสมาชิกสำเร็จ');
+        } catch (err) {
+            alert('❌ ' + err.message);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // STORE ITEM EDIT MODAL
+    // ═══════════════════════════════════════════════════════
+    function openStoreItemModal(itemId, name, price, desc, img, unlimited, stock, listed, sellable, inventoryItem) {
+        document.getElementById('edit-item-id').value       = itemId;
+        document.getElementById('edit-item-name').value     = name;
+        document.getElementById('edit-item-price').value    = price;
+        document.getElementById('edit-item-desc').value     = desc;
+        document.getElementById('edit-item-img').value      = img;
+        document.getElementById('edit-item-unlimited').checked = !!unlimited;
+        document.getElementById('edit-item-stock').value    = stock;
+        document.getElementById('edit-item-listed').checked   = !!listed;
+        document.getElementById('edit-item-sellable').checked  = !!sellable;
+        document.getElementById('edit-item-inventory').checked = !!inventoryItem;
+        toggleEditStock();
+
+        const prev = document.getElementById('edit-img-preview');
+        if (img && (img.startsWith('http://') || img.startsWith('https://'))) {
+            prev.src = img; prev.style.display = 'block';
+        } else {
+            prev.style.display = 'none';
+        }
+
+        document.getElementById('modal-store-item').style.display = 'flex';
+    }
+
+    function toggleEditStock() {
+        const unlim = document.getElementById('edit-item-unlimited').checked;
+        document.getElementById('edit-stock-wrap').style.display = unlim ? 'none' : 'block';
+    }
+
+    function previewEditImg(url) {
+        const prev = document.getElementById('edit-img-preview');
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            prev.src = url; prev.style.display = 'block';
+        } else {
+            prev.style.display = 'none';
+        }
+    }
+
+    async function saveStoreItem() {
+        const itemId     = document.getElementById('edit-item-id').value;
+        const itemName   = document.getElementById('edit-item-name').value.trim();
+        const price      = document.getElementById('edit-item-price').value;
+        const desc       = document.getElementById('edit-item-desc').value;
+        const img        = document.getElementById('edit-item-img').value.trim();
+        const unlimited  = document.getElementById('edit-item-unlimited').checked;
+        const stock      = document.getElementById('edit-item-stock').value;
+        const listed     = document.getElementById('edit-item-listed').checked;
+        const sellable   = document.getElementById('edit-item-sellable').checked;
+        const invItem    = document.getElementById('edit-item-inventory').checked;
+
+        if (!itemName) return alert('กรุณากรอกชื่อสินค้า');
+
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/store-item/${itemId}/edit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    itemName, price, description: desc, itemImage: img,
+                    unlimitedStock: String(unlimited), stock,
+                    listedInStore: String(listed),
+                    sellable: String(sellable),
+                    inventoryItem: String(invItem)
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            closeModal('modal-store-item');
+            showToastMsg('✅ บันทึกสินค้าสำเร็จ — รีเฟรชหน้าเพื่อดูการเปลี่ยนแปลง');
+        } catch (err) {
+            alert('❌ ' + err.message);
+        }
+    }
+
+    function openStoreItemModalEl(btn) {
+        const d = JSON.parse(btn.dataset.item);
+        openStoreItemModal(d.id, d.name, d.price, d.desc, d.img, d.unlimited, d.stock, d.listed, d.sellable, d.invItem);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // MODAL UTILS
+    // ═══════════════════════════════════════════════════════
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function showToastMsg(msg) {
+        let t = document.querySelector('.toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.className = 'toast success';
+            document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.classList.add('success');
+        t.style.display = 'flex';
+        setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // AUTO ROLE TAB
+    // ═══════════════════════════════════════════════════════
+    const AR_ROLES = <%- JSON.stringify((discordRoles || []).map(r => ({ id: r.id, name: r.name }))) %>;
+
+    function roleOptions(selectedId = '') {
+        return AR_ROLES.map(r =>
+            `<option value="${r.id}" ${r.id === selectedId ? 'selected' : ''}>${r.name}</option>`
+        ).join('');
+    }
+
+    // ─── Load channels for AR channel select ───────────────
+    let arChannelsLoaded = false;
+    async function loadArChannels() {
+        if (arChannelsLoaded) return;
+        arChannelsLoaded = true;
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/channels`);
+            if (!res.ok) return;
+            const channels = await res.json();
+            const sel = document.getElementById('rr-channel');
+            if (!sel) return;
+            channels.forEach(ch => {
+                const o = document.createElement('option');
+                o.value = ch.id;
+                o.textContent = '#' + ch.name;
+                sel.appendChild(o);
+            });
+        } catch (e) { console.error('[AR channels]', e); }
+    }
+
+    // ─── Join role rows ─────────────────────────────────────
+    function addJoinRoleRow(roleId='', delay=0) {
+        const row = document.createElement('div');
+        row.className = 'level-role-row';
+        row.style.alignItems = 'center';
+        row.innerHTML = `
+            <select class="form-input jr-role" style="flex:1">
+                <option value="">— เลือก Role —</option>
+                ${roleOptions(roleId)}
+            </select>
+            <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:12px;color:var(--muted)">หน่วงเวลา</span>
+                <input type="number" class="form-input jr-delay" value="${delay}" min="0" style="width:70px;text-align:center" placeholder="วินาที">
+                <span style="font-size:12px;color:var(--muted)">วิ</span>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="this.closest('.level-role-row').remove()">✕</button>`;
+        document.getElementById('join-roles-list').appendChild(row);
+    }
+
+    function addBotJoinRoleRow(roleId='') {
+        const row = document.createElement('div');
+        row.className = 'level-role-row';
+        row.innerHTML = `
+            <select class="form-input bjr-role" style="flex:1">
+                <option value="">— เลือก Role —</option>
+                ${roleOptions(roleId)}
+            </select>
+            <button class="btn btn-danger btn-sm" onclick="this.closest('.level-role-row').remove()">✕</button>`;
+        document.getElementById('bot-join-roles-list').appendChild(row);
+    }
+
+    // ─── Save Join Roles ────────────────────────────────────
+    async function saveJoinRoles(btn) {
+        const status = document.getElementById('jr-save-status');
+        btn.disabled = true;
+        status.textContent = 'กำลังบันทึก…';
+        status.style.color = 'var(--muted)';
+
+        const joinRoles = [...document.querySelectorAll('#join-roles-list .level-role-row')].map(row => ({
+            roleId: row.querySelector('.jr-role').value,
+            roleName: row.querySelector('.jr-role').selectedOptions[0]?.text || '',
+            delaySeconds: parseInt(row.querySelector('.jr-delay').value) || 0
+        })).filter(r => r.roleId);
+
+        const botJoinRoles = [...document.querySelectorAll('#bot-join-roles-list .level-role-row')].map(row => ({
+            roleId: row.querySelector('.bjr-role').value,
+            roleName: row.querySelector('.bjr-role').selectedOptions[0]?.text || ''
+        })).filter(r => r.roleId);
+
+        const payload = {
+            joinRoles,
+            botJoinRoles,
+            stickyRolesEnabled: document.getElementById('ar-sticky').checked
+        };
+
+        try {
+            const res  = await fetch(`/api/${GUILD_ID}/autorole/join`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'error');
+            status.textContent = '✅ บันทึกแล้ว!';
+            status.style.color = 'var(--green)';
+        } catch (e) {
+            status.textContent = '❌ ' + e.message;
+            status.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // ─── Reaction Role rows ─────────────────────────────────
+    function addRrRoleRow() {
+        const row = document.createElement('div');
+        row.className = 'level-role-row';
+        row.style.alignItems = 'center';
+        row.innerHTML = `
+            <input type="text" class="form-input rr-emoji" placeholder="Emoji (เช่น 🎮)" style="width:90px;text-align:center">
+            <select class="form-input rr-role" style="flex:1">
+                <option value="">— เลือก Role —</option>
+                ${roleOptions()}
+            </select>
+            <input type="text" class="form-input rr-rdesc" placeholder="คำอธิบาย (ไม่บังคับ)" style="flex:1">
+            <button class="btn btn-danger btn-sm" onclick="this.closest('.level-role-row').remove()">✕</button>`;
+        document.getElementById('rr-roles-list').appendChild(row);
+    }
+
+    // ─── Create Reaction Group ──────────────────────────────
+    async function createReactionGroup(btn) {
+        const status = document.getElementById('rr-save-status');
+        btn.disabled = true;
+        status.textContent = 'กำลังส่ง…';
+        status.style.color = 'var(--muted)';
+
+        const roles = [...document.querySelectorAll('#rr-roles-list .level-role-row')].map(row => ({
+            emoji:       row.querySelector('.rr-emoji').value.trim(),
+            roleId:      row.querySelector('.rr-role').value,
+            roleName:    row.querySelector('.rr-role').selectedOptions[0]?.text || '',
+            description: row.querySelector('.rr-rdesc').value.trim()
+        })).filter(r => r.emoji && r.roleId);
+
+        const payload = {
+            channelId:   document.getElementById('rr-channel').value,
+            title:       document.getElementById('rr-title').value.trim() || 'เลือก Role',
+            description: document.getElementById('rr-desc').value.trim(),
+            color:       document.getElementById('rr-color').value,
+            mode:        document.getElementById('rr-mode').value,
+            roles
+        };
+
+        if (!payload.channelId) {
+            status.textContent = '❌ กรุณาเลือก channel';
+            status.style.color = 'var(--red)';
+            btn.disabled = false;
+            return;
+        }
+        if (!roles.length) {
+            status.textContent = '❌ กรุณาเพิ่มอย่างน้อย 1 role';
+            status.style.color = 'var(--red)';
+            btn.disabled = false;
+            return;
+        }
+
+        try {
+            const res  = await fetch(`/api/${GUILD_ID}/autorole/group`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'error');
+            status.textContent = '✅ ส่ง embed แล้ว! รีเฟรชหน้าเพื่อดู group';
+            status.style.color = 'var(--green)';
+            // Clear form
+            document.getElementById('rr-title').value = '';
+            document.getElementById('rr-desc').value = '';
+            document.getElementById('rr-channel').value = '';
+            document.getElementById('rr-roles-list').innerHTML = '';
+        } catch (e) {
+            status.textContent = '❌ ' + e.message;
+            status.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // COMMANDS TAB
+    // ═══════════════════════════════════════════════════════
+    let cmdGridLoaded = false;
+    const CMD_DISABLED = <%- JSON.stringify(config.disabledCommands || []) %>;
+
+    async function loadCommandGrid() {
+        if (cmdGridLoaded) return;
+        cmdGridLoaded = true;
+        const container = document.getElementById('cmd-grid-container');
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/commands-list`);
+            const cmds = await res.json();
+
+            const categories = {
+                economy:  { label: '💰 เศรษฐกิจ',  cmds: [] },
+                gambling: { label: '🎰 การพนัน',   cmds: [] },
+                sports:   { label: '🏆 กีฬา',       cmds: [] },
+                other:    { label: '🔧 อื่นๆ',       cmds: [] },
+            };
+            cmds.forEach(c => { if (categories[c.category]) categories[c.category].cmds.push(c); });
+
+            let html = '';
+            for (const [, cat] of Object.entries(categories)) {
+                if (!cat.cmds.length) continue;
+                html += `<div class="section-label" style="margin-top:16px">${cat.label}</div>`;
+                html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:8px">';
+                cat.cmds.forEach(c => {
+                    const isEnabled = !CMD_DISABLED.includes(c.name);
+                    html += `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+                        <div>
+                            <div style="font-weight:600;font-size:13px">${escHtml(c.label)}</div>
+                            <div style="font-size:11px;color:var(--muted)">${escHtml(c.desc)}</div>
+                        </div>
+                        <label class="switch" style="flex-shrink:0;margin-left:10px">
+                            <input type="checkbox" class="cmd-toggle-check" data-cmd="${c.name}" ${isEnabled ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<div style="color:var(--red)">❌ โหลดไม่สำเร็จ: ${e.message}</div>`;
+        }
+    }
+
+    async function saveCommandSettings(btn) {
+        const status = document.getElementById('cmd-save-status');
+        btn.disabled = true;
+        status.textContent = '⏳ กำลังบันทึก...';
+        status.style.color = 'var(--muted)';
+
+        const disabled = [...document.querySelectorAll('.cmd-toggle-check:not(:checked)')].map(i => i.dataset.cmd);
+
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/commands`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disabledCommands: disabled }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            status.textContent = '✅ บันทึกสำเร็จ!';
+            status.style.color = 'var(--green)';
+        } catch (err) {
+            status.textContent = '❌ ' + err.message;
+            status.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+            setTimeout(() => { status.textContent = ''; }, 4000);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SPORTS TAB
+    // ═══════════════════════════════════════════════════════
+    let sportsChLoaded = false;
+
+    async function loadSportsChannels() {
+        if (sportsChLoaded) return;
+        sportsChLoaded = true;
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/sports-channels`);
+            if (!res.ok) return;
+            const channels = await res.json();
+
+            const ids = ['sp-esp-channel', 'sp-f1-channel', 'sp-fb-channel'];
+            const currents = {
+                'sp-esp-channel': '<%= (sn && sn.esportsChannelId)  || "" %>',
+                'sp-f1-channel':  '<%= (sn && sn.f1ChannelId)       || "" %>',
+                'sp-fb-channel':  '<%= (sn && sn.footballChannelId) || "" %>',
+            };
+
+            for (const id of ids) {
+                const sel = document.getElementById(id);
+                if (!sel) continue;
+                sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
+                channels.forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id;
+                    o.textContent = '# ' + c.name;
+                    if (c.id === currents[id]) o.selected = true;
+                    sel.appendChild(o);
+                });
+            }
+        } catch (e) { console.error('[Sports channels]', e); }
+    }
+
+    async function saveSportsSettings(btn) {
+        const status = document.getElementById('sp-save-status');
+        btn.disabled = true;
+        status.textContent = '⏳ กำลังบันทึก...';
+        status.style.color = 'var(--muted)';
+
+        const esportsGames   = [...document.querySelectorAll('.sp-esp-game:checked')].map(c => c.value);
+        const footballLeagues = [...document.querySelectorAll('.sp-fb-league:checked')].map(c => c.value);
+
+        const payload = {
+            esportsEnabled:      document.getElementById('sp-esp-enabled')?.checked,
+            esportsChannelId:    document.getElementById('sp-esp-channel')?.value || '',
+            esportsGames,
+            esportsNotifyBefore: parseInt(document.getElementById('sp-esp-before')?.value) || 30,
+            esportsTrackedTeams: {
+                cs2:      document.getElementById('sp-esp-teams-cs2')?.value.split(',').map(t=>t.trim()).filter(Boolean),
+                valorant: document.getElementById('sp-esp-teams-valorant')?.value.split(',').map(t=>t.trim()).filter(Boolean),
+                lol:      document.getElementById('sp-esp-teams-lol')?.value.split(',').map(t=>t.trim()).filter(Boolean),
+                mlbb:     document.getElementById('sp-esp-teams-mlbb')?.value.split(',').map(t=>t.trim()).filter(Boolean),
+            },
+            f1Enabled:      document.getElementById('sp-f1-enabled')?.checked,
+            f1ChannelId:    document.getElementById('sp-f1-channel')?.value || '',
+            f1NotifyBefore: parseInt(document.getElementById('sp-f1-before')?.value) || 60,
+            f1NotifyLive:   document.getElementById('sp-f1-live')?.checked,
+            footballEnabled:      document.getElementById('sp-fb-enabled')?.checked,
+            footballChannelId:    document.getElementById('sp-fb-channel')?.value || '',
+            footballLeagues,
+            footballTeams:        document.getElementById('sp-fb-teams')?.value || '',
+            footballNotifyBefore: parseInt(document.getElementById('sp-fb-before')?.value) || 30,
+            footballNotifyLive:   document.getElementById('sp-fb-live')?.checked,
+            footballNotifyLineup: document.getElementById('sp-fb-lineup')?.checked,
+        };
+
+        try {
+            const res  = await fetch(`/api/${GUILD_ID}/sports`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'บันทึกไม่สำเร็จ');
+            status.textContent = '✅ บันทึกสำเร็จแล้ว!';
+            status.style.color = 'var(--green)';
+        } catch (err) {
+            status.textContent = '❌ ' + err.message;
+            status.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+            setTimeout(() => { status.textContent = ''; }, 4000);
+        }
+    }
+
+    // ─── Delete Group ───────────────────────────────────────
+    async function deleteGroup(groupId) {
+        if (!confirm('ลบ group นี้? ข้อความบอทในช่องจะถูกลบด้วย')) return;
+        try {
+            const res = await fetch(`/api/${GUILD_ID}/autorole/group/${groupId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'error');
+            document.querySelector(`[data-group-id="${groupId}"]`)?.remove();
+        } catch (e) {
+            alert('❌ ' + e.message);
+        }
+    }
+
+    // ─── Resend Group embed ─────────────────────────────────
+    async function resendGroup(groupId) {
+        if (!confirm('ส่ง embed ใหม่? ข้อความเก่าจะถูกลบ')) return;
+        try {
+            const res  = await fetch(`/api/${GUILD_ID}/autorole/group/${groupId}/resend`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'error');
+            alert('✅ ส่ง embed ใหม่แล้ว (message ID: ' + data.messageId + ')');
+        } catch (e) {
+            alert('❌ ' + e.message);
+        }
+    }
+</script>
+</body>
+</html>
