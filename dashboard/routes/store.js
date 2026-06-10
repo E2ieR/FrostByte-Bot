@@ -17,7 +17,7 @@ function parseItemBody(b) {
         usable:        b.usable         === 'true',
         sellable:      b.sellable       === 'true',
         expiryDate:    b.expiryDate ? new Date(b.expiryDate) : null,
-        itemType:      b.itemType       || 'item',
+        itemType:      b.itemType       || '',
         roleReward:    b.roleReward     || '',
         sellPercent:   parseInt(b.sellPercent)  || 50,
         maxPerUser:    parseInt(b.maxPerUser)    || 0,

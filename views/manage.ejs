@@ -912,7 +912,7 @@
                                 </div>
                             </div>
                             <div style="display:flex;gap:6px;flex-shrink:0">
-                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',emoji:item.itemEmoji||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem,usable:item.usable,itemType:item.itemType||'item',roleReward:item.roleReward||'',sellPercent:item.sellPercent||50,maxPerUser:item.maxPerUser||0,category:item.category||'',useMessage:item.useMessage||'',marketEnabled:!!item.marketEnabled,basePrice:item.basePrice||item.price,currentPrice:item.currentPrice||item.price,volatility:item.volatility||10}).replace(/"/g,'&quot;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
+                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',emoji:item.itemEmoji||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem,usable:item.usable,itemType:item.itemType||'',roleReward:item.roleReward||'',sellPercent:item.sellPercent||50,maxPerUser:item.maxPerUser||0,category:item.category||'',useMessage:item.useMessage||'',marketEnabled:!!item.marketEnabled,basePrice:item.basePrice||item.price,currentPrice:item.currentPrice||item.price,volatility:item.volatility||10}).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
                                 <a href="/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบสินค้านี้?')">🗑️ ลบ</a>
                             </div>
                         </div>
@@ -3089,7 +3089,7 @@
         toggleEditMarket();
 
         const typeEl = document.getElementById('edit-item-type');
-        typeEl.value = d.itemType || 'item';
+        typeEl.value = d.itemType || '';
 
         const roleEl = document.getElementById('edit-item-role-reward');
         roleEl.value = d.roleReward || '';
@@ -3121,7 +3121,7 @@
 
     function previewEditImg(url) {
         const prev = document.getElementById('edit-img-preview');
-        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+        if (url && url.trim()) {
             prev.src = url; prev.style.display = 'block';
         } else {
             prev.style.display = 'none';
@@ -3150,6 +3150,7 @@
     }
 
     function openStoreItemModalEl(btn) {
+        // dataset.item already has HTML entities decoded by the browser
         const d = JSON.parse(btn.dataset.item);
         openStoreItemModal(d);
     }
