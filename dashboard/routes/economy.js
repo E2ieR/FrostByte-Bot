@@ -112,7 +112,8 @@ router.post('/:guildId/add-role-income', async (req, res) => {
         roleName,
         amount:        parseInt(req.body.amount)        || 0,
         intervalValue: parseInt(req.body.intervalValue) || 1,
-        intervalType:  req.body.intervalType            || 'hours'
+        intervalType:  req.body.intervalType            || 'hours',
+        startDate:     req.body.startDate ? new Date(req.body.startDate) : new Date()
     });
     config.markModified('roleIncomes');
     await config.save();
