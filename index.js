@@ -29,7 +29,7 @@ const client = new Client({
     partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 
-mongoose.connect('mongodb://127.0.0.1:27017/discord_economy_bot')
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('🍃 MongoDB เชื่อมต่อสำเร็จ'))
     .catch(err => console.error('MongoDB error:', err));
 
