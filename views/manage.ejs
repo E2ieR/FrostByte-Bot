@@ -308,22 +308,49 @@
         /* countdown */
         #bet-countdown { font-variant-numeric: tabular-nums; }
 
-        /* ─── MEMBERS TABLE ─── */
-        .members-table { width: 100%; border-collapse: collapse; }
-        .members-table th {
-            padding: 10px 14px; text-align: left;
-            font-size: 11px; font-weight: 700; color: var(--muted);
-            text-transform: uppercase; letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
+        /* ─── MEMBERS CARDS ─── */
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+            padding: 18px;
         }
-        .members-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px; vertical-align: middle;
+        .member-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: border-color 0.15s;
         }
-        .members-table tr:last-child td { border-bottom: none; }
-        .members-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .member-card:hover { border-color: var(--border2); }
+        .member-card-top {
+            display: flex; align-items: center; gap: 11px; margin-bottom: 12px;
+        }
+        .member-avatar-lg {
+            width: 44px; height: 44px; border-radius: 50%;
+            object-fit: cover; flex-shrink: 0;
+            border: 2px solid var(--border2);
+        }
+        .member-name { font-weight: 600; font-size: 14px; }
+        .member-id   { font-size: 10px; color: var(--muted); margin-top: 1px; font-family: monospace; }
+        .member-stats {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px; margin: 10px 0;
+        }
+        .member-stat {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px; padding: 8px 6px;
+            text-align: center;
+        }
+        .member-stat-val   { font-size: 14px; font-weight: 700; }
+        .member-stat-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+        .member-inv-pills  { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+        .member-inv-pill   {
+            font-size: 11px; color: var(--text);
+            background: var(--bg3); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2px 9px;
+        }
         .member-avatar {
             width: 28px; height: 28px; border-radius: 50%;
             object-fit: cover; vertical-align: middle; margin-right: 8px;
@@ -2034,34 +2061,22 @@
                 </div>
             </div>
 
-            <!-- Members table card -->
+            <!-- Members card grid -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">👥 รายชื่อสมาชิก</div>
                     <span id="member-count" class="badge badge-blurple">—</span>
                 </div>
-                <div style="overflow-x:auto">
-                    <div id="member-loading" style="text-align:center;padding:48px;color:var(--muted)">
-                        <div style="font-size:28px;margin-bottom:8px">⏳</div>
-                        กำลังโหลดข้อมูล...
-                    </div>
-                    <table id="member-table" class="members-table" style="display:none">
-                        <thead>
-                            <tr>
-                                <th>สมาชิก</th>
-                                <th>ยศ / ตำแหน่ง</th>
-                                <th style="text-align:right">💰 กระเป๋า</th>
-                                <th style="text-align:right">🏦 ธนาคาร</th>
-                                <th style="text-align:right">🎒 ไอเทม</th>
-                                <th style="text-align:center">แก้ไข</th>
-                            </tr>
-                        </thead>
-                        <tbody id="member-tbody"></tbody>
-                    </table>
-                    <div id="member-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
-                        <div style="font-size:32px;margin-bottom:8px">👥</div>
-                        ไม่พบสมาชิกที่มีข้อมูล
-                    </div>
+                <div id="member-loading" style="text-align:center;padding:48px;color:var(--muted)">
+                    <div style="font-size:28px;margin-bottom:8px">⏳</div>
+                    กำลังโหลดข้อมูล...
+                </div>
+                <div id="member-grid-wrap" style="display:none">
+                    <div id="member-grid" class="member-grid"></div>
+                </div>
+                <div id="member-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
+                    <div style="font-size:32px;margin-bottom:8px">👥</div>
+                    ไม่พบสมาชิกที่มีข้อมูล
                 </div>
                 <div id="member-pagination" style="padding:14px 18px;border-top:1px solid var(--border);display:none">
                     <div class="pagination" id="pagination-buttons"></div>
@@ -2910,14 +2925,14 @@
 
     async function loadMembers(page) {
         memberCurrentPage = page;
-        const loading = document.getElementById('member-loading');
-        const table   = document.getElementById('member-table');
-        const empty   = document.getElementById('member-empty');
+        const loading    = document.getElementById('member-loading');
+        const gridWrap   = document.getElementById('member-grid-wrap');
+        const empty      = document.getElementById('member-empty');
         const pagination = document.getElementById('member-pagination');
 
-        loading.style.display = 'block';
-        table.style.display   = 'none';
-        empty.style.display   = 'none';
+        loading.style.display  = 'block';
+        gridWrap.style.display = 'none';
+        empty.style.display    = 'none';
         pagination.style.display = 'none';
 
         try {
@@ -2929,50 +2944,61 @@
             loading.style.display = 'none';
             document.getElementById('member-count').textContent = `${data.total} คน`;
 
-            if (!data.members.length) {
-                empty.style.display = 'block';
-                return;
-            }
+            if (!data.members.length) { empty.style.display = 'block'; return; }
 
-            // Render rows
-            const tbody = document.getElementById('member-tbody');
-            tbody.innerHTML = data.members.map(m => {
+            const grid = document.getElementById('member-grid');
+            grid.innerHTML = data.members.map(m => {
                 const rolesHtml = m.roles.length
-                    ? m.roles.slice(0,4).map(r => {
+                    ? m.roles.slice(0, 4).map(r => {
                         const hex = r.color ? '#' + r.color.toString(16).padStart(6,'0') : '#7b7f8e';
-                        return `<span class="role-chip" style="color:${hex};border-color:${hex}33;background:${hex}18">${r.name}</span>`;
-                      }).join('') + (m.roles.length > 4 ? `<span class="role-chip">+${m.roles.length-4}</span>` : '')
-                    : '<span style="color:var(--muted);font-size:12px">—</span>';
+                        return `<span class="role-chip" style="color:${hex};border-color:${hex}33;background:${hex}18">${escHtml(r.name)}</span>`;
+                      }).join('') + (m.roles.length > 4 ? `<span class="role-chip" style="color:var(--muted)">+${m.roles.length-4}</span>` : '')
+                    : '<span style="color:var(--muted);font-size:11px">ไม่มียศ</span>';
 
-                const invText = m.inventory.length
-                    ? `${m.inventory.length} ชนิด`
-                    : '<span style="color:var(--muted)">—</span>';
+                const inv = m.inventory.filter(i => i.quantity > 0);
+                const invHtml = inv.length
+                    ? `<div class="member-inv-pills">
+                        ${inv.slice(0,4).map(i => `<span class="member-inv-pill">🎁 ${escHtml(i.itemName)} <strong>×${i.quantity}</strong></span>`).join('')}
+                        ${inv.length > 4 ? `<span class="member-inv-pill" style="color:var(--muted)">+${inv.length-4}</span>` : ''}
+                       </div>`
+                    : '<div style="font-size:11px;color:var(--muted);margin-top:6px">🎒 ไม่มีไอเทม</div>';
 
+                const total = m.coins + m.bank;
                 const memberData = encodeURIComponent(JSON.stringify(m));
-                return `<tr>
-                    <td>
-                        <img class="member-avatar" src="${m.avatar}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
-                        <span style="font-weight:500">${escHtml(m.username)}</span>
-                    </td>
-                    <td>${rolesHtml}</td>
-                    <td style="text-align:right;font-weight:600">${m.coins.toLocaleString()}</td>
-                    <td style="text-align:right;font-weight:600">${m.bank.toLocaleString()}</td>
-                    <td style="text-align:right">${invText}</td>
-                    <td style="text-align:center">
-                        <button class="btn btn-primary btn-sm" onclick="openMemberModal(decodeURIComponent('${memberData}'))">✏️</button>
-                    </td>
-                </tr>`;
+
+                return `<div class="member-card">
+                    <div class="member-card-top">
+                        <img class="member-avatar-lg" src="${m.avatar}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                        <div style="flex:1;min-width:0">
+                            <div class="member-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(m.username)}</div>
+                            <div class="member-id">${m.userId}</div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="openMemberModal(decodeURIComponent('${memberData}'))">✏️ แก้ไข</button>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${rolesHtml}</div>
+                    <div class="member-stats">
+                        <div class="member-stat">
+                            <div class="member-stat-val">${m.coins.toLocaleString()}</div>
+                            <div class="member-stat-label">💰 กระเป๋า</div>
+                        </div>
+                        <div class="member-stat">
+                            <div class="member-stat-val">${m.bank.toLocaleString()}</div>
+                            <div class="member-stat-label">🏦 ธนาคาร</div>
+                        </div>
+                        <div class="member-stat">
+                            <div class="member-stat-val" style="color:#57F287">${total.toLocaleString()}</div>
+                            <div class="member-stat-label">💎 รวม</div>
+                        </div>
+                    </div>
+                    ${invHtml}
+                </div>`;
             }).join('');
 
-            table.style.display = 'table';
+            gridWrap.style.display = 'block';
 
-            // Pagination
-            if (data.pages > 1) {
-                renderPagination(data.page, data.pages);
-                pagination.style.display = 'block';
-            }
+            if (data.pages > 1) { renderPagination(data.page, data.pages); pagination.style.display = 'block'; }
         } catch (err) {
-            loading.innerHTML = `<div style="color:var(--red)">❌ ${err.message}</div>`;
+            loading.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center">❌ ${err.message}</div>`;
         }
     }
 

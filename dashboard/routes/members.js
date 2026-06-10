@@ -55,7 +55,7 @@ router.get('/api/:guildId/members', async (req, res) => {
                 roles,
                 coins:     u.coins     || 0,
                 bank:      u.bank      || 0,
-                inventory: (u.inventory || []).map(i => ({ itemName: i.itemName, quantity: i.quantity })),
+                inventory: (u.inventory || []).filter(i => i.quantity > 0).map(i => ({ itemName: i.itemName, quantity: i.quantity })),
             };
         });
 
