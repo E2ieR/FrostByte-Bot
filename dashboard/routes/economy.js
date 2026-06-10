@@ -92,6 +92,43 @@ router.get('/:guildId/delete-reply/:index', async (req, res) => {
     res.redirect(`/manage/${req.params.guildId}?tab=work&delete_success=true`);
 });
 
+// ─── Role Incomes ────────────────────────────────────────────────────────
+router.post('/:guildId/add-role-income', async (req, res) => {
+    const axios = require('axios');
+    const { guildId } = req.params;
+    let config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+
+    let roleName = req.body.roleId;
+    try {
+        const rolesRes = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
+            headers: { Authorization: `Bot ${process.env.TOKEN}` }
+        });
+        const role = rolesRes.data.find(r => r.id === req.body.roleId);
+        if (role) roleName = role.name;
+    } catch (e) {}
+
+    config.roleIncomes.push({
+        roleId:        req.body.roleId,
+        roleName,
+        amount:        parseInt(req.body.amount)        || 0,
+        intervalValue: parseInt(req.body.intervalValue) || 1,
+        intervalType:  req.body.intervalType            || 'hours'
+    });
+    config.markModified('roleIncomes');
+    await config.save();
+    res.redirect(`/manage/${guildId}?tab=role-income&success=true`);
+});
+
+router.get('/:guildId/delete-role-income/:index', async (req, res) => {
+    const { guildId } = req.params;
+    let config = await GuildConfig.findOne({ guildId });
+    if (!config) return res.redirect(`/manage/${guildId}?tab=role-income`);
+    config.roleIncomes.splice(parseInt(req.params.index), 1);
+    config.markModified('roleIncomes');
+    await config.save();
+    res.redirect(`/manage/${guildId}?tab=role-income&delete_success=true`);
+});
+
 // ─── Seniority tiers ────────────────────────────────────────────────────
 router.post('/:guildId/add-seniority-tier', async (req, res) => {
     let config = await GuildConfig.findOne({ guildId: req.params.guildId }) || new GuildConfig({ guildId: req.params.guildId });

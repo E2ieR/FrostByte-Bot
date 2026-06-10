@@ -608,7 +608,7 @@
                     <div class="card-title">👑 เพิ่มรายได้ยศ</div>
                 </div>
                 <div class="card-body">
-                    <form action="/manage/<%= guildId %>/add-role-income" method="POST">
+                    <form action="/<%= guildId %>/add-role-income" method="POST">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>ยศ</label>
@@ -661,7 +661,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <a href="/manage/<%= guildId %>/delete-role-income/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ยกเลิกรายได้ยศนี้?')">ลบ</a>
+                            <a href="/<%= guildId %>/delete-role-income/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ยกเลิกรายได้ยศนี้?')">ลบ</a>
                         </div>
                         <% }) %>
                     <% } else { %>
