@@ -41,7 +41,7 @@ app.use('/', commandsRoutes);
 
 function startServer(client) {
     discordClient = client;
-    app.listen(PORT, () => console.log(`🖥️ [Dashboard] เปิดระบบเว็บไซต์เรียบร้อยที่: http://localhost:${PORT}`));
+    app.listen(PORT, () => console.log(`🖥️ [Dashboard] เปิดระบบเว็บไซต์เรียบร้อยที่: ${process.env.BASE_URL || `http://localhost:${PORT}`}`));
 }
 
 module.exports = { startServer };
