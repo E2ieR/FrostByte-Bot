@@ -683,6 +683,33 @@
         ═══════════════════════════════ -->
         <div id="tab-store" class="tab-panel">
 
+            <!-- ─── Item Type Management ─── -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🏷️ ประเภทสินค้า</div>
+                    <span class="badge badge-blue"><%= (config.storeItemTypes || []).length %> ประเภท</span>
+                </div>
+                <div class="card-body">
+                    <form action="/<%= guildId %>/add-store-type" method="POST" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+                        <input type="text" name="emoji" placeholder="🎁" style="width:64px;text-align:center" maxlength="8">
+                        <input type="text" name="name" placeholder="ชื่อประเภท เช่น ของสะสม" required style="flex:1;min-width:140px">
+                        <button type="submit" class="btn btn-success btn-sm">+ เพิ่ม</button>
+                    </form>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <% (config.storeItemTypes || []).forEach(t => { %>
+                        <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:13px">
+                            <span><%= t.emoji %></span>
+                            <span><%= t.name %></span>
+                            <a href="/<%= guildId %>/delete-store-type/<%= t.typeId || t._id %>" onclick="return confirm('ลบประเภท <%= t.name %>?')" style="color:var(--danger);font-size:16px;line-height:1;text-decoration:none;margin-left:4px">×</a>
+                        </div>
+                        <% }) %>
+                        <% if (!(config.storeItemTypes || []).length) { %>
+                            <div style="color:var(--muted);font-size:13px">ยังไม่มีประเภท — เพิ่มด้านบนเพื่อจัดกลุ่มสินค้า</div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
             <!-- ─── Category Management ─── -->
             <div class="card">
                 <div class="card-header">
@@ -723,10 +750,11 @@
                         <div class="form-grid" style="margin-bottom:12px">
                             <div class="form-group">
                                 <label>ประเภทสินค้า</label>
-                                <select name="itemType" id="store-item-type" onchange="storeItemTypeChange()">
-                                    <option value="item">🎁 ไอเทมทั่วไป</option>
-                                    <option value="role">🎭 มอบยศ</option>
-                                    <option value="consumable">⚡ ใช้แล้วหมด</option>
+                                <select name="itemType" id="store-item-type">
+                                    <option value="">— ไม่ระบุ —</option>
+                                    <% (config.storeItemTypes || []).forEach(t => { %>
+                                        <option value="<%= t.name %>"><%= t.emoji %> <%= t.name %></option>
+                                    <% }) %>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -739,11 +767,11 @@
                                 </select>
                             </div>
                         </div>
-                        <div id="store-role-reward-wrap" style="display:none;margin-bottom:12px">
+                        <div style="margin-bottom:12px">
                             <div class="form-group">
-                                <label>ยศที่จะมอบให้ (Role Reward)</label>
+                                <label>ยศที่จะมอบให้เมื่อซื้อ/ใช้ (Role Reward)</label>
                                 <select name="roleReward" id="store-role-reward">
-                                    <option value="">— เลือกยศ —</option>
+                                    <option value="">— ไม่มอบยศ —</option>
                                     <% if (typeof discordRoles !== 'undefined') { discordRoles.forEach(role => { %>
                                         <option value="<%= role.id %>"><%= role.name %></option>
                                     <% }) } %>
@@ -754,7 +782,7 @@
                             <label>คำอธิบาย</label>
                             <textarea name="description" placeholder="คำอธิบายสินค้า..."></textarea>
                         </div>
-                        <div id="store-usable-wrap" style="display:none;margin-bottom:12px">
+                        <div style="margin-bottom:12px">
                             <div class="form-group">
                                 <label>ข้อความเมื่อใช้ /use (useMessage)</label>
                                 <input type="text" name="useMessage" placeholder="ใช้ {user} เพื่อแสดงชื่อผู้ใช้">
@@ -857,24 +885,25 @@
                 <div class="card-body">
                     <% if (config.storeItems && config.storeItems.length > 0) { %>
                         <% config.storeItems.forEach((item, index) => {
-                            const effPrice = item.marketEnabled && item.currentPrice ? item.currentPrice : item.price;
-                            const baseP    = item.basePrice || item.price;
-                            const mPct     = item.marketEnabled ? Math.round((effPrice - baseP) / baseP * 100) : 0;
-                            const mArrow   = item.marketEnabled ? (mPct > 3 ? '📈' : mPct < -3 ? '📉' : '➡️') : '';
+                            const effPrice  = item.marketEnabled && item.currentPrice ? item.currentPrice : item.price;
+                            const baseP     = item.basePrice || item.price;
+                            const mPct      = item.marketEnabled ? Math.round((effPrice - baseP) / baseP * 100) : 0;
+                            const mArrow    = item.marketEnabled ? (mPct > 3 ? '📈' : mPct < -3 ? '📉' : '➡️') : '';
+                            const itemTypeObj = (config.storeItemTypes || []).find(t => t.name === item.itemType);
                         %>
                         <div class="list-item">
                             <div class="list-item-left">
                                 <div class="list-item-icon" style="font-size:22px;display:flex;align-items:center;justify-content:center">
                                     <% if (item.itemEmoji) { %><%= item.itemEmoji
                                     %><% } else if (item.itemImage) { %><img src="<%= item.itemImage %>" alt="" style="width:36px;height:36px;border-radius:6px;object-fit:cover">
-                                    <% } else { %><%= item.itemType === 'role' ? '🎭' : item.itemType === 'consumable' ? '⚡' : '🎁' %><% } %>
+                                    <% } else { %><%= itemTypeObj ? itemTypeObj.emoji : '🎁' %><% } %>
                                 </div>
                                 <div>
                                     <div class="list-item-name"><%= item.itemName %></div>
                                     <div class="list-item-meta">
                                         <span class="badge badge-yellow"><%= effPrice.toLocaleString() %> <%= config.currencyEmoji || '🪙' %></span>
                                         <% if (item.marketEnabled) { %>&nbsp;<span class="badge" style="background:#1a2a1a;color:#57F287"><%= mArrow %><%= mPct >= 0 ? '+' : '' %><%= mPct %>% ตลาด</span><% } %>
-                                        &nbsp;<span class="badge badge-blue"><%= item.itemType === 'role' ? '🎭 ยศ' : item.itemType === 'consumable' ? '⚡ consumable' : '🎁 ไอเทม' %></span>
+                                        <% if (itemTypeObj) { %>&nbsp;<span class="badge badge-blue"><%= itemTypeObj.emoji %> <%= itemTypeObj.name %></span><% } %>
                                         <% if (item.category) { %>&nbsp;<span class="badge" style="background:var(--border);color:var(--text)">[<%= item.category %>]</span><% } %>
                                         &nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>
                                         <% if (item.maxPerUser > 0) { %>&nbsp;· จำกัด <%= item.maxPerUser %>/คน<% } %>
@@ -2313,10 +2342,11 @@
             <div class="form-grid" style="margin-bottom:12px">
                 <div class="form-group">
                     <label>ประเภทสินค้า</label>
-                    <select id="edit-item-type" name="itemType" onchange="editItemTypeChange()">
-                        <option value="item">🎁 ไอเทมทั่วไป</option>
-                        <option value="role">🎭 มอบยศ</option>
-                        <option value="consumable">⚡ ใช้แล้วหมด</option>
+                    <select id="edit-item-type" name="itemType">
+                        <option value="">— ไม่ระบุ —</option>
+                        <% (config.storeItemTypes || []).forEach(t => { %>
+                            <option value="<%= t.name %>"><%= t.emoji %> <%= t.name %></option>
+                        <% }) %>
                     </select>
                 </div>
                 <div class="form-group">
@@ -2329,11 +2359,11 @@
                     </select>
                 </div>
             </div>
-            <div id="edit-role-reward-wrap" style="display:none;margin-bottom:12px">
+            <div style="margin-bottom:12px">
                 <div class="form-group">
-                    <label>ยศที่จะมอบให้ (Role Reward)</label>
+                    <label>ยศที่จะมอบให้เมื่อซื้อ/ใช้ (Role Reward)</label>
                     <select id="edit-item-role-reward" name="roleReward">
-                        <option value="">— เลือกยศ —</option>
+                        <option value="">— ไม่มอบยศ —</option>
                         <% if (typeof discordRoles !== 'undefined') { discordRoles.forEach(role => { %>
                             <option value="<%= role.id %>"><%= role.name %></option>
                         <% }) } %>
@@ -2344,7 +2374,7 @@
                 <label>คำอธิบาย</label>
                 <textarea id="edit-item-desc" name="description" style="min-height:70px"></textarea>
             </div>
-            <div id="edit-use-message-wrap" style="display:none;margin-bottom:12px">
+            <div style="margin-bottom:12px">
                 <div class="form-group">
                     <label>ข้อความเมื่อใช้ /use (useMessage)</label>
                     <input type="text" id="edit-item-use-message" name="useMessage" placeholder="ใช้ {user} เพื่อแสดงชื่อผู้ใช้">
@@ -3064,7 +3094,6 @@
         const roleEl = document.getElementById('edit-item-role-reward');
         roleEl.value = d.roleReward || '';
 
-        editItemTypeChange();
         toggleEditStock();
 
         const prev = document.getElementById('edit-img-preview');
@@ -3073,18 +3102,6 @@
 
         document.getElementById('store-edit-form').action = '/' + GUILD_ID + '/update-store-item/' + d.id;
         document.getElementById('modal-store-item').style.display = 'flex';
-    }
-
-    function editItemTypeChange() {
-        const val = document.getElementById('edit-item-type').value;
-        document.getElementById('edit-role-reward-wrap').style.display    = val === 'role'       ? 'block' : 'none';
-        document.getElementById('edit-use-message-wrap').style.display    = val === 'consumable' ? 'block' : 'none';
-    }
-
-    function storeItemTypeChange() {
-        const val = document.getElementById('store-item-type').value;
-        document.getElementById('store-role-reward-wrap').style.display = val === 'role'       ? 'block' : 'none';
-        document.getElementById('store-usable-wrap').style.display      = val === 'consumable' ? 'block' : 'none';
     }
 
     function toggleStoreMarket() {

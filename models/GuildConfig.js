@@ -83,6 +83,13 @@ const guildConfigSchema = new mongoose.Schema({
         emoji: { type: String, default: '📦' }
     }],
 
+    // ─── Store Item Types ─────────────────────────────────
+    storeItemTypes: [{
+        typeId: { type: String, default: () => new mongoose.Types.ObjectId().toString() },
+        name:   { type: String, required: true },
+        emoji:  { type: String, default: '🎁' }
+    }],
+
     // ─── Store ────────────────────────────────────────────
     storeItems: [{
         itemId:        { type: String, default: () => new mongoose.Types.ObjectId().toString() },
@@ -98,7 +105,7 @@ const guildConfigSchema = new mongoose.Schema({
         usable:        { type: Boolean, default: true },
         sellable:      { type: Boolean, default: true },
         expiryDate:    { type: Date, default: null },
-        itemType:      { type: String, enum: ['item', 'role', 'consumable'], default: 'item' },
+        itemType:      { type: String, default: '' },
         roleReward:    { type: String, default: '' },
         sellPercent:   { type: Number, default: 50 },
         maxPerUser:    { type: Number, default: 0 },

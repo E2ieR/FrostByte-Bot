@@ -82,6 +82,33 @@ router.post('/:guildId/update-store-item/:itemId', async (req, res) => {
     res.redirect(`/manage/${guildId}?tab=store&success=true`);
 });
 
+// ─── Add item type ───────────────────────────────────────────────────────────
+router.post('/:guildId/add-store-type', async (req, res) => {
+    const { guildId } = req.params;
+    let config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+    if (!req.body.name) return res.redirect(`/manage/${guildId}?tab=store`);
+    config.storeItemTypes.push({
+        name:  req.body.name.trim(),
+        emoji: req.body.emoji?.trim() || '🎁'
+    });
+    config.markModified('storeItemTypes');
+    await config.save();
+    res.redirect(`/manage/${guildId}?tab=store&success=true`);
+});
+
+// ─── Delete item type ─────────────────────────────────────────────────────────
+router.get('/:guildId/delete-store-type/:typeId', async (req, res) => {
+    const { guildId, typeId } = req.params;
+    let config = await GuildConfig.findOne({ guildId });
+    if (!config) return res.redirect(`/manage/${guildId}?tab=store`);
+    config.storeItemTypes = config.storeItemTypes.filter(
+        t => t.typeId.toString() !== typeId.toString()
+    );
+    config.markModified('storeItemTypes');
+    await config.save();
+    res.redirect(`/manage/${guildId}?tab=store&delete_success=true`);
+});
+
 // ─── Add category ────────────────────────────────────────────────────────────
 router.post('/:guildId/add-store-category', async (req, res) => {
     const { guildId } = req.params;

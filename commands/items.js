@@ -13,10 +13,10 @@ const invSessions = new Map();
 
 const PAGE_SIZE = 5;
 
-function typeEmoji(item) {
+function typeEmoji(item, itemTypes = []) {
     if (item.itemEmoji) return item.itemEmoji;
-    if (item.itemType === 'role') return '🎭';
-    if (item.itemType === 'consumable') return '⚡';
+    const t = itemTypes.find(t => t.name === item.itemType);
+    if (t) return t.emoji;
     return '🎁';
 }
 
@@ -80,7 +80,8 @@ function buildShopEmbed(items, page, guild, config) {
         const desc  = (item.description || '').substring(0, 50);
         const cat   = item.category ? `[${item.category}] ` : '';
         const mTag  = marketTag(item);
-        return `**${start + i + 1}. ${typeEmoji(item)} ${item.itemName}** — ${price.toLocaleString()} ${config.currencyEmoji || '💰'}${mTag}\n　${cat}${stock}${desc ? ` · ${desc}` : ''}`;
+        const tEmoji = typeEmoji(item, config.storeItemTypes || []);
+        return `**${start + i + 1}. ${tEmoji} ${item.itemName}** — ${price.toLocaleString()} ${config.currencyEmoji || '💰'}${mTag}\n　${cat}${stock}${desc ? ` · ${desc}` : ''}`;
     });
 
     return new EmbedBuilder()
@@ -249,8 +250,7 @@ const buy = {
             config.markModified('storeItems');
             await Promise.all([user.save(), config.save()]);
 
-            // Grant role reward if itemType === 'role'
-            if (item.itemType === 'role' && item.roleReward) {
+            if (item.roleReward) {
                 try {
                     const member = await interaction.guild.members.fetch(userId);
                     await member.roles.add(item.roleReward).catch(() => {});
@@ -378,8 +378,7 @@ const use = {
                 user.inventory = user.inventory.filter(i => i.itemName !== storeItem.itemName);
             await user.save();
 
-            // Grant role reward if itemType === 'role'
-            if (storeItem.itemType === 'role' && storeItem.roleReward) {
+            if (storeItem.roleReward) {
                 try {
                     const member = await interaction.guild.members.fetch(userId);
                     await member.roles.add(storeItem.roleReward).catch(() => {});
