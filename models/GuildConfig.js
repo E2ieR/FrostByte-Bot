@@ -89,7 +89,13 @@ const guildConfigSchema = new mongoose.Schema({
         inventoryItem: { type: Boolean, default: true },
         usable:        { type: Boolean, default: true },
         sellable:      { type: Boolean, default: true },
-        expiryDate:    { type: Date, default: null }
+        expiryDate:    { type: Date, default: null },
+        itemType:      { type: String, enum: ['item', 'role', 'consumable'], default: 'item' },
+        roleReward:    { type: String, default: '' },
+        sellPercent:   { type: Number, default: 50 },
+        maxPerUser:    { type: Number, default: 0 },
+        category:      { type: String, default: '' },
+        useMessage:    { type: String, default: '' }
     }],
 
     // ─── Level System ─────────────────────────────────────

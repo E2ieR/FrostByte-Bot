@@ -11,45 +11,46 @@ const shopSessions = new Map();
 // ─── inventory page sessions (memory) ─────────────────────────────────────
 const invSessions = new Map();
 
+const PAGE_SIZE = 5;
+
+function typeEmoji(itemType) {
+    if (itemType === 'role') return '🎭';
+    if (itemType === 'consumable') return '⚡';
+    return '🎁';
+}
+
 function buildShopEmbed(items, page, guild, config) {
-    const item  = items[page];
-    const stock = item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 เหลือ ${item.stock}`;
-    const e = new EmbedBuilder()
+    const start      = page * PAGE_SIZE;
+    const pageItems  = items.slice(start, start + PAGE_SIZE);
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+
+    const lines = pageItems.map((item, i) => {
+        const stock = item.unlimitedStock ? '♾️' : `📦${item.stock}`;
+        const desc  = (item.description || '').substring(0, 50);
+        const cat   = item.category ? `[${item.category}] ` : '';
+        return `**${start + i + 1}. ${typeEmoji(item.itemType)} ${item.itemName}** — ${item.price.toLocaleString()} ${config.currencyEmoji || '💰'}\n　${cat}${stock}${desc ? ` · ${desc}` : ''}`;
+    });
+
+    return new EmbedBuilder()
         .setColor(0x5865F2)
-        .setTitle(`🛒 ร้านค้าเซิร์ฟเวอร์ (สินค้าชิ้นที่ ${page + 1}/${items.length})`)
-        .addFields(
-            { name: '🏷️ ชื่อสินค้า', value: item.itemName, inline: true },
-            { name: `💰 ราคาขาย`,    value: `${item.price.toLocaleString()} ${config.currencyEmoji}`, inline: true },
-            { name: '📊 สต็อก',       value: stock, inline: true },
-            { name: '📝 รายละเอียด', value: item.description || 'ไม่มีคำอธิบาย', inline: false }
-        )
-        .setFooter({ text: 'กดปุ่มด้านล่างเพื่อเลือกดูสินค้าชิ้นอื่น หรือกดซื้อได้ทันที' });
-    // Discord รองรับเฉพาะ http/https เท่านั้น — ข้าม base64
-    if (item.itemImage && (item.itemImage.startsWith('http://') || item.itemImage.startsWith('https://'))) {
-        e.setThumbnail(item.itemImage);
-    }
-    return e;
+        .setTitle(`🛒 ร้านค้า — หน้า ${page + 1}/${totalPages}`)
+        .setDescription(lines.join('\n\n') || 'ไม่มีสินค้า')
+        .setFooter({ text: `สินค้าทั้งหมด ${items.length} ชิ้น · ใช้ /buy <ชื่อ> เพื่อซื้อ` });
 }
 
 function buildShopRow(items, page, userId) {
-    const item = items[page];
-    const canBuy = item.unlimitedStock || item.stock > 0;
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`shop_prev_${userId}`)
-            .setLabel('◀ ย้อนกลับ')
+            .setLabel('◀ หน้าก่อน')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(page === 0),
         new ButtonBuilder()
-            .setCustomId(`shop_buy_${userId}`)
-            .setLabel('🛒 กดซื้อสินค้าชิ้นนี้')
-            .setStyle(ButtonStyle.Success)
-            .setDisabled(!canBuy),
-        new ButtonBuilder()
             .setCustomId(`shop_next_${userId}`)
-            .setLabel('ถัดไป ▶')
+            .setLabel('หน้าถัดไป ▶')
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(page === items.length - 1)
+            .setDisabled(page >= totalPages - 1)
     );
 }
 
@@ -67,7 +68,7 @@ const shop = {
         shopSessions.set(`${userId}-${guildId}`, { page, items: items.map(i => ({ ...i._doc || i })), guildId });
 
         return interaction.reply({
-            embeds: [buildShopEmbed(items, page, interaction.guild, config)],
+            embeds:     [buildShopEmbed(items, page, interaction.guild, config)],
             components: [buildShopRow(items, page, userId)]
         });
     }
@@ -75,14 +76,14 @@ const shop = {
 
 // ─── shop button handler — export แยกให้ index.js เรียก ───────────────────
 async function handleShopButton(interaction) {
-    const parts  = interaction.customId.split('_'); // shop_prev/buy/next_userId
-    const action = parts[1];
+    const parts   = interaction.customId.split('_'); // shop_prev/next_userId
+    const action  = parts[1];
     const ownerId = parts[2];
 
     if (interaction.user.id !== ownerId)
         return interaction.reply({ content: '❌ นี่ไม่ใช่ร้านค้าของคุณ', ephemeral: true });
 
-    const { id: userId } = interaction.user;
+    const { id: userId }  = interaction.user;
     const { id: guildId } = interaction.guild;
     const key     = `${userId}-${guildId}`;
     const session = shopSessions.get(key);
@@ -91,57 +92,15 @@ async function handleShopButton(interaction) {
     const config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
     let { page, items } = session;
 
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
     if (action === 'prev') page = Math.max(0, page - 1);
-    if (action === 'next') page = Math.min(items.length - 1, page + 1);
+    if (action === 'next') page = Math.min(totalPages - 1, page + 1);
 
-    if (action === 'buy') {
-        const item = items[page];
-        let user = await User.findOne({ userId, guildId }) || new User({ userId, guildId });
-
-        if (!item.unlimitedStock && item.stock <= 0)
-            return interaction.reply({ content: '❌ สินค้าหมดแล้ว', ephemeral: true });
-        if (user.coins < item.price)
-            return interaction.reply({
-                content: `❌ เงินไม่พอ! ต้องการ **${item.price.toLocaleString()}** แต่มี **${user.coins.toLocaleString()}** ${config.currencyEmoji}`,
-                ephemeral: true
-            });
-
-        user.coins -= item.price;
-        if (item.inventoryItem !== false) {
-            const existing = user.inventory.find(i => i.itemName === item.itemName);
-            if (existing) existing.quantity += 1;
-            else user.inventory.push({ itemName: item.itemName, quantity: 1 });
-        }
-
-        // อัพเดต stock ใน config
-        const cfgItem = config.storeItems.find(i => i.itemName === item.itemName);
-        if (cfgItem && !cfgItem.unlimitedStock) {
-            cfgItem.stock -= 1;
-            item.stock    -= 1; // อัพ session ด้วย
-        }
-        config.markModified('storeItems');
-        await Promise.all([user.save(), config.save()]);
-        session.items = items; // sync stock
-
-        const successEmbed = new EmbedBuilder()
-            .setColor(0x57F287)
-            .setTitle('✅ ซื้อสำเร็จ!')
-            .addFields(
-                { name: '🛍️ ไอเทม',    value: item.itemName, inline: true },
-                { name: '💸 ราคา',      value: `${item.price.toLocaleString()} ${config.currencyEmoji}`, inline: true },
-                { name: '👛 คงเหลือ',   value: `${user.coins.toLocaleString()} ${config.currencyEmoji}`, inline: true }
-            );
-        if (item.itemImage) successEmbed.setThumbnail(item.itemImage);
-
-        return interaction.reply({ embeds: [successEmbed], ephemeral: true });
-    }
-
-    // prev / next — อัพเดต embed
     session.page = page;
     shopSessions.set(key, session);
 
     return interaction.update({
-        embeds: [buildShopEmbed(items, page, interaction.guild, config)],
+        embeds:     [buildShopEmbed(items, page, interaction.guild, config)],
         components: [buildShopRow(items, page, userId)]
     });
 }
@@ -150,17 +109,18 @@ async function handleShopButton(interaction) {
 function buildInvEmbed(invItems, page, targetUsername, targetAvatar, config, storeItems) {
     const item      = invItems[page];
     const storeItem = storeItems.find(s => s.itemName === item.itemName && s.sellable);
-    const sellPrice = storeItem ? Math.floor(storeItem.price * 0.5) : null;
+    const sellRate  = storeItem ? (storeItem.sellPercent || 50) : null;
+    const sellPrice = storeItem ? Math.floor(storeItem.price * (sellRate / 100)) : null;
 
     const e = new EmbedBuilder()
         .setColor(0x5865F2)
         .setTitle(`🎒 กระเป๋าของ ${targetUsername}`)
         .setFooter({ text: `ไอเทม ${page + 1} / ${invItems.length}` })
         .addFields(
-            { name: '🏷️ ไอเทม',   value: item.itemName,           inline: true },
-            { name: '📦 จำนวน',   value: `x${item.quantity}`,      inline: true },
+            { name: '🏷️ ไอเทม',   value: item.itemName,      inline: true },
+            { name: '📦 จำนวน',   value: `x${item.quantity}`, inline: true },
             { name: '💵 ราคาขาย', value: sellPrice !== null
-                ? `${sellPrice.toLocaleString()} ${config.currencyEmoji} (50%)`
+                ? `${sellPrice.toLocaleString()} ${config.currencyEmoji} (${sellRate}%)`
                 : '❌ ขายไม่ได้', inline: true }
         )
         .setTimestamp();
@@ -169,8 +129,8 @@ function buildInvEmbed(invItems, page, targetUsername, targetAvatar, config, sto
 }
 
 function buildInvRow(invItems, page, userId, storeItems) {
-    const item      = invItems[page];
-    const canSell   = storeItems.some(s => s.itemName === item.itemName && s.sellable) && item.quantity > 0;
+    const item    = invItems[page];
+    const canSell = storeItems.some(s => s.itemName === item.itemName && s.sellable) && item.quantity > 0;
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`inv_prev_${userId}`)
@@ -201,7 +161,7 @@ const buy = {
         .addStringOption(o => o.setName('item').setDescription('ชื่อไอเทม').setRequired(true))
         .addIntegerOption(o => o.setName('quantity').setDescription('จำนวน (default: 1)').setMinValue(1)),
     async execute(interaction) {
-        const { id: userId } = interaction.user;
+        const { id: userId }  = interaction.user;
         const { id: guildId } = interaction.guild;
         const itemName = interaction.options.getString('item');
         const qty      = interaction.options.getInteger('quantity') || 1;
@@ -211,10 +171,20 @@ const buy = {
             if (!item) return interaction.reply({ content: `❌ ไม่พบไอเทม "${itemName}"`, ephemeral: true });
             if (!item.unlimitedStock && item.stock < qty)
                 return interaction.reply({ content: `❌ สินค้าเหลือไม่พอ (เหลือ ${item.stock})`, ephemeral: true });
+
             const total = item.price * qty;
             let user = await User.findOne({ userId, guildId }) || new User({ userId, guildId });
+
+            // maxPerUser check
+            if (item.maxPerUser > 0) {
+                const existing = user.inventory.find(i => i.itemName === item.itemName)?.quantity || 0;
+                if ((existing + qty) > item.maxPerUser)
+                    return interaction.reply({ content: `❌ คุณซื้อได้สูงสุด **${item.maxPerUser}** ชิ้น (มีแล้ว ${existing} ชิ้น)`, ephemeral: true });
+            }
+
             if (user.coins < total)
                 return interaction.reply({ content: `❌ เงินไม่พอ (ต้องการ ${total.toLocaleString()}, มี ${user.coins.toLocaleString()})`, ephemeral: true });
+
             user.coins -= total;
             if (item.inventoryItem !== false) {
                 const existing = user.inventory.find(i => i.itemName === item.itemName);
@@ -224,6 +194,15 @@ const buy = {
             if (!item.unlimitedStock) item.stock -= qty;
             config.markModified('storeItems');
             await Promise.all([user.save(), config.save()]);
+
+            // Grant role reward if itemType === 'role'
+            if (item.itemType === 'role' && item.roleReward) {
+                try {
+                    const member = await interaction.guild.members.fetch(userId);
+                    await member.roles.add(item.roleReward).catch(() => {});
+                } catch (e) { /* ignore role errors */ }
+            }
+
             const e = new EmbedBuilder().setColor(0x57F287).setTitle('✅ ซื้อสำเร็จ')
                 .addFields(
                     { name: '🛍️ ไอเทม',  value: `${item.itemName} x${qty}`, inline: true },
@@ -260,7 +239,7 @@ const inventory = {
         }
 
         // ดูของตัวเอง → paginated พร้อมปุ่มขาย
-        const invItems  = user.inventory.map(i => ({ itemName: i.itemName, quantity: i.quantity }));
+        const invItems   = user.inventory.map(i => ({ itemName: i.itemName, quantity: i.quantity }));
         const storeItems = config.storeItems || [];
         const page = 0;
 
@@ -284,7 +263,7 @@ const sell = {
         .addStringOption(o => o.setName('item').setDescription('ชื่อไอเทม').setRequired(true))
         .addIntegerOption(o => o.setName('quantity').setDescription('จำนวน').setMinValue(1)),
     async execute(interaction) {
-        const { id: userId } = interaction.user;
+        const { id: userId }  = interaction.user;
         const { id: guildId } = interaction.guild;
         const itemName = interaction.options.getString('item');
         const qty      = interaction.options.getInteger('quantity') || 1;
@@ -297,7 +276,8 @@ const sell = {
             const invItem = user.inventory.find(i => i.itemName === storeItem.itemName);
             if (!invItem || invItem.quantity < qty)
                 return interaction.reply({ content: '❌ คุณมีไอเทมนี้ไม่พอ', ephemeral: true });
-            const refund = Math.floor(storeItem.price * 0.5) * qty;
+            const refundRate = (storeItem.sellPercent || 50) / 100;
+            const refund     = Math.floor(storeItem.price * refundRate) * qty;
             invItem.quantity -= qty;
             if (invItem.quantity <= 0) user.inventory = user.inventory.filter(i => i.itemName !== storeItem.itemName);
             user.coins += refund;
@@ -305,11 +285,55 @@ const sell = {
             const e = new EmbedBuilder().setColor(0xFEE75C).setTitle('💰 ขายสำเร็จ')
                 .addFields(
                     { name: '📦 ไอเทม',   value: `${storeItem.itemName} x${qty}`, inline: true },
-                    { name: '💵 ได้รับ',  value: `${refund.toLocaleString()} ${config.currencyEmoji} (50%)`, inline: true },
+                    { name: '💵 ได้รับ',  value: `${refund.toLocaleString()} ${config.currencyEmoji} (${storeItem.sellPercent || 50}%)`, inline: true },
                     { name: '👛 คงเหลือ', value: `${user.coins.toLocaleString()} ${config.currencyEmoji}`, inline: true }
                 );
             if (storeItem.itemImage) e.setThumbnail(storeItem.itemImage);
             return interaction.reply({ embeds: [e] });
+        } catch (err) { console.error(err); return interaction.reply({ content: 'เกิดข้อผิดพลาด', ephemeral: true }); }
+    }
+};
+
+// ─── /use ──────────────────────────────────────────────────────────────────
+const use = {
+    data: new SlashCommandBuilder().setName('use').setDescription('ใช้ไอเทมจากกระเป๋า')
+        .addStringOption(o => o.setName('item').setDescription('ชื่อไอเทม').setRequired(true)),
+    async execute(interaction) {
+        const { id: userId }  = interaction.user;
+        const { id: guildId } = interaction.guild;
+        const itemName = interaction.options.getString('item');
+        try {
+            const config    = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
+            const storeItem = config.storeItems.find(i => i.itemName.toLowerCase() === itemName.toLowerCase());
+            if (!storeItem) return interaction.reply({ content: `❌ ไม่พบไอเทม "${itemName}"`, ephemeral: true });
+            if (!storeItem.usable) return interaction.reply({ content: '❌ ไอเทมนี้ใช้งานไม่ได้', ephemeral: true });
+
+            let user = await User.findOne({ userId, guildId });
+            if (!user) return interaction.reply({ content: '❌ ไม่พบบัญชี', ephemeral: true });
+
+            const invItem = user.inventory.find(i => i.itemName === storeItem.itemName);
+            if (!invItem || invItem.quantity <= 0)
+                return interaction.reply({ content: `❌ คุณไม่มี "${storeItem.itemName}" ในกระเป๋า`, ephemeral: true });
+
+            // Remove 1 from inventory
+            invItem.quantity -= 1;
+            if (invItem.quantity <= 0)
+                user.inventory = user.inventory.filter(i => i.itemName !== storeItem.itemName);
+            await user.save();
+
+            // Grant role reward if itemType === 'role'
+            if (storeItem.itemType === 'role' && storeItem.roleReward) {
+                try {
+                    const member = await interaction.guild.members.fetch(userId);
+                    await member.roles.add(storeItem.roleReward).catch(() => {});
+                } catch (e) { /* ignore role errors */ }
+            }
+
+            const msg = storeItem.useMessage
+                ? storeItem.useMessage.replace(/\{user\}/g, `<@${userId}>`)
+                : `✅ ใช้ไอเทม **${storeItem.itemName}** สำเร็จ!`;
+
+            return interaction.reply({ content: msg });
         } catch (err) { console.error(err); return interaction.reply({ content: 'เกิดข้อผิดพลาด', ephemeral: true }); }
     }
 };
@@ -323,7 +347,7 @@ async function handleInvButton(interaction) {
     if (interaction.user.id !== ownerId)
         return interaction.reply({ content: '❌ นี่ไม่ใช่กระเป๋าของคุณ', ephemeral: true });
 
-    const { id: userId } = interaction.user;
+    const { id: userId }  = interaction.user;
     const { id: guildId } = interaction.guild;
     const key     = `${userId}-${guildId}`;
     const session = invSessions.get(key);
@@ -360,8 +384,9 @@ async function handleInvButton(interaction) {
         if (!dbItem || dbItem.quantity <= 0)
             return interaction.reply({ content: '❌ คุณไม่มีไอเทมนี้แล้ว', ephemeral: true });
 
-        const qty    = action === 'sellall' ? dbItem.quantity : 1;
-        const refund = Math.floor(storeItem.price * 0.5) * qty;
+        const qty        = action === 'sellall' ? dbItem.quantity : 1;
+        const refundRate = (storeItem.sellPercent || 50) / 100;
+        const refund     = Math.floor(storeItem.price * refundRate) * qty;
 
         dbItem.quantity -= qty;
         if (dbItem.quantity <= 0)
@@ -400,6 +425,6 @@ async function handleInvButton(interaction) {
     }
 }
 
-module.exports = [shop, buy, inventory, sell];
+module.exports = [shop, buy, inventory, sell, use];
 module.exports.handleShopButton = handleShopButton;
 module.exports.handleInvButton  = handleInvButton;

@@ -687,20 +687,61 @@
                     <div class="card-title">🛒 เพิ่มสินค้า</div>
                 </div>
                 <div class="card-body">
-                    <form action="/manage/<%= guildId %>/add-store-item" method="POST">
+                    <form action="/<%= guildId %>/add-store-item" method="POST">
                         <div class="form-grid">
                             <div class="form-group"><label>ชื่อสินค้า</label><input type="text" name="itemName" required placeholder="VIP Pass"></div>
                             <div class="form-group"><label>ราคา</label><input type="number" name="price" required min="0" placeholder="1000"></div>
+                        </div>
+                        <div class="form-grid" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label>ประเภทสินค้า</label>
+                                <select name="itemType" id="store-item-type" onchange="storeItemTypeChange()">
+                                    <option value="item">🎁 ไอเทมทั่วไป</option>
+                                    <option value="role">🎭 มอบยศ</option>
+                                    <option value="consumable">⚡ ใช้แล้วหมด</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>หมวดหมู่ (category)</label>
+                                <input type="text" name="category" placeholder="เช่น VIP, ของตกแต่ง">
+                            </div>
+                        </div>
+                        <div id="store-role-reward-wrap" style="display:none;margin-bottom:12px">
+                            <div class="form-group">
+                                <label>ยศที่จะมอบให้ (Role Reward)</label>
+                                <select name="roleReward" id="store-role-reward">
+                                    <option value="">— เลือกยศ —</option>
+                                    <% if (typeof discordRoles !== 'undefined') { discordRoles.forEach(role => { %>
+                                        <option value="<%= role.id %>"><%= role.name %></option>
+                                    <% }) } %>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group" style="margin-bottom:12px">
                             <label>คำอธิบาย</label>
                             <textarea name="description" placeholder="คำอธิบายสินค้า..."></textarea>
                         </div>
+                        <div id="store-usable-wrap" style="display:none;margin-bottom:12px">
+                            <div class="form-group">
+                                <label>ข้อความเมื่อใช้ /use (useMessage)</label>
+                                <input type="text" name="useMessage" placeholder="ใช้ {user} เพื่อแสดงชื่อผู้ใช้">
+                            </div>
+                        </div>
                         <div class="form-group" style="margin-bottom:12px">
                             <label>ลิงก์รูปภาพ (URL)</label>
                             <input type="url" name="itemImage" placeholder="https://i.imgur.com/abc.jpg" oninput="previewStoreImg(this)">
-                        <div style="font-size:11px;color:var(--muted);margin-top:4px">⚠️ ต้องเป็น URL รูปภาพ (https://...) เท่านั้น — ไม่รองรับการ upload ไฟล์โดยตรง</div>
-                        <img id="store-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                            <div style="font-size:11px;color:var(--muted);margin-top:4px">⚠️ ต้องเป็น URL รูปภาพ (https://...) เท่านั้น — ไม่รองรับการ upload ไฟล์โดยตรง</div>
+                            <img id="store-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                        </div>
+                        <div class="form-grid" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label>% คืนเงินเมื่อขาย (sellPercent)</label>
+                                <input type="number" name="sellPercent" value="50" min="0" max="100" placeholder="50">
+                            </div>
+                            <div class="form-group">
+                                <label>จำกัดต่อผู้ใช้ (0 = ไม่จำกัด)</label>
+                                <input type="number" name="maxPerUser" value="0" min="0" placeholder="0">
+                            </div>
                         </div>
 
                         <div class="toggle-row">
@@ -721,10 +762,24 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="listedInStore" value="true">
-                        <input type="hidden" name="inventoryItem" value="true">
-                        <input type="hidden" name="usable" value="true">
-                        <input type="hidden" name="sellable" value="true">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+                            <div class="toggle-row" style="margin:0">
+                                <div><div class="toggle-label" style="font-size:12px">แสดงในร้าน</div></div>
+                                <label class="switch"><input type="checkbox" name="listedInStore" value="true" checked><span class="slider"></span></label>
+                            </div>
+                            <div class="toggle-row" style="margin:0">
+                                <div><div class="toggle-label" style="font-size:12px">เก็บใน Inv</div></div>
+                                <label class="switch"><input type="checkbox" name="inventoryItem" value="true" checked><span class="slider"></span></label>
+                            </div>
+                            <div class="toggle-row" style="margin:0">
+                                <div><div class="toggle-label" style="font-size:12px">ใช้งานได้</div></div>
+                                <label class="switch"><input type="checkbox" name="usable" value="true" checked><span class="slider"></span></label>
+                            </div>
+                            <div class="toggle-row" style="margin:0">
+                                <div><div class="toggle-label" style="font-size:12px">ขายคืนได้</div></div>
+                                <label class="switch"><input type="checkbox" name="sellable" value="true" checked><span class="slider"></span></label>
+                            </div>
+                        </div>
 
                         <button type="submit" class="btn btn-success btn-block">💾 เพิ่มสินค้าในร้าน</button>
                     </form>
@@ -742,19 +797,23 @@
                         <div class="list-item">
                             <div class="list-item-left">
                                 <div class="list-item-icon">
-                                    <% if (item.itemImage) { %><img src="<%= item.itemImage %>" alt=""><% } else { %>🎁<% } %>
+                                    <% if (item.itemImage) { %><img src="<%= item.itemImage %>" alt=""><% } else { %><%= item.itemType === 'role' ? '🎭' : item.itemType === 'consumable' ? '⚡' : '🎁' %><% } %>
                                 </div>
                                 <div>
                                     <div class="list-item-name"><%= item.itemName %></div>
                                     <div class="list-item-meta">
                                         <span class="badge badge-yellow"><%= item.price.toLocaleString() %> <%= config.currencyEmoji || '🪙' %></span>
+                                        &nbsp;<span class="badge badge-blue"><%= item.itemType === 'role' ? '🎭 ยศ' : item.itemType === 'consumable' ? '⚡ consumable' : '🎁 ไอเทม' %></span>
+                                        <% if (item.category) { %>&nbsp;<span class="badge" style="background:var(--border);color:var(--text)">[<%= item.category %>]</span><% } %>
                                         &nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>
+                                        <% if (item.maxPerUser > 0) { %>&nbsp;· จำกัด <%= item.maxPerUser %>/คน<% } %>
+                                        &nbsp;· ขายคืน <%= item.sellPercent || 50 %>%
                                     </div>
                                 </div>
                             </div>
                             <div style="display:flex;gap:6px;flex-shrink:0">
-                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem}).replace(/"/g,'&quot;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
-                                <a href="/manage/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบสินค้านี้?')">🗑️ ลบ</a>
+                                <button class="btn btn-primary btn-sm" data-item="<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.description||'',img:item.itemImage||'',unlimited:item.unlimitedStock,stock:item.stock,listed:item.listedInStore,sellable:item.sellable,invItem:item.inventoryItem,usable:item.usable,itemType:item.itemType||'item',roleReward:item.roleReward||'',sellPercent:item.sellPercent||50,maxPerUser:item.maxPerUser||0,category:item.category||'',useMessage:item.useMessage||''}).replace(/"/g,'&quot;') %>" onclick="openStoreItemModalEl(this)">✏️ แก้ไข</button>
+                                <a href="/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบสินค้านี้?')">🗑️ ลบ</a>
                             </div>
                         </div>
                         <% }) %>
@@ -2167,26 +2226,68 @@
             <span>✏️ แก้ไขสินค้า</span>
             <button class="modal-close" onclick="closeModal('modal-store-item')">✕</button>
         </div>
+        <form id="store-edit-form" method="POST">
         <div class="modal-body">
             <input type="hidden" id="edit-item-id">
             <div class="form-grid" style="margin-bottom:14px">
                 <div class="form-group">
                     <label>ชื่อสินค้า</label>
-                    <input type="text" id="edit-item-name">
+                    <input type="text" id="edit-item-name" name="itemName">
                 </div>
                 <div class="form-group">
                     <label>ราคา</label>
-                    <input type="number" id="edit-item-price" min="0">
+                    <input type="number" id="edit-item-price" name="price" min="0">
+                </div>
+            </div>
+            <div class="form-grid" style="margin-bottom:12px">
+                <div class="form-group">
+                    <label>ประเภทสินค้า</label>
+                    <select id="edit-item-type" name="itemType" onchange="editItemTypeChange()">
+                        <option value="item">🎁 ไอเทมทั่วไป</option>
+                        <option value="role">🎭 มอบยศ</option>
+                        <option value="consumable">⚡ ใช้แล้วหมด</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>หมวดหมู่ (category)</label>
+                    <input type="text" id="edit-item-category" name="category" placeholder="เช่น VIP">
+                </div>
+            </div>
+            <div id="edit-role-reward-wrap" style="display:none;margin-bottom:12px">
+                <div class="form-group">
+                    <label>ยศที่จะมอบให้ (Role Reward)</label>
+                    <select id="edit-item-role-reward" name="roleReward">
+                        <option value="">— เลือกยศ —</option>
+                        <% if (typeof discordRoles !== 'undefined') { discordRoles.forEach(role => { %>
+                            <option value="<%= role.id %>"><%= role.name %></option>
+                        <% }) } %>
+                    </select>
                 </div>
             </div>
             <div class="form-group" style="margin-bottom:12px">
                 <label>คำอธิบาย</label>
-                <textarea id="edit-item-desc" style="min-height:70px"></textarea>
+                <textarea id="edit-item-desc" name="description" style="min-height:70px"></textarea>
+            </div>
+            <div id="edit-use-message-wrap" style="display:none;margin-bottom:12px">
+                <div class="form-group">
+                    <label>ข้อความเมื่อใช้ /use (useMessage)</label>
+                    <input type="text" id="edit-item-use-message" name="useMessage" placeholder="ใช้ {user} เพื่อแสดงชื่อผู้ใช้">
+                </div>
             </div>
             <div class="form-group" style="margin-bottom:14px">
                 <label>ลิงก์รูปภาพ (URL)</label>
-                <input type="url" id="edit-item-img" placeholder="https://..." oninput="previewEditImg(this.value)">
+                <input type="url" id="edit-item-img" name="itemImage" placeholder="https://..." oninput="previewEditImg(this.value)">
                 <img id="edit-img-preview" src="" style="display:none;margin-top:8px;width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+            </div>
+            <div class="form-grid" style="margin-bottom:12px">
+                <div class="form-group">
+                    <label>% คืนเงินเมื่อขาย</label>
+                    <input type="number" id="edit-item-sell-percent" name="sellPercent" min="0" max="100" value="50">
+                </div>
+                <div class="form-group">
+                    <label>จำกัดต่อผู้ใช้ (0 = ไม่จำกัด)</label>
+                    <input type="number" id="edit-item-max-per-user" name="maxPerUser" min="0" value="0">
+                </div>
             </div>
 
             <div class="toggle-row" style="margin-bottom:10px">
@@ -2199,11 +2300,11 @@
             <div id="edit-stock-wrap" style="margin-bottom:12px">
                 <div class="form-group">
                     <label>จำนวนในคลัง</label>
-                    <input type="number" id="edit-item-stock" min="0">
+                    <input type="number" id="edit-item-stock" name="stock" min="0">
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
                 <div class="toggle-row" style="margin:0">
                     <div><div class="toggle-label" style="font-size:12px">แสดงในร้าน</div></div>
                     <label class="switch"><input type="checkbox" id="edit-item-listed"><span class="slider"></span></label>
@@ -2216,12 +2317,17 @@
                     <div><div class="toggle-label" style="font-size:12px">เก็บใน Inv</div></div>
                     <label class="switch"><input type="checkbox" id="edit-item-inventory"><span class="slider"></span></label>
                 </div>
+                <div class="toggle-row" style="margin:0">
+                    <div><div class="toggle-label" style="font-size:12px">ใช้งานได้</div></div>
+                    <label class="switch"><input type="checkbox" id="edit-item-usable"><span class="slider"></span></label>
+                </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-danger btn-sm" onclick="closeModal('modal-store-item')">ยกเลิก</button>
-            <button class="btn btn-primary btn-sm" onclick="saveStoreItem()">💾 บันทึก</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="closeModal('modal-store-item')">ยกเลิก</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="submitStoreEditForm()">💾 บันทึก</button>
         </div>
+        </form>
     </div>
 </div>
 
@@ -2815,27 +2921,55 @@
     // ═══════════════════════════════════════════════════════
     // STORE ITEM EDIT MODAL
     // ═══════════════════════════════════════════════════════
-    function openStoreItemModal(itemId, name, price, desc, img, unlimited, stock, listed, sellable, inventoryItem) {
-        document.getElementById('edit-item-id').value       = itemId;
-        document.getElementById('edit-item-name').value     = name;
-        document.getElementById('edit-item-price').value    = price;
-        document.getElementById('edit-item-desc').value     = desc;
-        document.getElementById('edit-item-img').value      = img;
-        document.getElementById('edit-item-unlimited').checked = !!unlimited;
-        document.getElementById('edit-item-stock').value    = stock;
-        document.getElementById('edit-item-listed').checked   = !!listed;
-        document.getElementById('edit-item-sellable').checked  = !!sellable;
-        document.getElementById('edit-item-inventory').checked = !!inventoryItem;
+    function openStoreItemModal(d) {
+        document.getElementById('edit-item-id').value              = d.id;
+        document.getElementById('edit-item-name').value            = d.name;
+        document.getElementById('edit-item-price').value           = d.price;
+        document.getElementById('edit-item-desc').value            = d.desc;
+        document.getElementById('edit-item-img').value             = d.img;
+        document.getElementById('edit-item-unlimited').checked     = !!d.unlimited;
+        document.getElementById('edit-item-stock').value           = d.stock;
+        document.getElementById('edit-item-listed').checked        = !!d.listed;
+        document.getElementById('edit-item-sellable').checked      = !!d.sellable;
+        document.getElementById('edit-item-inventory').checked     = !!d.invItem;
+        document.getElementById('edit-item-usable').checked        = !!d.usable;
+        document.getElementById('edit-item-sell-percent').value    = d.sellPercent || 50;
+        document.getElementById('edit-item-max-per-user').value    = d.maxPerUser || 0;
+        document.getElementById('edit-item-category').value        = d.category || '';
+        document.getElementById('edit-item-use-message').value     = d.useMessage || '';
+
+        const typeEl = document.getElementById('edit-item-type');
+        typeEl.value = d.itemType || 'item';
+
+        const roleEl = document.getElementById('edit-item-role-reward');
+        roleEl.value = d.roleReward || '';
+
+        editItemTypeChange();
         toggleEditStock();
 
         const prev = document.getElementById('edit-img-preview');
-        if (img && (img.startsWith('http://') || img.startsWith('https://'))) {
-            prev.src = img; prev.style.display = 'block';
+        if (d.img && (d.img.startsWith('http://') || d.img.startsWith('https://'))) {
+            prev.src = d.img; prev.style.display = 'block';
         } else {
             prev.style.display = 'none';
         }
 
+        // Set form action to POST update route
+        document.getElementById('store-edit-form').action = '/' + GUILD_ID + '/update-store-item/' + d.id;
+
         document.getElementById('modal-store-item').style.display = 'flex';
+    }
+
+    function editItemTypeChange() {
+        const val = document.getElementById('edit-item-type').value;
+        document.getElementById('edit-role-reward-wrap').style.display    = val === 'role'       ? 'block' : 'none';
+        document.getElementById('edit-use-message-wrap').style.display    = val === 'consumable' ? 'block' : 'none';
+    }
+
+    function storeItemTypeChange() {
+        const val = document.getElementById('store-item-type').value;
+        document.getElementById('store-role-reward-wrap').style.display = val === 'role'       ? 'block' : 'none';
+        document.getElementById('store-usable-wrap').style.display      = val === 'consumable' ? 'block' : 'none';
     }
 
     function toggleEditStock() {
@@ -2852,44 +2986,28 @@
         }
     }
 
-    async function saveStoreItem() {
-        const itemId     = document.getElementById('edit-item-id').value;
-        const itemName   = document.getElementById('edit-item-name').value.trim();
-        const price      = document.getElementById('edit-item-price').value;
-        const desc       = document.getElementById('edit-item-desc').value;
-        const img        = document.getElementById('edit-item-img').value.trim();
-        const unlimited  = document.getElementById('edit-item-unlimited').checked;
-        const stock      = document.getElementById('edit-item-stock').value;
-        const listed     = document.getElementById('edit-item-listed').checked;
-        const sellable   = document.getElementById('edit-item-sellable').checked;
-        const invItem    = document.getElementById('edit-item-inventory').checked;
-
+    function submitStoreEditForm() {
+        const itemName = document.getElementById('edit-item-name').value.trim();
         if (!itemName) return alert('กรุณากรอกชื่อสินค้า');
 
-        try {
-            const res = await fetch(`/api/${GUILD_ID}/store-item/${itemId}/edit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    itemName, price, description: desc, itemImage: img,
-                    unlimitedStock: String(unlimited), stock,
-                    listedInStore: String(listed),
-                    sellable: String(sellable),
-                    inventoryItem: String(invItem)
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            closeModal('modal-store-item');
-            showToastMsg('✅ บันทึกสินค้าสำเร็จ — รีเฟรชหน้าเพื่อดูการเปลี่ยนแปลง');
-        } catch (err) {
-            alert('❌ ' + err.message);
+        // Sync checkbox values as hidden inputs before submit
+        const form = document.getElementById('store-edit-form');
+        function setHidden(name, value) {
+            let el = form.querySelector(`input[type=hidden][name="${name}"]`);
+            if (!el) { el = document.createElement('input'); el.type = 'hidden'; el.name = name; form.appendChild(el); }
+            el.value = value;
         }
+        setHidden('unlimitedStock', String(document.getElementById('edit-item-unlimited').checked));
+        setHidden('listedInStore',  String(document.getElementById('edit-item-listed').checked));
+        setHidden('inventoryItem',  String(document.getElementById('edit-item-inventory').checked));
+        setHidden('sellable',       String(document.getElementById('edit-item-sellable').checked));
+        setHidden('usable',         String(document.getElementById('edit-item-usable').checked));
+        form.submit();
     }
 
     function openStoreItemModalEl(btn) {
         const d = JSON.parse(btn.dataset.item);
-        openStoreItemModal(d.id, d.name, d.price, d.desc, d.img, d.unlimited, d.stock, d.listed, d.sellable, d.invItem);
+        openStoreItemModal(d);
     }
 
     // ═══════════════════════════════════════════════════════
