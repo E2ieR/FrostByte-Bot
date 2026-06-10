@@ -26,11 +26,27 @@ const guildConfigSchema = new mongoose.Schema({
     robMaxPercent:     { type: Number, default: 50 },   // % สูงสุดที่ปล้นได้
     robPenalty:        { type: Number, default: 100 },  // ค่าปรับถ้าปล้นพลาด
 
-    // ─── Active Bonus ─────────────────────────────────────
+    // ─── Active Bonus: Message ────────────────────────────
     activeBonusEnabled:   { type: Boolean, default: true },
-    activeBonusThreshold: { type: Number, default: 20 },  // ต้องส่งกี่ข้อความถึงจะได้โบนัส
-    activeBonusAmount:    { type: Number, default: 100 }, // จำนวนเงินโบนัส
-    activeBonusChannelId: { type: String, default: '' },  // จ่ายเฉพาะในช่องนี้ (ว่าง = ทุกช่อง)
+    activeBonusThreshold: { type: Number, default: 20 },
+    activeBonusAmount:    { type: Number, default: 100 },
+    activeBonusChannelId: { type: String, default: '' },
+
+    // ─── Active Bonus: Voice ──────────────────────────────
+    voiceBonusEnabled:   { type: Boolean, default: false },
+    voiceBonusThreshold: { type: Number, default: 30 },   // นาที
+    voiceBonusAmount:    { type: Number, default: 150 },
+    voiceBonusChannelId: { type: String, default: '' },
+
+    // ─── Active Bonus: Command ────────────────────────────
+    commandBonusEnabled:   { type: Boolean, default: false },
+    commandBonusThreshold: { type: Number, default: 10 },
+    commandBonusAmount:    { type: Number, default: 80 },
+
+    // ─── Active Bonus: React ──────────────────────────────
+    reactBonusEnabled:   { type: Boolean, default: false },
+    reactBonusThreshold: { type: Number, default: 15 },
+    reactBonusAmount:    { type: Number, default: 60 },
 
     // ─── Seniority Bonus ──────────────────────────────────
     seniorityBonusEnabled: { type: Boolean, default: true },

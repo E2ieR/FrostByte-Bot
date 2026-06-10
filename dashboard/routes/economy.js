@@ -38,6 +38,19 @@ router.post('/save-settings/:guildId', async (req, res) => {
         config.activeBonusAmount    = parseInt(req.body.activeBonusAmount)    || 100;
         config.activeBonusChannelId = req.body.activeBonusChannelId || '';
 
+        config.voiceBonusEnabled   = req.body.voiceBonusEnabled === 'true';
+        config.voiceBonusThreshold = parseInt(req.body.voiceBonusThreshold) || 30;
+        config.voiceBonusAmount    = parseInt(req.body.voiceBonusAmount)    || 150;
+        config.voiceBonusChannelId = req.body.voiceBonusChannelId || '';
+
+        config.commandBonusEnabled   = req.body.commandBonusEnabled === 'true';
+        config.commandBonusThreshold = parseInt(req.body.commandBonusThreshold) || 10;
+        config.commandBonusAmount    = parseInt(req.body.commandBonusAmount)    || 80;
+
+        config.reactBonusEnabled   = req.body.reactBonusEnabled === 'true';
+        config.reactBonusThreshold = parseInt(req.body.reactBonusThreshold) || 15;
+        config.reactBonusAmount    = parseInt(req.body.reactBonusAmount)    || 60;
+
     } else if (tab === 'seniority') {
         // รับ array ของ tiers จาก form
         const minDaysArr  = [].concat(req.body['tier_minDays[]']  || []);

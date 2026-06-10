@@ -8,8 +8,8 @@ const { startServer } = require('./dashboard/server.js');
 const { handleBettingInteraction } = require('./dashboard/handlers/bettingInteraction');
 const sportsScheduler = require('./services/sportsScheduler');
 const {
-    handleActiveBonus, handleXpGain, handleCommandXp,
-    handleReactionXp, handleVoiceXp,
+    handleActiveBonus, handleVoiceBonus, handleCommandBonus, handleReactBonus,
+    handleXpGain, handleCommandXp, handleReactionXp, handleVoiceXp,
     handleMemberLeave, handleMemberBan
 } = require('./dashboard/handlers/incomeHandler');
 const { handleBlackjack } = require('./dashboard/handlers/blackjackHandler');
@@ -61,17 +61,18 @@ client.on('messageCreate', async message => {
     await handleXpGain(message);
 });
 
-// ─── voiceStateUpdate — Voice XP ──────────────────────────────────────────
+// ─── voiceStateUpdate — Voice XP + Voice Bonus ────────────────────────────
 client.on('voiceStateUpdate', async (oldState, newState) => {
     await handleVoiceXp(oldState, newState);
+    await handleVoiceBonus(oldState, newState);
 });
 
-// ─── messageReactionAdd — Reaction XP ─────────────────────────────────────
+// ─── messageReactionAdd — Reaction XP + React Bonus ──────────────────────
 client.on('messageReactionAdd', async (reaction, user) => {
     if (user.bot) return;
-    // fetch partial
     if (reaction.partial) { try { await reaction.fetch(); } catch { return; } }
     await handleReactionXp(reaction, user);
+    await handleReactBonus(reaction, user);
 });
 
 // ─── guildMemberAdd — Join Roles + Sticky Roles ───────────────────────────
@@ -246,7 +247,8 @@ client.on('interactionCreate', async interaction => {
         }
         try {
             await command.execute(interaction);
-            await handleCommandXp(interaction); // Command XP (fire-and-forget)
+            await handleCommandXp(interaction);
+            await handleCommandBonus(interaction);
         } catch (error) {
             console.error(error);
             const reply = { content: '❌ เกิดข้อผิดพลาด', ephemeral: true };

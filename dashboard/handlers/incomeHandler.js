@@ -5,43 +5,39 @@ const GuildConfig = require('../../models/GuildConfig');
 const User        = require('../../models/User');
 const { calcLevel } = require('../../utils/rankCard');
 
+// ── helper: รีเซ็ต daily counter ถ้าเป็นวันใหม่ ────────────────────────────
+function resetIfNewDay(user, dateField, ...countFields) {
+    const today    = new Date().toDateString();
+    const lastDate = user[dateField] ? new Date(user[dateField]).toDateString() : null;
+    if (lastDate !== today) {
+        for (const f of countFields) user[f] = 0;
+        return true;
+    }
+    return false;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
-// Active Bonus — ให้รางวัลคนที่พิมพ์บ่อย
-// เรียกจาก messageCreate event
+// Active Bonus: Message — รางวัลคนที่พิมพ์บ่อย
 // ═══════════════════════════════════════════════════════════════════════════
 async function handleActiveBonus(message) {
     if (message.author.bot || !message.guild) return;
-
     const guildId = message.guild.id;
     const userId  = message.author.id;
-
     try {
         const config = await GuildConfig.findOne({ guildId });
         if (!config || !config.activeBonusEnabled) return;
-
-        // กรองเฉพาะช่องที่กำหนด (ถ้ากำหนด)
         if (config.activeBonusChannelId && message.channel.id !== config.activeBonusChannelId) return;
 
         let user = await User.findOne({ userId, guildId });
-        if (!user) {
-            user = new User({ userId, guildId, coins: config.startCoins || 0 });
-        }
+        if (!user) user = new User({ userId, guildId, coins: config.startCoins || 0 });
 
-        const today     = new Date().toDateString();
-        const lastDate  = user.lastMessageDate ? new Date(user.lastMessageDate).toDateString() : null;
-
-        // รีเซ็ตนับถ้าเป็นวันใหม่
-        if (lastDate !== today) {
-            user.messageCountToday = 0;
-            user.activeBonusPaid   = false;
-        }
+        const wasReset = resetIfNewDay(user, 'lastMessageDate', 'messageCountToday');
+        if (wasReset) user.activeBonusPaid = false;
 
         user.messageCountToday += 1;
         user.lastMessageDate    = new Date();
 
         const threshold = config.activeBonusThreshold || 20;
-
-        // จ่ายโบนัสเมื่อส่งครบ threshold ครั้ง (จ่ายแค่ครั้งเดียวต่อวัน)
         let bonusMsg = null;
         if (user.messageCountToday >= threshold && !user.activeBonusPaid) {
             const bonus = config.activeBonusAmount || 100;
@@ -50,17 +46,145 @@ async function handleActiveBonus(message) {
             bonusMsg = `🎉 <@${userId}> พูดคุยครบ **${threshold}** ข้อความวันนี้! ได้รับโบนัส **${bonus.toLocaleString()}** ${config.currencyEmoji || '💰'}`;
         }
 
-        // ─── เช็ค Daily Quest: message_count ─────────────────
         await checkQuestProgress(user, config, 'message_count', user.messageCountToday);
-        await user.save(); // save ครั้งเดียว
+        await user.save();
+        if (bonusMsg) await message.channel.send({ content: bonusMsg }).catch(() => {});
+    } catch (err) { console.error('[MessageBonus] error:', err.message); }
+}
 
-        if (bonusMsg) {
-            await message.channel.send({ content: bonusMsg }).catch(() => {});
+// ═══════════════════════════════════════════════════════════════════════════
+// Active Bonus: Voice — รางวัลคนที่อยู่ใน voice นาน
+// ═══════════════════════════════════════════════════════════════════════════
+async function handleVoiceBonus(oldState, newState) {
+    const guild  = newState.guild || oldState.guild;
+    const userId = newState.id    || oldState.id;
+    if (!guild || !userId) return;
+    if (newState.member?.user?.bot || oldState.member?.user?.bot) return;
+
+    const guildId = guild.id;
+    try {
+        const config = await GuildConfig.findOne({ guildId });
+        if (!config?.voiceBonusEnabled) return;
+
+        const wasInVoice = oldState.channelId && !oldState.selfDeaf && !oldState.selfMute;
+        const isInVoice  = newState.channelId && !newState.selfDeaf && !newState.selfMute;
+        if (wasInVoice === isInVoice) return;
+
+        let user = await User.findOne({ userId, guildId });
+        if (!user) user = new User({ userId, guildId, coins: config.startCoins || 0 });
+
+        // เข้า voice — บันทึกเวลาเริ่ม (voiceJoinedAt ใช้ร่วมกับ XP system)
+        if (!wasInVoice && isInVoice) {
+            if (!user.voiceJoinedAt) {
+                user.voiceJoinedAt = new Date();
+                await user.save();
+            }
+            return;
         }
 
-    } catch (err) {
-        console.error('[ActiveBonus] error:', err.message);
-    }
+        // ออก voice — คำนวณนาที
+        if (wasInVoice && !isInVoice) {
+            if (!user.voiceJoinedAt) return;
+            const minutes = (Date.now() - new Date(user.voiceJoinedAt).getTime()) / 60000;
+            user.voiceJoinedAt = null;
+            if (minutes < 1) { await user.save(); return; }
+
+            const wasReset = resetIfNewDay(user, 'lastVoiceBonusDate', 'voiceMinutesToday');
+            if (wasReset) user.voiceBonusPaid = false;
+
+            user.voiceMinutesToday  += Math.floor(minutes);
+            user.lastVoiceBonusDate  = new Date();
+
+            const threshold = config.voiceBonusThreshold || 30;
+            let bonusMsg = null;
+            if (user.voiceMinutesToday >= threshold && !user.voiceBonusPaid) {
+                const bonus = config.voiceBonusAmount || 150;
+                user.coins       += bonus;
+                user.voiceBonusPaid = true;
+                bonusMsg = `🎤 <@${userId}> อยู่ใน voice ครบ **${threshold}** นาทีวันนี้! ได้รับโบนัส **${bonus.toLocaleString()}** ${config.currencyEmoji || '💰'}`;
+            }
+            await user.save();
+            if (bonusMsg) {
+                const ch = config.voiceBonusChannelId
+                    ? guild.channels.cache.get(config.voiceBonusChannelId)
+                    : (newState.channel || oldState.channel);
+                if (ch) await ch.send({ content: bonusMsg }).catch(() => {});
+            }
+        }
+    } catch (err) { console.error('[VoiceBonus] error:', err.message); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Active Bonus: Command — รางวัลคนที่ใช้คำสั่งบ่อย
+// ═══════════════════════════════════════════════════════════════════════════
+async function handleCommandBonus(interaction) {
+    if (!interaction.guild || !interaction.user) return;
+    const guildId = interaction.guild.id;
+    const userId  = interaction.user.id;
+    try {
+        const config = await GuildConfig.findOne({ guildId });
+        if (!config?.commandBonusEnabled) return;
+
+        let user = await User.findOne({ userId, guildId });
+        if (!user) user = new User({ userId, guildId, coins: config.startCoins || 0 });
+
+        const wasReset = resetIfNewDay(user, 'lastCommandBonusDate', 'commandCountToday');
+        if (wasReset) user.commandBonusPaid = false;
+
+        user.commandCountToday   += 1;
+        user.lastCommandBonusDate = new Date();
+
+        const threshold = config.commandBonusThreshold || 10;
+        let bonusMsg = null;
+        if (user.commandCountToday >= threshold && !user.commandBonusPaid) {
+            const bonus = config.commandBonusAmount || 80;
+            user.coins          += bonus;
+            user.commandBonusPaid = true;
+            bonusMsg = `⚡ <@${userId}> ใช้คำสั่งครบ **${threshold}** ครั้งวันนี้! ได้รับโบนัส **${bonus.toLocaleString()}** ${config.currencyEmoji || '💰'}`;
+        }
+        await user.save();
+        if (bonusMsg) {
+            const ch = interaction.channel || interaction.guild.channels.cache.get(interaction.channelId);
+            if (ch) await ch.send({ content: bonusMsg }).catch(() => {});
+        }
+    } catch (err) { console.error('[CommandBonus] error:', err.message); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Active Bonus: React — รางวัลคนที่ react บ่อย
+// ═══════════════════════════════════════════════════════════════════════════
+async function handleReactBonus(reaction, discordUser) {
+    if (discordUser.bot) return;
+    const guild = reaction.message?.guild;
+    if (!guild) return;
+    const guildId = guild.id;
+    const userId  = discordUser.id;
+    try {
+        const config = await GuildConfig.findOne({ guildId });
+        if (!config?.reactBonusEnabled) return;
+
+        let user = await User.findOne({ userId, guildId });
+        if (!user) user = new User({ userId, guildId, coins: config.startCoins || 0 });
+
+        const wasReset = resetIfNewDay(user, 'lastReactBonusDate', 'reactCountToday');
+        if (wasReset) user.reactBonusPaid = false;
+
+        user.reactCountToday   += 1;
+        user.lastReactBonusDate = new Date();
+
+        const threshold = config.reactBonusThreshold || 15;
+        let bonusMsg = null;
+        if (user.reactCountToday >= threshold && !user.reactBonusPaid) {
+            const bonus = config.reactBonusAmount || 60;
+            user.coins       += bonus;
+            user.reactBonusPaid = true;
+            bonusMsg = `🎭 <@${userId}> react ครบ **${threshold}** ครั้งวันนี้! ได้รับโบนัส **${bonus.toLocaleString()}** ${config.currencyEmoji || '💰'}`;
+        }
+        await user.save();
+        if (bonusMsg) {
+            await reaction.message.channel.send({ content: bonusMsg }).catch(() => {});
+        }
+    } catch (err) { console.error('[ReactBonus] error:', err.message); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -420,7 +544,7 @@ async function claimDailyRewards(interaction) {
 }
 
 module.exports = {
-    handleActiveBonus,
+    handleActiveBonus, handleVoiceBonus, handleCommandBonus, handleReactBonus,
     handleXpGain, handleCommandXp, handleReactionXp, handleVoiceXp,
     handleMemberLeave, handleMemberBan,
     getSeniorityBonus, refreshDailyQuests, checkQuestProgress, claimDailyRewards

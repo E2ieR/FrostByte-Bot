@@ -1561,28 +1561,95 @@
         <!-- ═══ TAB: Active Bonus ═══ -->
         <div id="tab-active-bonus" class="tab-panel">
             <form action="/save-settings/<%= guildId %>?tab=active-bonus" method="POST">
+                <div style="display:grid;gap:16px">
+
+                <!-- ── Message Bonus ── -->
                 <div class="card">
-                    <div class="card-header"><div class="card-title">💬 Active Bonus — โบนัสคนพิมพ์บ่อย</div></div>
+                    <div class="card-header"><div class="card-title">💬 Message Bonus — โบนัสคนพิมพ์บ่อย</div></div>
                     <div class="card-body">
-                        <div style="background:rgba(88,101,242,0.07);border:1px solid rgba(88,101,242,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--muted)">
-                            💡 เมื่อสมาชิกส่งข้อความครบตามจำนวนที่กำหนดในวันเดียว จะได้รับเงินโบนัสอัตโนมัติ (จ่ายครั้งเดียวต่อวัน)
+                        <div style="background:rgba(88,101,242,0.07);border:1px solid rgba(88,101,242,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--muted)">
+                            💡 เมื่อสมาชิกส่งข้อความครบกำหนดในวันเดียว จะได้รับเงินโบนัสอัตโนมัติ (จ่ายครั้งเดียวต่อวัน)
                         </div>
-                        <div class="toggle-row" style="margin-bottom:16px">
-                            <div><div class="toggle-label">เปิดใช้ Active Bonus</div></div>
+                        <div class="toggle-row" style="margin-bottom:14px">
+                            <div class="toggle-label">เปิดใช้ Message Bonus</div>
                             <label class="switch"><input type="checkbox" name="activeBonusEnabled" value="true" <%= config.activeBonusEnabled !== false ? 'checked' : '' %>><span class="slider"></span></label>
                         </div>
                         <div class="form-grid">
                             <div class="form-group"><label>ต้องส่งกี่ข้อความ/วัน</label><input type="number" name="activeBonusThreshold" value="<%= config.activeBonusThreshold||20 %>" min="1"></div>
                             <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="activeBonusAmount" value="<%= config.activeBonusAmount||100 %>" min="1"></div>
                         </div>
-                        <div class="form-group" style="margin-bottom:16px">
+                        <div class="form-group">
                             <label>นับเฉพาะช่องนี้ (ว่าง = ทุกช่อง)</label>
                             <select name="activeBonusChannelId" id="active-channel-select">
                                 <option value="">— ทุกช่องข้อความ —</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่า</button>
                     </div>
+                </div>
+
+                <!-- ── Voice Bonus ── -->
+                <div class="card">
+                    <div class="card-header"><div class="card-title">🎤 Voice Bonus — โบนัสคนอยู่ใน Voice</div></div>
+                    <div class="card-body">
+                        <div style="background:rgba(88,101,242,0.07);border:1px solid rgba(88,101,242,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--muted)">
+                            💡 เมื่อสมาชิกอยู่ใน voice channel ครบกำหนด (นาที) จะได้รับโบนัส (ไม่นับเมื่อ mute/deafen)
+                        </div>
+                        <div class="toggle-row" style="margin-bottom:14px">
+                            <div class="toggle-label">เปิดใช้ Voice Bonus</div>
+                            <label class="switch"><input type="checkbox" name="voiceBonusEnabled" value="true" <%= config.voiceBonusEnabled ? 'checked' : '' %>><span class="slider"></span></label>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>ต้องอยู่กี่นาที/วัน</label><input type="number" name="voiceBonusThreshold" value="<%= config.voiceBonusThreshold||30 %>" min="1"></div>
+                            <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="voiceBonusAmount" value="<%= config.voiceBonusAmount||150 %>" min="1"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>ส่งแจ้งเตือนในช่องนี้ (ว่าง = ช่อง voice ที่ออก)</label>
+                            <select name="voiceBonusChannelId" id="voice-bonus-channel-select">
+                                <option value="">— ช่อง voice ที่ออก —</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Command Bonus ── -->
+                <div class="card">
+                    <div class="card-header"><div class="card-title">⚡ Command Bonus — โบนัสคนใช้คำสั่งบ่อย</div></div>
+                    <div class="card-body">
+                        <div style="background:rgba(88,101,242,0.07);border:1px solid rgba(88,101,242,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--muted)">
+                            💡 เมื่อสมาชิกใช้ slash command ครบกำหนดในวันเดียว จะได้รับโบนัส
+                        </div>
+                        <div class="toggle-row" style="margin-bottom:14px">
+                            <div class="toggle-label">เปิดใช้ Command Bonus</div>
+                            <label class="switch"><input type="checkbox" name="commandBonusEnabled" value="true" <%= config.commandBonusEnabled ? 'checked' : '' %>><span class="slider"></span></label>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>ต้องใช้กี่คำสั่ง/วัน</label><input type="number" name="commandBonusThreshold" value="<%= config.commandBonusThreshold||10 %>" min="1"></div>
+                            <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="commandBonusAmount" value="<%= config.commandBonusAmount||80 %>" min="1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── React Bonus ── -->
+                <div class="card">
+                    <div class="card-header"><div class="card-title">🎭 React Bonus — โบนัสคนที่ react บ่อย</div></div>
+                    <div class="card-body">
+                        <div style="background:rgba(88,101,242,0.07);border:1px solid rgba(88,101,242,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--muted)">
+                            💡 เมื่อสมาชิก react ครบกำหนดในวันเดียว จะได้รับโบนัส
+                        </div>
+                        <div class="toggle-row" style="margin-bottom:14px">
+                            <div class="toggle-label">เปิดใช้ React Bonus</div>
+                            <label class="switch"><input type="checkbox" name="reactBonusEnabled" value="true" <%= config.reactBonusEnabled ? 'checked' : '' %>><span class="slider"></span></label>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>ต้อง react กี่ครั้ง/วัน</label><input type="number" name="reactBonusThreshold" value="<%= config.reactBonusThreshold||15 %>" min="1"></div>
+                            <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="reactBonusAmount" value="<%= config.reactBonusAmount||60 %>" min="1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+                <div style="margin-top:16px">
+                    <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่าทั้งหมด</button>
                 </div>
             </form>
         </div>
@@ -2144,23 +2211,30 @@
 
     // ─── Load channels for Active Bonus ─────────────────
     function loadActiveChannel() {
-        const sel = document.getElementById('active-channel-select');
-        if (!sel || sel.dataset.loaded) return;
-        fetch('/<%= guildId %>/betting-channels')
-            .then(r => r.json())
-            .then(channels => {
-                const current = '<%= config.activeBonusChannelId || "" %>';
-                sel.innerHTML = '<option value="">— ทุกช่องข้อความ —</option>';
-                channels.forEach(ch => {
-                    const opt = document.createElement('option');
-                    opt.value = ch.id;
-                    opt.textContent = '# ' + ch.name;
-                    if (ch.id === current) opt.selected = true;
-                    sel.appendChild(opt);
-                });
-                sel.dataset.loaded = '1';
-            })
-            .catch(() => {});
+        const selMsg   = document.getElementById('active-channel-select');
+        const selVoice = document.getElementById('voice-bonus-channel-select');
+        const curMsg   = '<%= config.activeBonusChannelId || "" %>';
+        const curVoice = '<%= config.voiceBonusChannelId  || "" %>';
+
+        function fillSelect(sel, current, blankLabel) {
+            if (!sel || sel.dataset.loaded) return;
+            fetch('/<%= guildId %>/betting-channels')
+                .then(r => r.json())
+                .then(channels => {
+                    sel.innerHTML = `<option value="">${blankLabel}</option>`;
+                    channels.forEach(ch => {
+                        const opt = document.createElement('option');
+                        opt.value = ch.id;
+                        opt.textContent = '# ' + ch.name;
+                        if (ch.id === current) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                    sel.dataset.loaded = '1';
+                })
+                .catch(() => {});
+        }
+        fillSelect(selMsg,   curMsg,   '— ทุกช่องข้อความ —');
+        fillSelect(selVoice, curVoice, '— ช่อง voice ที่ออก —');
     }
 
     // ─── Countdown timer ──────────────────────────────────

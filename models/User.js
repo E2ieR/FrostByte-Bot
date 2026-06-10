@@ -20,10 +20,25 @@ const UserSchema = new mongoose.Schema({
     lastWork: { type: Date, default: null },      // ← ใช้จริงใน /work
     lastRob:  { type: Date, default: null },      // ← ใช้จริงใน /rob
 
-    // 📊 Active Bonus — นับข้อความที่ส่งในแต่ละวัน
+    // 📊 Active Bonus — Message
     messageCountToday: { type: Number, default: 0 },
     lastMessageDate:   { type: Date,   default: null },
-    activeBonusPaid:   { type: Boolean, default: false }, // จ่ายโบนัสวันนี้แล้วหรือยัง
+    activeBonusPaid:   { type: Boolean, default: false },
+
+    // 📊 Active Bonus — Voice
+    voiceMinutesToday: { type: Number,  default: 0 },
+    lastVoiceBonusDate:{ type: Date,    default: null },
+    voiceBonusPaid:    { type: Boolean, default: false },
+
+    // 📊 Active Bonus — Command
+    commandCountToday:  { type: Number,  default: 0 },
+    lastCommandBonusDate:{ type: Date,   default: null },
+    commandBonusPaid:   { type: Boolean, default: false },
+
+    // 📊 Active Bonus — React
+    reactCountToday:  { type: Number,  default: 0 },
+    lastReactBonusDate:{ type: Date,   default: null },
+    reactBonusPaid:   { type: Boolean, default: false },
 
     // 🏅 Seniority Bonus — วันที่เข้าเซิร์ฟ (ดึงจาก Discord แล้วบันทึก)
     joinedAt: { type: Date, default: null },
