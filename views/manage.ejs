@@ -1543,264 +1543,229 @@
              TAB: ระบบเดิมพัน
         ═══════════════════════════════ -->
         <div id="tab-betting" class="tab-panel">
-            <%
-                const bet = config.betting || {};
-                const poolA = bet.poolA || 0;
-                const poolB = bet.poolB || 0;
-                const totalPool = poolA + poolB;
-                const pctA = totalPool > 0 ? Math.round((poolA / totalPool) * 100) : 50;
-                const pctB = 100 - pctA;
-                const oddsA = poolA > 0 ? (totalPool / poolA).toFixed(2) : '—';
-                const oddsB = poolB > 0 ? (totalPool / poolB).toFixed(2) : '—';
-            %>
 
-            <!-- ─── สถิติ live (แสดงเมื่อมีกิจกรรม) ─── -->
-            <% if (bet.title) { %>
-            <div class="stat-row">
-                <div class="stat-card">
-                    <div class="stat-label">Pool รวม</div>
-                    <div class="stat-value" style="font-size:18px"><%= totalPool.toLocaleString() %> <span style="font-size:12px;color:var(--muted)"><%= config.currencyEmoji||'🪙' %></span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">ผู้เดิมพัน</div>
-                    <div class="stat-value" style="font-size:18px"><%= (bet.bets||[]).length %> <span style="font-size:12px;color:var(--muted)">คน</span></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Odds A / B</div>
-                    <div class="stat-value" style="font-size:16px"><%= oddsA %>x <span style="color:var(--muted);font-size:12px">/</span> <%= oddsB %>x</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">สถานะ</div>
-                    <div style="margin-top:6px">
-                        <% if (bet.winner) { %>
-                            <span class="badge badge-yellow" style="font-size:12px;padding:4px 10px">🏆 จบแล้ว</span>
-                        <% } else if (bet.isOpen) { %>
-                            <span class="badge badge-green" style="font-size:12px;padding:4px 10px">🟢 เปิดรับ</span>
-                        <% } else { %>
-                            <span class="badge badge-red" style="font-size:12px;padding:4px 10px">🔴 ปิด</span>
-                        <% } %>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ─── การ์ดกิจกรรมปัจจุบัน ─── -->
+            <!-- ─── สร้างเดิมพันใหม่ ─── -->
             <div class="card" style="margin-bottom:20px">
-                <div class="card-header">
-                    <div class="card-title">🎯 <%= bet.title %></div>
-                    <div style="display:flex;gap:8px;align-items:center">
-                        <% if (bet.channelId) { %>
-                        <span style="font-size:11px;color:var(--muted)">📢 #<%= bet.channelId %></span>
-                        <% } %>
-                        <% if (!bet.winner) { %>
-                        <form action="/<%= guildId %>/toggle-bet" method="POST" style="margin:0">
-                            <button class="btn btn-sm <%= bet.isOpen ? 'btn-danger' : 'btn-success' %>">
-                                <%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>
-                            </button>
-                        </form>
-                        <% } %>
-                    </div>
+                <div class="card-header" style="cursor:pointer" onclick="toggleEl('create-bet-body')">
+                    <div class="card-title">➕ สร้างเดิมพันใหม่</div>
+                    <span style="font-size:11px;color:var(--muted)">คลิกเพื่อขยาย ▾</span>
                 </div>
-                <div class="card-body">
-
-                    <!-- รูป + ชื่อฝ่าย -->
-                    <div style="display:grid;grid-template-columns:1fr 48px 1fr;gap:12px;align-items:center;margin-bottom:20px">
-                        <div style="text-align:center">
-                            <% if (bet.imageA) { %>
-                                <img src="<%= bet.imageA %>" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:2px solid #5865F2;margin-bottom:8px">
-                            <% } else { %>
-                                <div style="width:88px;height:88px;border-radius:12px;background:rgba(88,101,242,0.12);border:2px solid rgba(88,101,242,0.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 8px">🔵</div>
-                            <% } %>
-                            <div style="font-weight:700;font-size:15px;color:#7b8df8"><%= bet.optionA||'ฝ่าย A' %></div>
-                            <div style="font-size:12px;color:var(--muted);margin-top:3px"><%= poolA.toLocaleString() %> <%= config.currencyEmoji||'🪙' %></div>
-                            <div style="font-size:11px;color:#7b8df8;margin-top:2px">Odds <%= oddsA %>x</div>
-                        </div>
-                        <div style="text-align:center;font-size:18px;font-weight:700;color:var(--muted)">VS</div>
-                        <div style="text-align:center">
-                            <% if (bet.imageB) { %>
-                                <img src="<%= bet.imageB %>" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:2px solid #ed4245;margin-bottom:8px">
-                            <% } else { %>
-                                <div style="width:88px;height:88px;border-radius:12px;background:rgba(237,66,69,0.12);border:2px solid rgba(237,66,69,0.3);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 8px">🔴</div>
-                            <% } %>
-                            <div style="font-weight:700;font-size:15px;color:#f28f8f"><%= bet.optionB||'ฝ่าย B' %></div>
-                            <div style="font-size:12px;color:var(--muted);margin-top:3px"><%= poolB.toLocaleString() %> <%= config.currencyEmoji||'🪙' %></div>
-                            <div style="font-size:11px;color:#f28f8f;margin-top:2px">Odds <%= oddsB %>x</div>
-                        </div>
-                    </div>
-
-                    <!-- Pool bar สองสี -->
-                    <div style="margin-bottom:6px;display:flex;justify-content:space-between;font-size:12px">
-                        <span style="color:#7b8df8;font-weight:600"><%= pctA %>%</span>
-                        <span style="color:var(--muted)">pool split</span>
-                        <span style="color:#f28f8f;font-weight:600"><%= pctB %>%</span>
-                    </div>
-                    <div class="pool-bar" style="margin-bottom:16px">
-                        <div class="pool-bar-a" style="width:<%= pctA %>%"></div>
-                        <div class="pool-bar-b" style="width:<%= pctB %>%"></div>
-                    </div>
-
-                    <!-- countdown -->
-                    <% if (bet.expiresAt) { %>
-                    <div style="background:rgba(254,231,92,0.07);border:1px solid rgba(254,231,92,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px">
-                        <span>⏰</span>
-                        <span style="color:var(--muted)">หมดเวลา <%= new Date(bet.expiresAt).toLocaleString('th-TH') %></span>
-                        <span id="bet-countdown" style="margin-left:auto;font-weight:700;color:var(--yellow)"></span>
-                    </div>
-                    <% } %>
-
-                    <!-- ประกาศผล / winner banner -->
-                    <% if (bet.winner) { %>
-                    <div style="text-align:center;padding:18px;background:rgba(254,231,92,0.07);border:1px solid rgba(254,231,92,0.25);border-radius:10px">
-                        <div style="font-size:28px;margin-bottom:6px">🏆</div>
-                        <div style="font-weight:700;font-size:16px;color:var(--yellow)">
-                            ผู้ชนะ: <%= bet.winner==='A' ? (bet.optionA||'ฝ่าย A') : (bet.optionB||'ฝ่าย B') %>
-                        </div>
-                    </div>
-                    <% } else { %>
-                    <hr class="divider">
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">ประกาศผลผู้ชนะ — ระบบจะปิดรับและส่ง embed ผลลัพธ์เข้า channel อัตโนมัติ</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                        <form action="/<%= guildId %>/settle-bet" method="POST" style="margin:0">
-                            <input type="hidden" name="winner" value="A">
-                            <button type="submit" class="btn btn-block" style="background:rgba(88,101,242,0.18);color:#7b8df8;border:1px solid rgba(88,101,242,0.35)" onclick="return confirm('ประกาศ <%= (bet.optionA||'ฝ่าย A').replace(/'/g, '') %> ชนะ?')">
-                                🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ
-                            </button>
-                        </form>
-                        <form action="/<%= guildId %>/settle-bet" method="POST" style="margin:0">
-                            <input type="hidden" name="winner" value="B">
-                            <button type="submit" class="btn btn-block" style="background:rgba(237,66,69,0.15);color:#f28f8f;border:1px solid rgba(237,66,69,0.35)" onclick="return confirm('ประกาศ <%= (bet.optionB||'ฝ่าย B').replace(/'/g, '') %> ชนะ?')">
-                                🏆 <%= bet.optionB||'ฝ่าย B' %> ชนะ
-                            </button>
-                        </form>
-                    </div>
-                    <% } %>
-                </div>
-            </div>
-
-            <!-- ─── รายการผู้เดิมพัน ─── -->
-            <% if (bet.bets && bet.bets.length > 0) { %>
-            <div class="card" style="margin-bottom:20px">
-                <div class="card-header">
-                    <div class="card-title">👥 รายการผู้เดิมพัน</div>
-                    <span class="badge badge-blurple"><%= bet.bets.length %> คน</span>
-                </div>
-                <div class="card-body">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <% bet.bets.forEach(b => { %>
-                        <div class="list-item" style="border-left:3px solid <%= b.option==='A' ? '#5865F2' : '#ed4245' %>">
-                            <div class="list-item-left">
-                                <div class="list-item-icon" style="background:<%= b.option==='A' ? 'rgba(88,101,242,0.15)' : 'rgba(237,66,69,0.15)' %>">
-                                    <%= b.option==='A' ? '🔵' : '🔴' %>
-                                </div>
-                                <div>
-                                    <div class="list-item-name" style="font-size:13px"><%= b.username %></div>
-                                    <div class="list-item-meta">
-                                        <span class="badge <%= b.option==='A' ? 'badge-blurple' : 'badge-red' %>"><%= b.option==='A'?(bet.optionA||'A'):(bet.optionB||'B') %></span>
-                                        &nbsp;<strong><%= b.amount.toLocaleString() %></strong> <%= config.currencyEmoji||'🪙' %>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-            <% } %>
-
-            <!-- ─── ฟอร์มตั้งค่าใหม่ ─── -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">⚙️ <%= bet.title ? 'แก้ไข / รีเซ็ต' : 'สร้าง' %>การเดิมพัน</div>
-                </div>
-                <div class="card-body">
-                    <form action="/<%= guildId %>/setup-bet" method="POST">
-
-                        <!-- หัวข้อ -->
+                <div id="create-bet-body" class="card-body" style="display:none">
+                    <form action="/<%= guildId %>/create-bet" method="POST">
                         <div class="form-group" style="margin-bottom:14px">
-                            <label>หัวข้อการเดิมพัน</label>
-                            <input type="text" name="title" value="<%= bet.title||'' %>" placeholder="เช่น ใครจะชนะ Season นี้?" required>
+                            <label>หัวข้อการเดิมพัน *</label>
+                            <input type="text" name="title" placeholder="เช่น ใครจะชนะ Season นี้?" required>
                         </div>
-
-                        <!-- สองฝ่าย -->
+                        <div class="form-group" style="margin-bottom:14px">
+                            <label>คำอธิบาย (ไม่บังคับ)</label>
+                            <input type="text" name="description" placeholder="รายละเอียดเพิ่มเติม...">
+                        </div>
                         <div class="bet-sides">
-                            <!-- ฝ่าย A -->
                             <div class="bet-side-a">
                                 <div class="bet-side-label">🔵 ฝ่าย A</div>
                                 <div class="form-group" style="margin-bottom:10px">
                                     <label>ชื่อฝ่าย A</label>
-                                    <input type="text" name="optionA" value="<%= bet.optionA||'' %>" placeholder="ฝ่าย A">
+                                    <input type="text" name="optionA" placeholder="ฝ่าย A" value="ฝ่าย A">
                                 </div>
                                 <div class="form-group">
                                     <label>รูปฝ่าย A (URL)</label>
-                                    <input type="url" name="imageA" id="imgA" value="<%= bet.imageA||'' %>" placeholder="https://i.imgur.com/..." oninput="previewImg('imgA','previewA','placeholderA')">
-                                    <% if (bet.imageA) { %>
-                                        <img id="previewA" class="bet-img-preview" src="<%= bet.imageA %>" style="margin-top:8px">
-                                        <div id="placeholderA" class="bet-img-placeholder" style="display:none">🔵</div>
-                                    <% } else { %>
-                                        <img id="previewA" class="bet-img-preview" src="" style="display:none;margin-top:8px">
-                                        <div id="placeholderA" class="bet-img-placeholder" style="margin-top:8px">🔵</div>
-                                    <% } %>
+                                    <input type="url" name="imageA" placeholder="https://...">
                                 </div>
                             </div>
-                            <!-- ฝ่าย B -->
                             <div class="bet-side-b">
                                 <div class="bet-side-label">🔴 ฝ่าย B</div>
                                 <div class="form-group" style="margin-bottom:10px">
                                     <label>ชื่อฝ่าย B</label>
-                                    <input type="text" name="optionB" value="<%= bet.optionB||'' %>" placeholder="ฝ่าย B">
+                                    <input type="text" name="optionB" placeholder="ฝ่าย B" value="ฝ่าย B">
                                 </div>
                                 <div class="form-group">
                                     <label>รูปฝ่าย B (URL)</label>
-                                    <input type="url" name="imageB" id="imgB" value="<%= bet.imageB||'' %>" placeholder="https://i.imgur.com/..." oninput="previewImg('imgB','previewB','placeholderB')">
-                                    <% if (bet.imageB) { %>
-                                        <img id="previewB" class="bet-img-preview" src="<%= bet.imageB %>" style="margin-top:8px">
-                                        <div id="placeholderB" class="bet-img-placeholder" style="display:none">🔴</div>
-                                    <% } else { %>
-                                        <img id="previewB" class="bet-img-preview" src="" style="display:none;margin-top:8px">
-                                        <div id="placeholderB" class="bet-img-placeholder" style="margin-top:8px">🔴</div>
-                                    <% } %>
+                                    <input type="url" name="imageB" placeholder="https://...">
                                 </div>
                             </div>
                         </div>
-
-                        <!-- ช่องข้อความ Discord -->
-                        <div class="form-group" style="margin-bottom:14px">
-                            <label>ช่องข้อความ Discord (embed จะถูกโพสต์ที่นี่)</label>
-                            <select name="channelId" id="channel-select" required>
-                                <option value="">⏳ กำลังโหลดช่องข้อความ...</option>
-                            </select>
-                        </div>
-
-                        <!-- เวลาหมดกิจกรรม -->
                         <div class="form-grid" style="margin-bottom:14px">
                             <div class="form-group">
-                                <label>หมดเวลาใน (นาที)</label>
-                                <input type="number" name="expiryMinutes" min="1" placeholder="เช่น 60 = 1 ชั่วโมง  (เว้นว่าง = ไม่กำหนด)">
+                                <label>ช่องข้อความ Discord *</label>
+                                <select name="channelId" id="create-bet-channel" required>
+                                    <option value="">⏳ กำลังโหลด...</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label>เงินเดิมพันขั้นต่ำ</label>
-                                <input type="number" name="minBet" value="<%= bet.minBet||1 %>" min="1" placeholder="1">
+                                <label>สีธีม Embed</label>
+                                <input type="color" name="color" value="#5865F2" style="height:36px;padding:2px 6px;width:100%">
                             </div>
                         </div>
-
-                        <!-- toggle เปิดรับ -->
+                        <div class="form-grid" style="margin-bottom:14px">
+                            <div class="form-group">
+                                <label>เดิมพันขั้นต่ำ</label>
+                                <input type="number" name="minBet" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>เดิมพันสูงสุด <span style="color:var(--muted)">(0 = ไม่จำกัด)</span></label>
+                                <input type="number" name="maxBet" value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:14px">
+                            <label>หมดเวลาใน (นาที — เว้นว่าง = ไม่กำหนด)</label>
+                            <input type="number" name="expiryMinutes" min="1" placeholder="เช่น 60 = 1 ชั่วโมง">
+                        </div>
                         <div class="toggle-row" style="margin-bottom:16px">
                             <div>
                                 <div class="toggle-label">เปิดรับเดิมพันทันที</div>
-                                <div class="toggle-desc">ปิดเพื่อสร้างเป็น draft ก่อนโพสต์</div>
+                                <div class="toggle-desc">ปิดเพื่อสร้างเป็น draft ก่อน</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="isOpen" value="true" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
-
-                        <button type="submit" class="btn btn-primary btn-block" style="font-size:14px;padding:12px">
-                            🚀 <%= bet.title ? 'รีเซ็ตและสร้างกิจกรรมใหม่' : 'สร้างกิจกรรมเดิมพัน' %>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            🎲 สร้างกิจกรรมเดิมพัน
                         </button>
                     </form>
                 </div>
             </div>
+
+            <!-- ─── รายการเดิมพันทั้งหมด ─── -->
+            <% if (!config.bettings || config.bettings.length === 0) { %>
+            <div style="text-align:center;padding:48px 20px;color:var(--muted)">
+                <div style="font-size:40px;margin-bottom:12px">🎲</div>
+                <div>ยังไม่มีกิจกรรมเดิมพัน — กดสร้างด้านบน!</div>
+            </div>
+            <% } %>
+
+            <% (config.bettings || []).forEach(function(bet) {
+                const betId   = bet.betId || (bet._id && bet._id.toString());
+                const poolA   = bet.poolA || 0;
+                const poolB   = bet.poolB || 0;
+                const total   = poolA + poolB;
+                const pctA    = total > 0 ? Math.round((poolA / total) * 100) : 50;
+                const pctB    = 100 - pctA;
+                const oddsA   = poolA > 0 ? (total / poolA).toFixed(2) : '—';
+                const oddsB   = poolB > 0 ? (total / poolB).toFixed(2) : '—';
+            %>
+            <div class="card" style="margin-bottom:20px">
+                <!-- Header -->
+                <div class="card-header">
+                    <div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        🎲 <%= bet.title || 'เดิมพัน' %>
+                        <% if (bet.winner) { %>
+                            <span class="badge badge-yellow">🏆 จบแล้ว</span>
+                        <% } else if (bet.isOpen) { %>
+                            <span class="badge badge-green">🟢 เปิดรับ</span>
+                        <% } else { %>
+                            <span class="badge badge-red">🔴 ปิด</span>
+                        <% } %>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                        <% if (!bet.winner) { %>
+                        <form action="/<%= guildId %>/toggle-bet/<%= betId %>" method="POST" style="margin:0">
+                            <button class="btn btn-sm <%= bet.isOpen ? 'btn-danger' : 'btn-success' %>">
+                                <%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>
+                            </button>
+                        </form>
+                        <% } %>
+                        <form action="/<%= guildId %>/repost-bet/<%= betId %>" method="POST" style="margin:0">
+                            <button class="btn btn-sm btn-secondary" title="โพสต์ embed ใหม่">📢 repost</button>
+                        </form>
+                        <a href="/<%= guildId %>/delete-bet/<%= betId %>"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('ลบการเดิมพัน <%- (bet.title||'นี้').replace(/'/g,\"'\") %>?')">🗑️ ลบ</a>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <!-- VS Display -->
+                    <div style="display:grid;grid-template-columns:1fr 48px 1fr;gap:12px;align-items:center;margin-bottom:16px">
+                        <div style="text-align:center">
+                            <% if (bet.imageA) { %>
+                                <img src="<%= bet.imageA %>" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid #5865F2;margin-bottom:6px;display:block;margin-left:auto;margin-right:auto">
+                            <% } else { %>
+                                <div style="width:72px;height:72px;border-radius:10px;background:rgba(88,101,242,0.12);border:2px solid rgba(88,101,242,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 6px">🔵</div>
+                            <% } %>
+                            <div style="font-weight:700;color:#7b8df8;font-size:14px"><%= bet.optionA||'ฝ่าย A' %></div>
+                            <div style="font-size:11px;color:var(--muted);margin-top:2px"><%= poolA.toLocaleString() %> <%= config.currencyEmoji||'🪙' %> · Odds <%= oddsA %>x</div>
+                        </div>
+                        <div style="text-align:center;font-weight:700;color:var(--muted);font-size:13px">VS</div>
+                        <div style="text-align:center">
+                            <% if (bet.imageB) { %>
+                                <img src="<%= bet.imageB %>" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid #ed4245;margin-bottom:6px;display:block;margin-left:auto;margin-right:auto">
+                            <% } else { %>
+                                <div style="width:72px;height:72px;border-radius:10px;background:rgba(237,66,69,0.12);border:2px solid rgba(237,66,69,0.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 6px">🔴</div>
+                            <% } %>
+                            <div style="font-weight:700;color:#f28f8f;font-size:14px"><%= bet.optionB||'ฝ่าย B' %></div>
+                            <div style="font-size:11px;color:var(--muted);margin-top:2px"><%= poolB.toLocaleString() %> <%= config.currencyEmoji||'🪙' %> · Odds <%= oddsB %>x</div>
+                        </div>
+                    </div>
+
+                    <!-- Pool bar -->
+                    <div style="margin-bottom:4px;display:flex;justify-content:space-between;font-size:11px">
+                        <span style="color:#7b8df8;font-weight:600"><%= pctA %>%</span>
+                        <span style="color:var(--muted)"><%= total.toLocaleString() %> <%= config.currencyEmoji||'🪙' %> · <%= (bet.bets||[]).length %> คน</span>
+                        <span style="color:#f28f8f;font-weight:600"><%= pctB %>%</span>
+                    </div>
+                    <div class="pool-bar" style="margin-bottom:12px">
+                        <div class="pool-bar-a" style="width:<%= pctA %>%"></div>
+                        <div class="pool-bar-b" style="width:<%= pctB %>%"></div>
+                    </div>
+
+                    <!-- Info row -->
+                    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap">
+                        <span>💰 ขั้นต่ำ <%= (bet.minBet||1).toLocaleString() %><% if(bet.maxBet>0){%> · สูงสุด <%= bet.maxBet.toLocaleString() %><%}%> <%= config.currencyEmoji||'🪙' %></span>
+                        <% if(bet.channelId){%><span>📢 #<%= bet.channelId %></span><%}%>
+                        <% if(bet.expiresAt){%><span>⏰ <%= new Date(bet.expiresAt).toLocaleString('th-TH') %></span><%}%>
+                        <% if(bet.description){%><span>📝 <%= bet.description %></span><%}%>
+                    </div>
+
+                    <!-- Winner banner หรือปุ่มประกาศผล -->
+                    <% if (bet.winner) { %>
+                    <div style="text-align:center;padding:12px;background:rgba(254,231,92,0.07);border:1px solid rgba(254,231,92,0.25);border-radius:8px;margin-bottom:12px">
+                        <span style="font-weight:700;color:var(--yellow)">🏆 ผู้ชนะ: <%= bet.winner==='A'?(bet.optionA||'ฝ่าย A'):(bet.optionB||'ฝ่าย B') %></span>
+                    </div>
+                    <% } else { %>
+                    <hr class="divider" style="margin:10px 0">
+                    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">ประกาศผลผู้ชนะ — ระบบปิดรับและส่งผลเข้า channel อัตโนมัติ</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+                        <form action="/<%= guildId %>/settle-bet/<%= betId %>" method="POST" style="margin:0">
+                            <input type="hidden" name="winner" value="A">
+                            <button type="submit" class="btn btn-block btn-sm" style="background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)" onclick="return confirm('ประกาศ <%- (bet.optionA||'ฝ่าย A').replace(/'/g,\"'\") %> ชนะ?')">
+                                🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ
+                            </button>
+                        </form>
+                        <form action="/<%= guildId %>/settle-bet/<%= betId %>" method="POST" style="margin:0">
+                            <input type="hidden" name="winner" value="B">
+                            <button type="submit" class="btn btn-block btn-sm" style="background:rgba(237,66,69,0.12);color:#f28f8f;border:1px solid rgba(237,66,69,0.3)" onclick="return confirm('ประกาศ <%- (bet.optionB||'ฝ่าย B').replace(/'/g,\"'\") %> ชนะ?')">
+                                🏆 <%= bet.optionB||'ฝ่าย B' %> ชนะ
+                            </button>
+                        </form>
+                    </div>
+                    <% } %>
+
+                    <!-- รายการผู้เดิมพัน (collapsible) -->
+                    <% if (bet.bets && bet.bets.length > 0) { %>
+                    <button class="btn btn-sm btn-secondary" onclick="toggleEl('bettors-<%= betId %>')" style="font-size:11px;margin-bottom:8px">
+                        👥 รายการผู้เดิมพัน (<%= bet.bets.length %> คน)
+                    </button>
+                    <div id="bettors-<%= betId %>" style="display:none">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                        <% bet.bets.forEach(function(b) { %>
+                            <div class="list-item" style="border-left:3px solid <%= b.option==='A'?'#5865F2':'#ed4245' %>;padding:6px 10px">
+                                <div class="list-item-left">
+                                    <span><%= b.option==='A'?'🔵':'🔴' %></span>
+                                    <div>
+                                        <div style="font-size:12px;font-weight:600"><%= b.username %></div>
+                                        <div style="font-size:11px;color:var(--muted)"><%= b.option==='A'?(bet.optionA||'A'):(bet.optionB||'B') %> · <%= b.amount.toLocaleString() %> <%= config.currencyEmoji||'🪙' %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            <% }) %>
         </div>
 
 
@@ -2518,27 +2483,36 @@
         }
     }
 
-    // ─── Load Discord channels via API ────────────────────
+    // ─── Load Discord channels for betting tab ────────────
+    let _bettingChannels = null;
     function loadChannels() {
-        const sel = document.getElementById('channel-select');
-        if (!sel || sel.dataset.loaded) return;
+        const sel = document.getElementById('create-bet-channel');
+        if (!sel) return;
+        if (_bettingChannels) { fillBetSelect(sel, ''); return; }
         fetch('/<%= guildId %>/betting-channels')
             .then(r => r.json())
             .then(channels => {
-                const current = '<%= (bet && bet.channelId) ? bet.channelId : "" %>';
-                sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
-                channels.forEach(ch => {
-                    const opt = document.createElement('option');
-                    opt.value = ch.id;
-                    opt.textContent = '# ' + ch.name;
-                    if (ch.id === current) opt.selected = true;
-                    sel.appendChild(opt);
-                });
-                sel.dataset.loaded = '1';
+                _bettingChannels = channels;
+                fillBetSelect(sel, '');
             })
             .catch(() => {
-                sel.innerHTML = '<option value="">⚠️ โหลด channels ไม่สำเร็จ — ลองรีเฟรช</option>';
+                if (sel) sel.innerHTML = '<option value="">⚠️ โหลด channels ไม่สำเร็จ</option>';
             });
+    }
+    function fillBetSelect(sel, current) {
+        if (!sel || !_bettingChannels) return;
+        sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
+        _bettingChannels.forEach(ch => {
+            const opt = document.createElement('option');
+            opt.value = ch.id;
+            opt.textContent = '# ' + ch.name;
+            if (ch.id === current) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+    function toggleEl(id) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
     }
 
     // ─── Store item image preview ────────────────────────
@@ -2581,26 +2555,6 @@
         fillSelect(selVoice, curVoice, '— ช่อง voice ที่ออก —');
     }
 
-    // ─── Countdown timer ──────────────────────────────────
-    <% if (typeof bet !== 'undefined' && bet && bet.expiresAt) { %>
-    (function() {
-        const el  = document.getElementById('bet-countdown');
-        if (!el) return;
-        const end = new Date('<%= bet.expiresAt %>').getTime();
-        function tick() {
-            const diff = end - Date.now();
-            if (diff <= 0) { el.textContent = '⏰ หมดเวลาแล้ว'; el.style.color = 'var(--red)'; return; }
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            el.textContent = h > 0
-                ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} เหลืออยู่`
-                : `${m}:${String(s).padStart(2,'0')} เหลืออยู่`;
-            setTimeout(tick, 1000);
-        }
-        tick();
-    })();
-    <% } %>
 
     // ─── On load ──────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {

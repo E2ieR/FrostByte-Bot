@@ -228,28 +228,33 @@ const guildConfigSchema = new mongoose.Schema({
         esportsTrackedTeams: { type: mongoose.Schema.Types.Mixed, default: {} },
     },
 
-    // ─── Betting ──────────────────────────────────────────
-    betting: {
-        isOpen:    { type: Boolean, default: false },
-        title:     { type: String,  default: '' },
-        imageA:    { type: String,  default: '' },
-        imageB:    { type: String,  default: '' },
-        optionA:   { type: String,  default: 'ฝ่าย A' },
-        optionB:   { type: String,  default: 'ฝ่าย B' },
-        poolA:     { type: Number,  default: 0 },
-        poolB:     { type: Number,  default: 0 },
-        channelId: { type: String,  default: '' },
-        messageId: { type: String,  default: '' },
-        expiresAt: { type: Date,    default: null },
-        minBet:    { type: Number,  default: 1 },
-        winner:    { type: String,  default: '' },
+    // ─── Bettings ─────────────────────────────────────────
+    bettings: [{
+        betId:       { type: String, default: () => new mongoose.Types.ObjectId().toString() },
+        isOpen:      { type: Boolean, default: false },
+        title:       { type: String,  default: '' },
+        description: { type: String,  default: '' },
+        imageA:      { type: String,  default: '' },
+        imageB:      { type: String,  default: '' },
+        optionA:     { type: String,  default: 'ฝ่าย A' },
+        optionB:     { type: String,  default: 'ฝ่าย B' },
+        color:       { type: String,  default: '#5865F2' },
+        poolA:       { type: Number,  default: 0 },
+        poolB:       { type: Number,  default: 0 },
+        channelId:   { type: String,  default: '' },
+        messageId:   { type: String,  default: '' },
+        expiresAt:   { type: Date,    default: null },
+        minBet:      { type: Number,  default: 1 },
+        maxBet:      { type: Number,  default: 0 },
+        winner:      { type: String,  default: '' },
+        createdAt:   { type: Date,    default: Date.now },
         bets: [{
             userId:   String,
             username: String,
             option:   String,
             amount:   Number
         }]
-    },
+    }],
 
     // ─── Disabled Commands ────────────────────────────────
     disabledCommands: { type: [String], default: [] },
