@@ -1671,7 +1671,7 @@
                         </form>
                         <a href="/<%= guildId %>/delete-bet/<%= betId %>"
                            class="btn btn-sm btn-danger"
-                           onclick="return confirm('ลบการเดิมพัน <%- (bet.title||'นี้').replace(/'/g,\"'\") %>?')">🗑️ ลบ</a>
+                           onclick="return confirm('ลบการเดิมพัน <%= (bet.title||'นี้').replace(/'/g,'') %>?')">🗑️ ลบ</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -1729,13 +1729,13 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
                         <form action="/<%= guildId %>/settle-bet/<%= betId %>" method="POST" style="margin:0">
                             <input type="hidden" name="winner" value="A">
-                            <button type="submit" class="btn btn-block btn-sm" style="background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)" onclick="return confirm('ประกาศ <%- (bet.optionA||'ฝ่าย A').replace(/'/g,\"'\") %> ชนะ?')">
+                            <button type="submit" class="btn btn-block btn-sm" style="background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)" onclick="return confirm('ประกาศ <%= (bet.optionA||'ฝ่าย A').replace(/'/g,'') %> ชนะ?')">
                                 🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ
                             </button>
                         </form>
                         <form action="/<%= guildId %>/settle-bet/<%= betId %>" method="POST" style="margin:0">
                             <input type="hidden" name="winner" value="B">
-                            <button type="submit" class="btn btn-block btn-sm" style="background:rgba(237,66,69,0.12);color:#f28f8f;border:1px solid rgba(237,66,69,0.3)" onclick="return confirm('ประกาศ <%- (bet.optionB||'ฝ่าย B').replace(/'/g,\"'\") %> ชนะ?')">
+                            <button type="submit" class="btn btn-block btn-sm" style="background:rgba(237,66,69,0.12);color:#f28f8f;border:1px solid rgba(237,66,69,0.3)" onclick="return confirm('ประกาศ <%= (bet.optionB||'ฝ่าย B').replace(/'/g,'') %> ชนะ?')">
                                 🏆 <%= bet.optionB||'ฝ่าย B' %> ชนะ
                             </button>
                         </form>
