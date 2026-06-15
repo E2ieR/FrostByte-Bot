@@ -12,28 +12,36 @@ const {
 const playdl = require('play-dl');
 
 // ─── Spotify token init ───────────────────────────────────────────────────────
-async function initSpotify() {
+async function initTokens() {
+    const tokenConfig = {};
+
+    if (process.env.YOUTUBE_COOKIE) {
+        tokenConfig.youtube = { cookie: process.env.YOUTUBE_COOKIE };
+    }
+
     if (
         process.env.SPOTIFY_CLIENT_ID &&
         process.env.SPOTIFY_CLIENT_SECRET &&
         process.env.SPOTIFY_REFRESH_TOKEN
     ) {
+        tokenConfig.spotify = {
+            client_id: process.env.SPOTIFY_CLIENT_ID,
+            client_secret: process.env.SPOTIFY_CLIENT_SECRET,
+            refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
+            market: 'TH',
+        };
+    }
+
+    if (Object.keys(tokenConfig).length > 0) {
         try {
-            await playdl.setToken({
-                spotify: {
-                    client_id: process.env.SPOTIFY_CLIENT_ID,
-                    client_secret: process.env.SPOTIFY_CLIENT_SECRET,
-                    refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
-                    market: 'TH',
-                },
-            });
-            console.log('[Music] Spotify token ตั้งค่าเรียบร้อย');
+            await playdl.setToken(tokenConfig);
+            console.log('[Music] Token ตั้งค่าเรียบร้อย');
         } catch (err) {
-            console.warn('[Music] ไม่สามารถตั้งค่า Spotify token:', err.message);
+            console.warn('[Music] ไม่สามารถตั้งค่า token:', err.message);
         }
     }
 }
-initSpotify();
+initTokens();
 
 // ─── Queue store ─────────────────────────────────────────────────────────────
 /** @type {Map<string, GuildQueue>} */
