@@ -153,7 +153,7 @@ async function resolveTracks(query, requestedBy) {
     const tracks = [];
 
     // ─── Spotify ───────────────────────────────────────────────
-    if (playdl.is_expired()) await playdl.refreshToken();
+    if (process.env.SPOTIFY_CLIENT_ID && playdl.is_expired()) await playdl.refreshToken();
 
     const spType = playdl.sp_validate ? await playdl.sp_validate(query).catch(() => false) : false;
 
