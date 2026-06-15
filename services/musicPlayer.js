@@ -155,7 +155,7 @@ async function resolveTracks(query, requestedBy) {
     // ─── Spotify ───────────────────────────────────────────────
     if (process.env.SPOTIFY_CLIENT_ID && playdl.is_expired()) await playdl.refreshToken();
 
-    const spType = playdl.sp_validate ? await playdl.sp_validate(query).catch(() => false) : false;
+    const spType = playdl.sp_validate ? playdl.sp_validate(query) : false;
 
     if (spType && spType !== false) {
         if (spType === 'track') {
