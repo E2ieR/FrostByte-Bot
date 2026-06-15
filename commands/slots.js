@@ -33,19 +33,19 @@ module.exports = {
             let resultMessage = '';
             let winAmount = 0;
 
+            userData.coins -= bet;
             if (slot1 === slot2 && slot2 === slot3) {
-                // ซ้ำกัน 3 ตัว (Jackpot! ได้ 5 เท่า)
+                // ซ้ำกัน 3 ตัว (Jackpot! คืน 5 เท่า)
                 winAmount = bet * 5;
                 userData.coins += winAmount;
                 resultMessage = `🎉 **JACKPOT!!** คุณชนะได้รับเงินคูณ 5 เท่า! ได้รับ **${winAmount}** เหรียญ!`;
             } else if (slot1 === slot2 || slot2 === slot3 || slot1 === slot3) {
-                // ซ้ำกัน 2 ตัว (ได้ 2 เท่า)
+                // ซ้ำกัน 2 ตัว (คืน 2 เท่า)
                 winAmount = bet * 2;
                 userData.coins += winAmount;
                 resultMessage = `✨ **ยินดีด้วย!** รูปซ้ำกัน 2 ช่อง ได้รับเงินคูณ 2 เท่า! ได้รับ **${winAmount}** เหรียญ!`;
             } else {
                 // ไม่ซ้ำเลย (เสียเงิน)
-                userData.coins -= bet;
                 resultMessage = `💸 **เสียใจด้วยคุณกินเรียบ!** คุณสูญเสียเงินเดิมพันไป **${bet}** เหรียญ`;
             }
 

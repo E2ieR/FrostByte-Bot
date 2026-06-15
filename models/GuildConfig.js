@@ -188,7 +188,7 @@ const guildConfigSchema = new mongoose.Schema({
     }],
     stickyRolesEnabled: { type: Boolean, default: false },
     reactionRoleGroups: [{
-        groupId:     { type: String, default: () => require('mongoose').Types.ObjectId().toString() },
+        groupId:     { type: String, default: () => new mongoose.Types.ObjectId().toString() },
         channelId:   { type: String, required: true },
         messageId:   { type: String, default: '' },    // ID ของ message ที่บอทส่ง
         title:       { type: String, default: 'เลือก Role' },

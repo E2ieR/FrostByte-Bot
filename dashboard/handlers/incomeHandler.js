@@ -74,10 +74,10 @@ async function handleVoiceBonus(oldState, newState) {
         let user = await User.findOne({ userId, guildId });
         if (!user) user = new User({ userId, guildId, coins: config.startCoins || 0 });
 
-        // เข้า voice — บันทึกเวลาเริ่ม (voiceJoinedAt ใช้ร่วมกับ XP system)
+        // เข้า voice — บันทึกเวลาเริ่ม (voiceBonusJoinedAt แยกจาก XP system)
         if (!wasInVoice && isInVoice) {
-            if (!user.voiceJoinedAt) {
-                user.voiceJoinedAt = new Date();
+            if (!user.voiceBonusJoinedAt) {
+                user.voiceBonusJoinedAt = new Date();
                 await user.save();
             }
             return;
@@ -85,9 +85,9 @@ async function handleVoiceBonus(oldState, newState) {
 
         // ออก voice — คำนวณนาที
         if (wasInVoice && !isInVoice) {
-            if (!user.voiceJoinedAt) return;
-            const minutes = (Date.now() - new Date(user.voiceJoinedAt).getTime()) / 60000;
-            user.voiceJoinedAt = null;
+            if (!user.voiceBonusJoinedAt) return;
+            const minutes = (Date.now() - new Date(user.voiceBonusJoinedAt).getTime()) / 60000;
+            user.voiceBonusJoinedAt = null;
             if (minutes < 1) { await user.save(); return; }
 
             const wasReset = resetIfNewDay(user, 'lastVoiceBonusDate', 'voiceMinutesToday');

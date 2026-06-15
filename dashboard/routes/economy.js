@@ -98,8 +98,10 @@ router.post('/:guildId/add-reply', async (req, res) => {
 });
 
 router.get('/:guildId/delete-reply/:index', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
     let config = await GuildConfig.findOne({ guildId: req.params.guildId });
-    config.workSituations.splice(req.params.index, 1);
+    if (!config) return res.redirect(`/manage/${req.params.guildId}?tab=work`);
+    config.workSituations.splice(parseInt(req.params.index), 1);
     config.markModified('workSituations');
     await config.save();
     res.redirect(`/manage/${req.params.guildId}?tab=work&delete_success=true`);

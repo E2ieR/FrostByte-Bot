@@ -48,6 +48,7 @@ const UserSchema = new mongoose.Schema({
     level:                    { type: Number, default: 0 },
     xpCooldownUntil:          { type: Date,   default: null },
     voiceJoinedAt:            { type: Date,   default: null }, // เริ่มนับ voice XP
+    voiceBonusJoinedAt:       { type: Date,   default: null }, // เริ่มนับ voice bonus (แยกจาก XP)
     reactionXpCooldownUntil:  { type: Date,   default: null },
     commandXpCooldownUntil:   { type: Date,   default: null },
 

@@ -67,14 +67,6 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     await handleVoiceBonus(oldState, newState);
 });
 
-// ─── messageReactionAdd — Reaction XP + React Bonus ──────────────────────
-client.on('messageReactionAdd', async (reaction, user) => {
-    if (user.bot) return;
-    if (reaction.partial) { try { await reaction.fetch(); } catch { return; } }
-    await handleReactionXp(reaction, user);
-    await handleReactBonus(reaction, user);
-});
-
 // ─── guildMemberAdd — Join Roles + Sticky Roles ───────────────────────────
 client.on('guildMemberAdd', async member => {
     try {
@@ -144,8 +136,8 @@ client.on('guildMemberRemove', async member => {
     }
     await handleMemberLeave(member);
 });
-client.on('guildBanAdd', async (guild, user) => {
-    await handleMemberBan(guild, user);
+client.on('guildBanAdd', async (ban) => {
+    await handleMemberBan(ban.guild, ban.user);
 });
 
 // ─── Reaction Role — Add ───────────────────────────────────────────────────
@@ -153,8 +145,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
     if (user.bot) return;
     if (reaction.partial) { try { await reaction.fetch(); } catch { return; } }
 
-    // Reaction XP
+    // Reaction XP + React Bonus
     await handleReactionXp(reaction, user);
+    await handleReactBonus(reaction, user);
 
     // Reaction Roles
     try {
@@ -290,6 +283,7 @@ client.on('interactionCreate', async interaction => {
             const User = require('./models/User');
             const config = await GuildConfig.findOne({ guildId: interaction.guild.id }) || {};
             let user = await User.findOne({ userId: ownerId, guildId: interaction.guild.id });
+            if (!user) return interaction.update({ content: '❌ ไม่พบบัญชีผู้ใช้', embeds: [], components: [] });
             const payout = Math.floor(game.bet * game.multiplier);
             user.coins += payout - game.bet;
             await user.save();

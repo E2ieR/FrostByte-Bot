@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
-app.use(session({ secret: 'ickez-super-secret-key', resave: false, saveUninitialized: false }));
+app.use(session({ secret: process.env.SESSION_SECRET || 'ickez-super-secret-key', resave: false, saveUninitialized: false }));
 
 // ทำให้ routes เข้าถึง discordClient ได้ผ่าน req.app.locals
 app.use((req, res, next) => {
