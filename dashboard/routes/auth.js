@@ -40,7 +40,8 @@ router.get('/manage/:guildId', async (req, res) => {
             guild,
             guildId,
             config,
-            discordRoles
+            discordRoles,
+            query: req.query
         });
     } catch (err) {
         console.error(err);

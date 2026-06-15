@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= guild.name %> — ICKEz Dashboard</title>
+    <title><%= guild.name %> — FrostByte Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -420,9 +420,12 @@
 <body>
 
 <!-- ─── TOAST ─── -->
-<% const qs = (typeof query !== 'undefined') ? query : {}; %>
-<% if (typeof success !== 'undefined' || (typeof query !== 'undefined' && query.success)) { %>
-<div class="toast success">✅ บันทึกการตั้งค่าเรียบร้อยแล้ว</div>
+<% if (query && query.success) { %>
+<div class="toast success" id="page-toast">✅ บันทึกการตั้งค่าเรียบร้อยแล้ว</div>
+<% } else if (query && query.delete_success) { %>
+<div class="toast success" id="page-toast">🗑️ ลบรายการเรียบร้อยแล้ว</div>
+<% } else if (query && query.settle_success) { %>
+<div class="toast success" id="page-toast">🏆 ประกาศผลการเดิมพันเรียบร้อยแล้ว</div>
 <% } %>
 
 <!-- ─── SIDEBAR ─── -->
@@ -500,6 +503,11 @@
         <div id="btn-sports" class="nav-item" onclick="switchTab('sports','btn-sports')">
             <span class="icon">🏆</span> แจ้งเตือนกีฬา
         </div>
+
+        <div class="nav-section">บันเทิง</div>
+        <div id="btn-music" class="nav-item" onclick="switchTab('music','btn-music')">
+            <span class="icon">🎵</span> ระบบเพลง
+        </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -526,7 +534,7 @@
             <span>›</span>
             <span style="color:var(--text)"><%= guild.name %></span>
         </div>
-        <div style="font-size:12px;color:var(--muted);">ICKEz Dashboard</div>
+        <div style="font-size:12px;color:var(--muted);">FrostByte Dashboard</div>
     </div>
 
     <div class="content-area">
@@ -2254,6 +2262,60 @@
             </div>
         </div>
 
+        <!-- ═══════════════════════════════
+             TAB: ระบบเพลง
+        ═══════════════════════════════ -->
+        <div id="tab-music" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🎵 ระบบเพลง</div>
+                    <span style="font-size:12px;color:var(--muted)">YouTube & Spotify — ใช้ใน Voice Channel</span>
+                </div>
+                <div class="card-body">
+                    <div class="section-label">คำสั่งที่ใช้งานได้</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:20px">
+                        <% [
+                            { cmd:'/play <query>', desc:'เล่นเพลงจาก YouTube หรือ Spotify (URL/ชื่อเพลง)', icon:'▶️' },
+                            { cmd:'/skip',          desc:'ข้ามเพลงปัจจุบัน',                               icon:'⏭' },
+                            { cmd:'/stop',          desc:'หยุดเพลงและล้าง Queue ทั้งหมด',                  icon:'⏹' },
+                            { cmd:'/pause',         desc:'หยุดเพลงชั่วคราว',                               icon:'⏸' },
+                            { cmd:'/resume',        desc:'เล่นเพลงต่อจากที่หยุดไว้',                       icon:'▶️' },
+                            { cmd:'/queue',         desc:'แสดงรายการเพลงใน Queue (pagination ทุก 10)',     icon:'📋' },
+                            { cmd:'/nowplaying',    desc:'แสดงเพลงปัจจุบัน พร้อม progress bar',            icon:'🎵' },
+                            { cmd:'/volume <1-100>',desc:'ปรับระดับเสียง',                                 icon:'🔊' },
+                            { cmd:'/loop',          desc:'สลับโหมด Loop (ปิด → เพลงนี้ → ทั้ง Queue)',    icon:'🔁' },
+                            { cmd:'/shuffle',       desc:'สุ่มลำดับเพลงใน Queue',                          icon:'🔀' },
+                            { cmd:'/remove <pos>',  desc:'ลบเพลงออกจาก Queue ตามลำดับ',                   icon:'🗑️' },
+                        ].forEach(c => { %>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+                            <span style="font-size:18px;flex-shrink:0;margin-top:1px"><%= c.icon %></span>
+                            <div>
+                                <div style="font-size:13px;font-weight:600;font-family:monospace;color:var(--blurple)"><%= c.cmd %></div>
+                                <div style="font-size:11px;color:var(--muted);margin-top:3px"><%= c.desc %></div>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+
+                    <div class="section-label">การตั้งค่า Spotify (ทำครั้งเดียว)</div>
+                    <div style="padding:16px 18px;background:rgba(30,215,96,0.06);border:1px solid rgba(30,215,96,0.2);border-radius:10px;font-size:13px;line-height:1.8">
+                        <div style="font-weight:600;color:#1ed760;margin-bottom:8px">🎧 วิธีเปิดใช้งาน Spotify</div>
+                        <ol style="padding-left:18px;color:var(--muted)">
+                            <li>ไปที่ <strong style="color:var(--text)">developer.spotify.com/dashboard</strong> → สร้าง App ใหม่</li>
+                            <li>คัดลอก <strong style="color:var(--text)">Client ID</strong> และ <strong style="color:var(--text)">Client Secret</strong></li>
+                            <li>ทำ Authorization Code Flow เพื่อรับ <strong style="color:var(--text)">Refresh Token</strong></li>
+                            <li>ใส่ทั้งสามค่าใน <code style="background:var(--surface);padding:1px 5px;border-radius:4px">.env</code></li>
+                        </ol>
+                        <div style="margin-top:10px;padding:10px 12px;background:var(--surface);border-radius:8px;font-family:monospace;font-size:12px;color:var(--muted)">
+                            SPOTIFY_CLIENT_ID=<span style="color:var(--blurple)">your_id</span><br>
+                            SPOTIFY_CLIENT_SECRET=<span style="color:var(--blurple)">your_secret</span><br>
+                            SPOTIFY_REFRESH_TOKEN=<span style="color:var(--blurple)">your_token</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div><!-- end content-area -->
 </div><!-- end main -->
 
@@ -2449,18 +2511,39 @@
 <script>
     // ─── Tab switching ───────────────────────────────────
     function switchTab(name, btnId) {
+        const panel = document.getElementById('tab-' + name);
+        const btn   = document.getElementById(btnId);
+        if (!panel || !btn) return;
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('tab-' + name).classList.add('active');
-        document.getElementById(btnId).classList.add('active');
-        if (name === 'betting')  loadChannels();
+        panel.classList.add('active');
+        btn.classList.add('active');
+        if (name === 'betting')      loadChannels();
         if (name === 'active-bonus') loadActiveChannel();
-        if (name === 'members')  loadMembers(1);
-        if (name === 'level')    loadLevelChannels();
-        if (name === 'autorole') loadArChannels();
-        if (name === 'sports')   loadSportsChannels();
-        if (name === 'commands') loadCommandGrid();
+        if (name === 'members')      loadMembers(1);
+        if (name === 'level')        loadLevelChannels();
+        if (name === 'autorole')     loadArChannels();
+        if (name === 'sports')       loadSportsChannels();
+        if (name === 'commands')     loadCommandGrid();
+        history.replaceState(null, '', '?tab=' + name);
     }
+
+    // ─── Restore tab from URL ────────────────────────────
+    (function () {
+        const _tab = new URLSearchParams(window.location.search).get('tab');
+        if (_tab) switchTab(_tab, 'btn-' + _tab);
+
+        // Auto-dismiss toast
+        const _toast = document.getElementById('page-toast');
+        if (_toast) {
+            _toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            setTimeout(() => {
+                _toast.style.opacity = '0';
+                _toast.style.transform = 'translateX(20px)';
+                setTimeout(() => _toast.remove(), 400);
+            }, 3000);
+        }
+    })();
 
     // ─── Store stock toggle ───────────────────────────────
     function toggleStock() {
