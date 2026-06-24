@@ -44,12 +44,6 @@ module.exports = {
         const sub = interaction.options.getSubcommand();
         await interaction.deferReply();
 
-        if (!process.env.FOOTBALL_API_KEY) {
-            return interaction.editReply({
-                content: '⚠️ ระบบฟุตบอลต้องการ `FOOTBALL_API_KEY` ใน .env\nรับได้ฟรีที่ https://www.football-data.org/client/register',
-            });
-        }
-
         try {
             // ── แมตช์ที่กำลังจะมาถึง ─────────────────────────────────────────
             if (sub === 'matches') {
@@ -70,7 +64,7 @@ module.exports = {
                     });
                 }
 
-                embed.setFooter({ text: 'ใช้ /football lineup match_id: เพื่อดู lineup • football-data.org' });
+                embed.setFooter({ text: 'ใช้ /football lineup match_id: เพื่อดู lineup • espn.com' });
                 return interaction.editReply({ embeds: [embed] });
             }
 
@@ -94,7 +88,7 @@ module.exports = {
                     });
                 }
 
-                embed.setFooter({ text: 'football-data.org' });
+                embed.setFooter({ text: 'espn.com' });
                 return interaction.editReply({ embeds: [embed] });
             }
 
@@ -128,7 +122,7 @@ module.exports = {
                             inline: true,
                         },
                     )
-                    .setFooter({ text: `Match ID: ${matchId} • football-data.org` })
+                    .setFooter({ text: `Match ID: ${matchId} • espn.com` })
                     .setTimestamp();
 
                 if (lineup.homeBench?.length) {
@@ -165,7 +159,7 @@ module.exports = {
                     .setDescription(`\`\`\`\n${table.map(t =>
                         `${String(t.pos).padStart(2)}. ${t.team.substring(0,16).padEnd(16)} ${String(t.played).padStart(2)}G ${String(t.pts).padStart(3)}pts GD${t.gd >= 0 ? '+' : ''}${String(t.gd).padStart(3)}`
                     ).join('\n')}\`\`\``)
-                    .setFooter({ text: 'football-data.org' })
+                    .setFooter({ text: 'espn.com' })
                     .setTimestamp();
 
                 return interaction.editReply({ embeds: [embed] });

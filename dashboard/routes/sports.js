@@ -1,6 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const GuildConfig = require('../../models/GuildConfig');
+const { searchFotMob, getLeagueTeams } = require('../../services/footballService');
 
 // ─── GET channels (AJAX) ──────────────────────────────────────────────────────
 router.get('/api/:guildId/sports-channels', async (req, res) => {
@@ -15,6 +16,33 @@ router.get('/api/:guildId/sports-channels', async (req, res) => {
             .sort((a, b) => a.name.localeCompare(b.name));
         res.json(channels);
     } catch {
+        res.json([]);
+    }
+});
+
+// ─── GET ทีมทั้งหมดในลีก ─────────────────────────────────────────────────────
+router.get('/api/:guildId/football-league-teams', async (req, res) => {
+    const { league } = req.query;
+    if (!league) return res.json([]);
+    try {
+        const teams = await getLeagueTeams(league);
+        res.json(teams);
+    } catch (err) {
+        console.error('[LeagueTeams]', err.message);
+        res.json([]);
+    }
+});
+
+// ─── GET ค้นหาทีม / นักเตะ จาก FotMob ───────────────────────────────────────
+router.get('/api/:guildId/football-search', async (req, res) => {
+    const { q, type } = req.query;
+    if (!q || q.trim().length < 2) return res.json([]);
+    try {
+        const results = await searchFotMob(q.trim(), type === 'player' ? 'player' : 'team');
+        console.log(`[FootballSearch] q="${q}" type=${type} → ${results.length} results`);
+        res.json(Array.isArray(results) ? results : []);
+    } catch (err) {
+        console.error('[FootballSearch] unhandled:', err.message);
         res.json([]);
     }
 });
@@ -43,9 +71,8 @@ router.post('/api/:guildId/sports', async (req, res) => {
             footballEnabled:      !!b.footballEnabled,
             footballChannelId:    b.footballChannelId || '',
             footballLeagues:      [].concat(b.footballLeagues || []).filter(Boolean),
-            footballTeams:        typeof b.footballTeams === 'string'
-                ? b.footballTeams.split(',').map(t => t.trim()).filter(Boolean)
-                : [].concat(b.footballTeams || []).filter(Boolean),
+            footballTeams:        Array.isArray(b.footballTeams) ? b.footballTeams : [],
+            footballPlayers:      Array.isArray(b.footballPlayers) ? b.footballPlayers : [],
             footballNotifyBefore: parseInt(b.footballNotifyBefore) || 30,
             footballNotifyLive:   !!b.footballNotifyLive,
             footballNotifyLineup: !!b.footballNotifyLineup,

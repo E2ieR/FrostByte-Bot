@@ -192,9 +192,12 @@ async function checkFootball() {
         for (const cfg of configs) {
             const n = cfg.sportsNotifications || {};
             if (!n.footballEnabled || !n.footballChannelId) continue;
-            const leagues  = n.footballLeagues?.length ? n.footballLeagues : ['PL'];
-            const alertMs  = (n.footballNotifyBefore || 30) * 60 * 1000;
-            const followed = (n.footballTeams || []).map(t => t.toLowerCase());
+            const leagues        = n.footballLeagues?.length ? n.footballLeagues : ['PL'];
+            const alertMs        = (n.footballNotifyBefore || 30) * 60 * 1000;
+            const followedTeams  = n.footballTeams || [];
+            const followedIds    = followedTeams.map(t => t.id).filter(Boolean);
+            const followedNames  = followedTeams.map(t => (t.name || '').toLowerCase()).filter(Boolean);
+            const hasTeamFilter  = followedIds.length > 0 || followedNames.length > 0;
 
             for (const league of leagues) {
                 let matches = [];
@@ -204,12 +207,13 @@ async function checkFootball() {
                     if (!m.dateTime) continue;
 
                     // กรองตามทีมที่ติดตาม (ถ้ากำหนด)
-                    if (followed.length > 0) {
-                        const match = followed.some(t =>
+                    if (hasTeamFilter) {
+                        const byId   = followedIds.some(id => m.homeTeamId === id || m.awayTeamId === id);
+                        const byName = followedNames.some(t =>
                             m.homeTeam.toLowerCase().includes(t) ||
                             m.awayTeam.toLowerCase().includes(t)
                         );
-                        if (!match) continue;
+                        if (!byId && !byName) continue;
                     }
 
                     const key = `fb_${cfg.guildId}_${m.id}`;
@@ -251,15 +255,19 @@ async function checkFootballLive() {
         for (const cfg of configs) {
             const n = cfg.sportsNotifications || {};
             if (!n.footballEnabled || !n.footballChannelId) continue;
-            const followed = (n.footballTeams || []).map(t => t.toLowerCase());
+            const followedTeams = n.footballTeams || [];
+            const followedIds   = followedTeams.map(t => t.id).filter(Boolean);
+            const followedNames = followedTeams.map(t => (t.name || '').toLowerCase()).filter(Boolean);
+            const hasFilter     = followedIds.length > 0 || followedNames.length > 0;
 
             for (const m of liveMatches) {
-                if (followed.length > 0) {
-                    const match = followed.some(t =>
+                if (hasFilter) {
+                    const byId   = followedIds.some(id => m.homeTeamId === id || m.awayTeamId === id);
+                    const byName = followedNames.some(t =>
                         m.homeTeam.toLowerCase().includes(t) ||
                         m.awayTeam.toLowerCase().includes(t)
                     );
-                    if (!match) continue;
+                    if (!byId && !byName) continue;
                 }
 
                 const key = `fb_live_${cfg.guildId}_${m.id}`;

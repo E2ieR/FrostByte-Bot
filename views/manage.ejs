@@ -415,6 +415,40 @@
         }
         .inv-row-name { font-weight: 500; }
         .inv-row-right { display: flex; align-items: center; gap: 8px; }
+
+        /* ─── SEARCH CHIPS ─── */
+        .search-chips-wrap { position: relative; margin-bottom: 4px; }
+        .search-dropdown {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: 8px; z-index: 200;
+            max-height: 220px; overflow-y: auto; display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .search-dropdown.open { display: block; }
+        .sd-item {
+            padding: 9px 14px; font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; transition: background .1s;
+        }
+        .sd-item:hover { background: var(--surface2); }
+        .sd-item-sub { font-size: 11px; color: var(--muted); }
+        .sd-empty { padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
+        .chips-container {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            min-height: 30px; padding: 6px 0;
+        }
+        .chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; background: rgba(88,101,242,0.12);
+            border: 1px solid rgba(88,101,242,0.3); border-radius: 20px;
+            font-size: 12px; font-weight: 500;
+        }
+        .chip-rm {
+            background: none; border: none; color: var(--muted);
+            cursor: pointer; padding: 0 0 0 2px; font-size: 14px;
+            line-height: 1; transition: color .1s;
+        }
+        .chip-rm:hover { color: var(--red); }
     </style>
 </head>
 <body>
@@ -2178,13 +2212,11 @@
                     </label>
                 </div>
                 <div class="card-body">
-                    <div style="margin-bottom:14px;padding:10px 14px;background:rgba(254,231,92,0.08);border:1px solid rgba(254,231,92,0.2);border-radius:8px;font-size:12px">
-                        🔑 ต้องการ <strong>FOOTBALL_API_KEY</strong> ใน .env — รับฟรีที่
-                        <a href="https://www.football-data.org/client/register" target="_blank" style="color:var(--blurple)">football-data.org</a>
-                        (100 req/วัน ใน free tier)
+                    <div style="margin-bottom:14px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted)">
+                        📡 ข้อมูลจาก <strong style="color:var(--text)">FotMob</strong> — ไม่ต้องใช้ API key ครอบคลุมทุกลีก ทีมชาติ และนักเตะทั่วโลก
                     </div>
 
-                    <div class="form-grid" style="margin-bottom:14px">
+                    <div class="form-grid" style="margin-bottom:18px">
                         <div class="form-group">
                             <label>📢 Channel แจ้งเตือน</label>
                             <select id="sp-fb-channel" class="form-input">
@@ -2198,21 +2230,41 @@
                     </div>
 
                     <div class="section-label">ลีกที่ต้องการติดตาม</div>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:12px">
                         <% const fbLeagues = sn.footballLeagues || ['PL']; %>
-                        <% [['PL','🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'],['BL1','🇩🇪 Bundesliga'],['SA','🇮🇹 Serie A'],['PD','🇪🇸 La Liga'],['FL1','🇫🇷 Ligue 1'],['CL','⭐ UCL']].forEach(([code,name]) => { %>
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                            <input type="checkbox" class="sp-fb-league" value="<%= code %>" <%= fbLeagues.includes(code) ? 'checked' : '' %>> <%- name %>
+                        <% [['PL','🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League'],['BL1','🇩🇪 Bundesliga'],['SA','🇮🇹 Serie A'],['PD','🇪🇸 La Liga'],['FL1','🇫🇷 Ligue 1'],['CL','⭐ Champions League'],['EL','🟠 Europa League'],['PPL','🇵🇹 Primeira Liga'],['DED','🇳🇱 Eredivisie']].forEach(([code,name]) => { %>
+                        <label style="display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;transition:border-color .15s" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+                            <input type="checkbox" class="sp-fb-league" value="<%= code %>" <%= fbLeagues.includes(code) ? 'checked' : '' %> style="accent-color:var(--blurple)" onchange="onFbLeagueToggle(this)"> <%- name %>
                         </label>
                         <% }) %>
                     </div>
 
-                    <div class="form-group" style="margin-bottom:14px">
-                        <label>👥 ทีมที่ติดตาม (คั่นด้วยเครื่องหมายคอมม่า)</label>
-                        <input type="text" id="sp-fb-teams" placeholder="เช่น Liverpool, Manchester City, Arsenal"
-                               value="<%= (sn.footballTeams || []).join(', ') %>">
-                        <span style="font-size:11px;color:var(--muted)">เว้นว่างไว้ = แจ้งทุกแมตช์ของลีกที่เลือก</span>
+                    <!-- ทีมจากลีกที่เลือก -->
+                    <div id="fb-league-teams-panel" style="display:none;margin-bottom:18px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+                        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
+                            เลือกทีมจากลีก <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">— คลิกเพื่อเลือก/ยกเลิก</span>
+                        </div>
+                        <div id="fb-league-teams-body" style="display:flex;flex-direction:column;gap:12px"></div>
                     </div>
+
+                    <!-- ค้นหาทีมชาติ / ทีมอื่น -->
+                    <div class="section-label">ค้นหาทีมชาติหรือทีมอื่น <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(ที่ไม่อยู่ในลีกข้างต้น)</span></div>
+                    <div class="search-chips-wrap" style="margin-bottom:6px">
+                        <input type="text" id="fb-team-search" placeholder="🔍 เช่น Thailand, Brazil, Japan..." autocomplete="off" oninput="debounceFbSearch('team',this.value)">
+                        <div class="search-dropdown" id="fb-team-dd"></div>
+                    </div>
+
+                    <!-- ทีมที่เลือกแล้ว -->
+                    <div class="section-label" style="margin-top:14px">ทีมที่เลือก <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(เว้นว่าง = แจ้งทุกแมตช์ของลีกที่เลือก)</span></div>
+                    <div class="chips-container" id="fb-teams-chips" style="margin-bottom:20px;min-height:32px"></div>
+
+                    <!-- นักเตะ -->
+                    <div class="section-label">นักเตะที่ติดตาม <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(แจ้งเตือนเมื่อ Lineup ประกาศ)</span></div>
+                    <div class="search-chips-wrap" style="margin-bottom:6px">
+                        <input type="text" id="fb-player-search" placeholder="🔍 เช่น Haaland, Mbappe, Salah..." autocomplete="off" oninput="debounceFbSearch('player',this.value)">
+                        <div class="search-dropdown" id="fb-player-dd"></div>
+                    </div>
+                    <div class="chips-container" id="fb-players-chips" style="margin-bottom:20px;min-height:32px"></div>
 
                     <div class="toggle-row" style="margin-bottom:10px">
                         <div>
@@ -2227,7 +2279,7 @@
                     <div class="toggle-row">
                         <div>
                             <div class="toggle-label">แจ้งเตือน Lineup</div>
-                            <div class="toggle-desc">ส่ง lineup เมื่อประกาศ (ต้องการ API key)</div>
+                            <div class="toggle-desc">ส่ง lineup ของทีมที่ติดตามเมื่อประกาศ</div>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="sp-fb-lineup" <%= sn.footballNotifyLineup !== false ? 'checked' : '' %>>
@@ -3527,6 +3579,168 @@
                 });
             }
         } catch (e) { console.error('[Sports channels]', e); }
+
+        // init football section — โหลดทีมลีกที่บันทึกไว้แล้ว
+        renderFbChips('team');
+        renderFbChips('player');
+        const preChecked = [...document.querySelectorAll('.sp-fb-league:checked')].map(c => c.value);
+        if (preChecked.length) {
+            await loadFbLeagueTeams(preChecked);
+            renderFbLeaguePicker();
+        }
+    }
+
+    // ─── Football: State ──────────────────────────────────────────────────────
+    const FB_LEAGUE_NAMES = {
+        PL:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', BL1:'🇩🇪 Bundesliga', SA:'🇮🇹 Serie A',
+        PD:'🇪🇸 La Liga', FL1:'🇫🇷 Ligue 1', CL:'⭐ Champions League',
+        EL:'🟠 Europa League', PPL:'🇵🇹 Primeira Liga', DED:'🇳🇱 Eredivisie',
+    };
+    let fbTeams   = <%- JSON.stringify((sn.footballTeams || []).map(t => typeof t === 'string' ? {id:0,name:t,country:''} : t)) %>;
+    let fbPlayers = <%- JSON.stringify(sn.footballPlayers || []) %>;
+    let fbLeagueCache  = {};   // { PL: [{id,name,country},...] }
+    let fbLeagueLoading = new Set();
+    let fbSearchTimer   = null;
+    let fbSearchResults = { team: [], player: [] };
+
+    // ─── Chips ────────────────────────────────────────────────────────────────
+    function renderFbChips(type) {
+        const items = type === 'team' ? fbTeams : fbPlayers;
+        const el = document.getElementById(type === 'team' ? 'fb-teams-chips' : 'fb-players-chips');
+        if (!el) return;
+        if (!items.length) {
+            el.innerHTML = '<span style="color:var(--muted);font-size:12px">ยังไม่ได้เลือก</span>';
+            return;
+        }
+        el.innerHTML = items.map((it, i) => {
+            const sub = type === 'team'
+                ? (it.country ? ` <span style="color:var(--muted);font-size:11px">· ${it.country}</span>` : '')
+                : (it.teamName ? ` <span style="color:var(--muted);font-size:11px">· ${it.teamName}</span>` : '');
+            return `<span class="chip">${it.name}${sub}<button class="chip-rm" type="button" onclick="removeFbChip('${type}',${i})">×</button></span>`;
+        }).join('');
+    }
+
+    function removeFbChip(type, idx) {
+        if (type === 'team') { fbTeams.splice(idx, 1); renderFbChips('team'); renderFbLeaguePicker(); }
+        else                 { fbPlayers.splice(idx, 1); renderFbChips('player'); }
+    }
+
+    // ─── League → Team Picker ─────────────────────────────────────────────────
+    async function onFbLeagueToggle(checkbox) {
+        if (checkbox.checked && !fbLeagueCache[checkbox.value]) {
+            await loadFbLeagueTeams([checkbox.value]);
+        }
+        renderFbLeaguePicker();
+    }
+
+    async function loadFbLeagueTeams(codes) {
+        const toLoad = codes.filter(c => !fbLeagueCache[c] && !fbLeagueLoading.has(c));
+        if (!toLoad.length) return;
+        toLoad.forEach(c => fbLeagueLoading.add(c));
+        renderFbLeaguePicker();
+        await Promise.all(toLoad.map(async code => {
+            try {
+                const r = await fetch(`/api/${GUILD_ID}/football-league-teams?league=${code}`);
+                fbLeagueCache[code] = await r.json();
+            } catch { fbLeagueCache[code] = []; }
+            fbLeagueLoading.delete(code);
+        }));
+    }
+
+    function renderFbLeaguePicker() {
+        const checked = [...document.querySelectorAll('.sp-fb-league:checked')].map(c => c.value);
+        const panel = document.getElementById('fb-league-teams-panel');
+        const body  = document.getElementById('fb-league-teams-body');
+        if (!panel || !body) return;
+        if (!checked.length) { panel.style.display = 'none'; return; }
+        panel.style.display = 'block';
+
+        body.innerHTML = checked.map(code => {
+            const label   = FB_LEAGUE_NAMES[code] || code;
+            const loading = fbLeagueLoading.has(code);
+            const teams   = fbLeagueCache[code] || [];
+
+            let inner;
+            if (loading) {
+                inner = '<span style="color:var(--muted);font-size:12px">⏳ กำลังโหลด...</span>';
+            } else if (!teams.length) {
+                inner = '<span style="color:var(--muted);font-size:12px">ไม่พบข้อมูลทีม</span>';
+            } else {
+                inner = teams.map(t => {
+                    const sel = fbTeams.some(ft => ft.id === t.id);
+                    const style = sel
+                        ? 'border-color:var(--blurple);background:rgba(88,101,242,0.18);color:var(--blurple)'
+                        : 'border-color:var(--border);background:var(--bg);color:var(--text)';
+                    return `<button type="button" onclick="toggleFbTeam(${t.id},${JSON.stringify(t.name)},${JSON.stringify(t.country||'')})"
+                        style="padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;
+                               transition:all .12s;border:1px solid;${style}"
+                    >${sel ? '✓ ' : ''}${t.name}</button>`;
+                }).join('');
+            }
+            return `<div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">${label}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:5px">${inner}</div></div>`;
+        }).join('');
+    }
+
+    function toggleFbTeam(id, name, country) {
+        const idx = fbTeams.findIndex(t => t.id === id);
+        if (idx >= 0) fbTeams.splice(idx, 1);
+        else fbTeams.push({ id, name, country });
+        renderFbChips('team');
+        renderFbLeaguePicker();
+    }
+
+    // ─── Search (national teams / players) ────────────────────────────────────
+    function debounceFbSearch(type, val) {
+        clearTimeout(fbSearchTimer);
+        const dd = document.getElementById(type === 'team' ? 'fb-team-dd' : 'fb-player-dd');
+        if (!val || val.trim().length < 2) {
+            if (dd) { dd.innerHTML = ''; dd.classList.remove('open'); }
+            return;
+        }
+        fbSearchTimer = setTimeout(() => doFbSearch(type, val.trim()), 380);
+    }
+
+    async function doFbSearch(type, q) {
+        const ddEl = document.getElementById(type === 'team' ? 'fb-team-dd' : 'fb-player-dd');
+        if (!ddEl) return;
+        ddEl.innerHTML = '<div class="sd-empty">🔍 กำลังค้นหา...</div>';
+        ddEl.classList.add('open');
+        try {
+            const resp = await fetch(`/api/${GUILD_ID}/football-search?q=${encodeURIComponent(q)}&type=${type}`);
+            if (!resp.ok) {
+                ddEl.innerHTML = `<div class="sd-empty">ข้อผิดพลาด HTTP ${resp.status}</div>`;
+                return;
+            }
+            const results = await resp.json();
+            const list = Array.isArray(results) ? results : [];
+            fbSearchResults[type] = list;
+            if (!list.length) { ddEl.innerHTML = '<div class="sd-empty">ไม่พบผลลัพธ์</div>'; return; }
+            ddEl.innerHTML = list.map((item, idx) => {
+                const sub = type === 'team' ? (item.country||'') : (item.teamName||'');
+                return `<div class="sd-item" onmousedown="pickFbResult('${type}',${idx})">
+                    <span style="font-size:15px">${type==='team'?'🏟️':'🧑'}</span>
+                    <div><div style="font-weight:500">${item.name||''}</div>${sub?`<div class="sd-item-sub">${sub}</div>`:''}</div>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            console.error('[FB Search]', err);
+            ddEl.innerHTML = `<div class="sd-empty">เกิดข้อผิดพลาด: ${err.message}</div>`;
+        }
+    }
+
+    function pickFbResult(type, idx) {
+        const item = fbSearchResults[type]?.[idx];
+        if (!item) return;
+        if (type === 'team') {
+            if (!fbTeams.some(t => t.id === item.id)) { fbTeams.push(item); renderFbChips('team'); renderFbLeaguePicker(); }
+        } else {
+            if (!fbPlayers.some(p => p.id === item.id)) { fbPlayers.push(item); renderFbChips('player'); }
+        }
+        const input = document.getElementById(type === 'team' ? 'fb-team-search' : 'fb-player-search');
+        const dd    = document.getElementById(type === 'team' ? 'fb-team-dd'     : 'fb-player-dd');
+        if (input) input.value = '';
+        if (dd) { dd.innerHTML = ''; dd.classList.remove('open'); }
     }
 
     async function saveSportsSettings(btn) {
@@ -3556,7 +3770,8 @@
             footballEnabled:      document.getElementById('sp-fb-enabled')?.checked,
             footballChannelId:    document.getElementById('sp-fb-channel')?.value || '',
             footballLeagues,
-            footballTeams:        document.getElementById('sp-fb-teams')?.value || '',
+            footballTeams:        fbTeams,
+            footballPlayers:      fbPlayers,
             footballNotifyBefore: parseInt(document.getElementById('sp-fb-before')?.value) || 30,
             footballNotifyLive:   document.getElementById('sp-fb-live')?.checked,
             footballNotifyLineup: document.getElementById('sp-fb-lineup')?.checked,
