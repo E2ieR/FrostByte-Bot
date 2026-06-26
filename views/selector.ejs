@@ -19,6 +19,7 @@
             --green:    #57F287;
             --text:     #e8eaf0;
             --muted:    #7b7f8e;
+            --accent-glow: rgba(88,101,242,0.25);
         }
 
         body {
@@ -39,6 +40,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 1px 0 rgba(88,101,242,0.12);
         }
 
         .nav-brand {
@@ -47,10 +49,11 @@
         }
         .nav-brand .dot {
             width: 32px; height: 32px;
-            background: var(--blurple);
+            background: linear-gradient(135deg, var(--blurple) 0%, #7b8df8 100%);
             border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 16px;
+            box-shadow: 0 2px 8px rgba(88,101,242,0.35);
         }
 
         .nav-user {
@@ -145,7 +148,11 @@
             gap: 16px;
             transition: border-color 0.15s, background 0.15s;
         }
-        .guild-card:hover { border-color: #3d4152; background: var(--surface2); }
+        .guild-card:hover {
+            border-color: rgba(88,101,242,0.5);
+            background: var(--surface2);
+            box-shadow: 0 0 0 1px rgba(88,101,242,0.12), 0 4px 20px rgba(88,101,242,0.1);
+        }
 
         .guild-icon {
             width: 46px; height: 46px;
@@ -186,8 +193,8 @@
             text-decoration: none; border: none; cursor: pointer;
             font-family: inherit; transition: all 0.15s;
         }
-        .btn-primary { background: var(--blurple); color: #fff; }
-        .btn-primary:hover { background: var(--blurple-h); }
+        .btn-primary { background: linear-gradient(135deg, var(--blurple) 0%, #7b8df8 100%); color: #fff; }
+        .btn-primary:hover { background: linear-gradient(135deg, var(--blurple-h) 0%, var(--blurple) 100%); }
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
