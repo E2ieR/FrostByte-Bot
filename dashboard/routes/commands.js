@@ -24,6 +24,8 @@ router.get('/api/:guildId/commands-list', (req, res) => {
         { name: 'esports',    category: 'sports',   label: '/esports',    desc: 'ข้อมูล Esports' },
         { name: 'f1',         category: 'sports',   label: '/f1',         desc: 'ข้อมูล Formula 1' },
         { name: 'football',   category: 'sports',   label: '/football',   desc: 'ข้อมูลฟุตบอล' },
+        { name: 'worldcup',   category: 'sports',   label: '/worldcup',   desc: 'FIFA World Cup 2026' },
+        { name: 'music',      category: 'other',    label: '/music',      desc: 'ระบบเพลง' },
         { name: 'items',      category: 'other',    label: '/items',      desc: 'จัดการไอเทม' },
         { name: 'fun',        category: 'other',    label: '/fun',        desc: 'คำสั่งสนุก' },
         { name: 'admin-money',category: 'other',    label: '/admin-money',desc: 'จัดการเงิน (Admin)' },
