@@ -48,17 +48,29 @@ function _getCached(key, ttl = _CACHE_TTL) {
 }
 function _setCached(key, data) { _cache.set(key, { data, ts: Date.now() }); }
 
-async function fetchPage(wiki, path) {
-    await delay(2000); // Liquipedia rate limit
-    const url = `${BASE}/${wiki}${path}`;
-    const { data } = await axios.get(url, {
-        headers: {
-            'User-Agent': 'ICKEzBot/1.0 (Discord Economy Bot; contact via Discord)',
-            'Accept-Language': 'en-US,en;q=0.9',
-        },
-        timeout: 10000,
+// Global queue: serialize ทุก Liquipedia request เพื่อไม่ให้ rate-limit
+// (หลาย concurrent call จะรอคิว ไม่ hit พร้อมกัน)
+let _liqQueue = Promise.resolve();
+function fetchPage(wiki, path) {
+    return new Promise((resolve, reject) => {
+        _liqQueue = _liqQueue.then(async () => {
+            await delay(2500); // 2.5 วิ ระหว่าง requests
+            const url = `${BASE}/${wiki}${path}`;
+            try {
+                const { data } = await axios.get(url, {
+                    headers: {
+                        'User-Agent': 'ICKEzBot/1.0 (Discord Economy Bot; contact via Discord)',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    },
+                    timeout: 15000,
+                });
+                resolve(cheerio.load(data));
+            } catch (err) {
+                reject(err);
+            }
+            // always return undefined so queue chain continues
+        });
     });
-    return cheerio.load(data);
 }
 
 // path ของหน้า upcoming matches แต่ละ wiki (บาง wiki ใช้ path ต่างกัน)
@@ -283,7 +295,7 @@ async function getTeamsByRegion(game) {
                 if (cleanPath && cleanPath !== '/Portal:Teams') subPagePaths.add(cleanPath);
             }
         });
-        console.log(`[Teams ${game}] sub-pages found: ${[...subPagePaths].join(', ') || 'none'}`);
+        console.log(`[Teams ${game}] sub-pages: ${[...subPagePaths].join(', ') || 'none'}`);
 
         const regions = {};
 
@@ -291,8 +303,9 @@ async function getTeamsByRegion(game) {
             let curRegion   = defaultRegion;
             let inDisbanded = false;
             const root = _contentRoot($ctx);
-            console.log(`[Teams ${game}] scanning "${defaultRegion}" — root children: ${root.children().length}`);
-            root.children().each((_, el) => {
+            // ใช้ .find() แทน .children() เพื่อ traverse ลึกเข้าใน div.teamcard-columns
+            // h3 "North America" / "Korea" อยู่ข้างใน container ไม่ใช่ direct child
+            root.find('h2, h3, h4, .team-template-text').each((_, el) => {
                 const tag = (el.tagName || el.name || '').toLowerCase();
                 if (['h2', 'h3', 'h4'].includes(tag)) {
                     const title = $ctx(el).find('.mw-headline').text().trim();
@@ -308,20 +321,27 @@ async function getTeamsByRegion(game) {
                     return;
                 }
                 if (inDisbanded) return;
-                _addTeams($ctx, el, regions, curRegion, wiki);
+                // เจอ .team-template-text — ดึง link ตัวแรกเป็นชื่อทีม
+                const $a   = $ctx(el).find('a').first();
+                const name = $a.text().trim();
+                const href = $a.attr('href') || '';
+                if (!name || name.length < 2 || !href || href.startsWith('http') || href.startsWith('//')) return;
+                if (!regions[curRegion]) regions[curRegion] = [];
+                if (!regions[curRegion].find(t => t.name === name))
+                    regions[curRegion].push({ name, url: `${BASE}${href}`, region: curRegion });
             });
+            console.log(`[Teams ${game}] after "${defaultRegion}": regions=${Object.keys(regions).join(', ')}`);
         }
 
         // ── fetch sub-pages ────────────────────────────────────────────────────
         if (subPagePaths.size > 0) {
             for (const subPath of [...subPagePaths].slice(0, 8)) {
                 try {
-                    const $s     = await fetchPage(wiki, subPath);
+                    const $s      = await fetchPage(wiki, subPath);
                     const subName = subPath.split('/').pop().replace(/_/g, ' ');
                     _scanPage($s, subName);
-                    console.log(`[Teams ${game}] after "${subName}": regions=${Object.keys(regions).join(', ')}`);
                 } catch (subErr) {
-                    console.error(`[Liquipedia ${game}] sub-page ${subPath}:`, subErr.message);
+                    console.error(`[Liquipedia ${game}] sub-page ${subPath}:`, subErr.message || subErr);
                 }
             }
         }
@@ -342,7 +362,7 @@ async function getTeamsByRegion(game) {
         _setCached(`teams:${game}`, cleaned);
         return cleaned;
     } catch (err) {
-        console.error(`[Liquipedia ${game}] getTeamsByRegion:`, err.message);
+        console.error(`[Liquipedia ${game}] getTeamsByRegion:`, err.message || err);
         return {};
     }
 }
