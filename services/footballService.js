@@ -3,6 +3,18 @@ const axios = require('axios');
 const ESPN_BASE   = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 const ESPN_SEARCH = 'https://site.api.espn.com/apis/common/v3/search';
 
+// Hardcoded ESPN CDN league logo URLs (fallbacks so logos work even during off-season)
+const LEAGUE_LOGOS = {
+    WC:  'https://a.espncdn.com/i/leaguelogos/soccer/500/4.png',
+    PL:  'https://a.espncdn.com/i/leaguelogos/soccer/500/23.png',
+    BL1: 'https://a.espncdn.com/i/leaguelogos/soccer/500/10.png',
+    SA:  'https://a.espncdn.com/i/leaguelogos/soccer/500/12.png',
+    PD:  'https://a.espncdn.com/i/leaguelogos/soccer/500/15.png',
+    FL1: 'https://a.espncdn.com/i/leaguelogos/soccer/500/9.png',
+    CL:  'https://a.espncdn.com/i/leaguelogos/soccer/500/2.png',
+    EL:  'https://a.espncdn.com/i/leaguelogos/soccer/500/5.png',
+};
+
 // ESPN league slugs mapped to internal codes
 const LEAGUE_SLUGS = {
     WC:  'fifa.world',
@@ -54,8 +66,8 @@ const TTL_STANDINGS = 20 * 60 * 1000;  // standings — 20 min
 // matchId → leagueSlug — populated by getMatches/getLiveMatches so lineup only needs 1 request
 const matchLeagueMap = new Map();
 
-// leagueCode → logo URL — populated from ESPN API responses
-const leagueLogoCache = {};
+// leagueCode → logo URL — pre-seeded with hardcoded fallbacks, overwritten by live API data
+const leagueLogoCache = { ...LEAGUE_LOGOS };
 
 function setCache(key, data) { cache.set(key, { data, ts: Date.now() }); }
 
@@ -357,6 +369,7 @@ async function getWCGroups() {
 
 module.exports = {
     LEAGUE_NAMES,
+    LEAGUE_LOGOS,
     AVAILABLE_LEAGUES,
     SEASON_START,
     leagueLogoCache,

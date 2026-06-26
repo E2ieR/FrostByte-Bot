@@ -1597,6 +1597,21 @@
         ═══════════════════════════════ -->
         <div id="tab-betting" class="tab-panel">
 
+            <!-- ─── สร้างเดิมพันจากการแข่งขันฟุตบอล ─── -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header" style="cursor:pointer" onclick="toggleFbBetSection()">
+                    <div class="card-title">⚽ สร้างเดิมพันจากการแข่งขัน</div>
+                    <span id="fb-bet-hint" style="font-size:11px;color:var(--muted)">คลิกเพื่อโหลดแมตช์ ▾</span>
+                </div>
+                <div id="fb-bet-body" class="card-body" style="display:none">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+                        แมตช์จากลีกที่ติดตามในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ
+                    </div>
+                    <div id="fb-bet-loading" style="text-align:center;padding:28px;color:var(--muted)">⏳ กำลังโหลดแมตช์...</div>
+                    <div id="fb-bet-list"></div>
+                </div>
+            </div>
+
             <!-- ─── สร้างเดิมพันใหม่ ─── -->
             <div class="card" style="margin-bottom:20px">
                 <div class="card-header" style="cursor:pointer" onclick="toggleEl('create-bet-body')">
@@ -2659,6 +2674,81 @@
     function toggleEl(id) {
         const el = document.getElementById(id);
         if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+    }
+
+    // ─── Football Bet Matches ─────────────────────────────
+    let _fbBetLoaded = false;
+    let _fbBetMatches = [];
+
+    function toggleFbBetSection() {
+        const body = document.getElementById('fb-bet-body');
+        const hint = document.getElementById('fb-bet-hint');
+        if (!body) return;
+        const opening = body.style.display === 'none';
+        body.style.display = opening ? '' : 'none';
+        hint.textContent = opening ? 'คลิกเพื่อซ่อน ▴' : 'คลิกเพื่อโหลดแมตช์ ▾';
+        if (opening && !_fbBetLoaded) {
+            _fbBetLoaded = true;
+            loadFootballBetMatches();
+        }
+    }
+
+    async function loadFootballBetMatches() {
+        const listEl  = document.getElementById('fb-bet-list');
+        const loadEl  = document.getElementById('fb-bet-loading');
+        if (!listEl || !loadEl) return;
+        try {
+            const r = await fetch('/<%= guildId %>/football-matches');
+            const matches = await r.json();
+            loadEl.style.display = 'none';
+            _fbBetMatches = matches;
+            if (!matches.length) {
+                listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">ไม่พบแมตช์ที่จะมาถึง<br><small>ตรวจสอบว่าเลือกลีกในหน้า Sports แล้ว หรืออาจอยู่ใน off-season</small></div>';
+                return;
+            }
+            listEl.innerHTML = matches.map((m, i) => {
+                const timeStr = m.dateTime ? new Date(m.dateTime).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'TBD';
+                const homeLogo = m.homeLogo ? `<img src="${m.homeLogo}" style="width:28px;height:28px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">` : '';
+                const awayLogo = m.awayLogo ? `<img src="${m.awayLogo}" style="width:28px;height:28px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">` : '';
+                const leagueLogo = m.leagueLogo ? `<img src="${m.leagueLogo}" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'">` : '';
+                return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:180px;display:flex;align-items:center;gap:8px;justify-content:center">
+                        ${homeLogo}
+                        <span style="font-weight:600;font-size:13px">${m.homeTeam}</span>
+                        <span style="color:var(--muted);font-size:11px;font-weight:600">VS</span>
+                        <span style="font-weight:600;font-size:13px">${m.awayTeam}</span>
+                        ${awayLogo}
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);text-align:center;min-width:120px">
+                        <div>${leagueLogo}${m.league||''}</div>
+                        <div>⏰ ${timeStr}</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="prefillFootballBet(${i})" style="white-space:nowrap">⚽ สร้างเดิมพัน</button>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            if (loadEl) loadEl.textContent = '❌ เกิดข้อผิดพลาดในการโหลดแมตช์';
+        }
+    }
+
+    function prefillFootballBet(idx) {
+        const m = _fbBetMatches[idx];
+        if (!m) return;
+        // ขยายฟอร์มสร้างเดิมพัน
+        const formBody = document.getElementById('create-bet-body');
+        if (formBody) formBody.style.display = '';
+        // กรอกข้อมูล
+        const form = formBody?.querySelector('form');
+        if (!form) return;
+        const dateStr = m.dateTime ? new Date(m.dateTime).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : '';
+        form.querySelector('[name="title"]').value       = `${m.homeTeam} vs ${m.awayTeam}`;
+        form.querySelector('[name="description"]').value = `${m.league||''}${dateStr ? ' — ' + dateStr : ''}`;
+        form.querySelector('[name="optionA"]').value     = m.homeTeam;
+        form.querySelector('[name="optionB"]').value     = m.awayTeam;
+        form.querySelector('[name="imageA"]').value      = m.homeLogo || '';
+        form.querySelector('[name="imageB"]').value      = m.awayLogo || '';
+        // Scroll ไปที่ฟอร์ม
+        formBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // ─── Store item image preview ────────────────────────

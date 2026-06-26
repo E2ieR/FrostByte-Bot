@@ -1,8 +1,9 @@
 const express = require('express');
 const router  = express.Router();
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const GuildConfig = require('../../models/GuildConfig');
-const User        = require('../../models/User');
+const GuildConfig   = require('../../models/GuildConfig');
+const User          = require('../../models/User');
+const { getMatches, leagueLogoCache } = require('../../services/footballService');
 
 // ─── Shared embed builder ─────────────────────────────────────────────────────
 function buildBetEmbed(bet, currencyEmoji = '🪙') {
@@ -328,6 +329,37 @@ router.post('/:guildId/repost-bet/:betId', async (req, res) => {
     } catch (err) {
         console.error('[Betting] repost-bet:', err);
         res.redirect(`/manage/${guildId}?tab=betting&error=failed`);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET  /:guildId/football-matches  — แมตช์จากลีกที่ติดตาม (AJAX, สำหรับสร้างเดิมพัน)
+// ═══════════════════════════════════════════════════════════════════════════════
+router.get('/:guildId/football-matches', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
+    const { guildId } = req.params;
+    try {
+        const config  = await GuildConfig.findOne({ guildId });
+        const leagues = config?.sportsNotifications?.footballLeagues?.length
+            ? config.sportsNotifications.footballLeagues
+            : ['PL'];
+
+        const allMatches = [];
+        await Promise.all(leagues.map(async league => {
+            try {
+                const m = await getMatches(league, 5);
+                for (const match of m) {
+                    match.leagueLogo = leagueLogoCache[league] || '';
+                    allMatches.push(match);
+                }
+            } catch (_) {}
+        }));
+
+        allMatches.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+        res.json(allMatches.slice(0, 20));
+    } catch (err) {
+        console.error('[Betting] football-matches:', err.message);
+        res.json([]);
     }
 });
 
