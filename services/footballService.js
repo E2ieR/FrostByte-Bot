@@ -5,6 +5,7 @@ const ESPN_SEARCH = 'https://site.api.espn.com/apis/common/v3/search';
 
 // ESPN league slugs mapped to internal codes
 const LEAGUE_SLUGS = {
+    WC:  'fifa.world',
     PL:  'eng.1',
     BL1: 'ger.1',
     SA:  'ita.1',
@@ -17,6 +18,7 @@ const LEAGUE_SLUGS = {
 };
 
 const LEAGUE_NAMES = {
+    WC:  '🌍 FIFA World Cup 2026',
     PL:  '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League',
     BL1: '🇩🇪 Bundesliga',
     SA:  '🇮🇹 Serie A',
@@ -30,7 +32,7 @@ const LEAGUE_NAMES = {
 
 // ESPN league slug → short name (for team search display)
 const SLUG_SHORT = {
-    'eng.1': 'PL',  'ger.1': 'BL1', 'ita.1': 'SA',
+    'fifa.world': 'WC', 'eng.1': 'PL',  'ger.1': 'BL1', 'ita.1': 'SA',
     'esp.1': 'PD',  'fra.1': 'FL1', 'uefa.champions': 'UCL',
     'uefa.europa': 'UEL', 'por.1': 'PPL', 'ned.1': 'DED',
 };

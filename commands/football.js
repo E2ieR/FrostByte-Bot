@@ -5,11 +5,11 @@ const {
 } = require('../services/footballService');
 
 const LEAGUE_CHOICES = [
+    { name: '🌍 FIFA World Cup 2026',    value: 'WC'  },
     { name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League',      value: 'PL'  },
     { name: '🇩🇪 Bundesliga',            value: 'BL1' },
     { name: '🇮🇹 Serie A',               value: 'SA'  },
     { name: '🇪🇸 La Liga',               value: 'PD'  },
-    { name: '🇫🇷 Ligue 1',               value: 'FL1' },
     { name: '⭐ UEFA Champions League',   value: 'CL'  },
 ];
 
