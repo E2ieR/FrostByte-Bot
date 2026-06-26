@@ -1628,27 +1628,40 @@
                             <label>คำอธิบาย (ไม่บังคับ)</label>
                             <input type="text" name="description" placeholder="รายละเอียดเพิ่มเติม...">
                         </div>
+                        <!-- VS preview bar — แสดงโลโก้ทีมก่อน submit -->
+                        <div id="bet-vs-preview" style="display:none;align-items:center;gap:14px;justify-content:center;margin-bottom:14px;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--border)">
+                            <div style="text-align:center">
+                                <img id="bet-preview-imgA" src="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:2px solid rgba(88,101,242,0.4)" onerror="this.style.display='none'">
+                                <div id="bet-preview-nameA" style="font-size:12px;font-weight:600;margin-top:4px;color:#7b8df8"></div>
+                            </div>
+                            <div style="font-weight:700;color:var(--muted);font-size:16px">VS</div>
+                            <div style="text-align:center">
+                                <img id="bet-preview-imgB" src="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:2px solid rgba(237,66,69,0.4)" onerror="this.style.display='none'">
+                                <div id="bet-preview-nameB" style="font-size:12px;font-weight:600;margin-top:4px;color:#f28f8f"></div>
+                            </div>
+                        </div>
+
                         <div class="bet-sides">
                             <div class="bet-side-a">
                                 <div class="bet-side-label">🔵 ฝ่าย A</div>
                                 <div class="form-group" style="margin-bottom:10px">
                                     <label>ชื่อฝ่าย A</label>
-                                    <input type="text" name="optionA" placeholder="ฝ่าย A" value="ฝ่าย A">
+                                    <input type="text" name="optionA" placeholder="ฝ่าย A" value="ฝ่าย A" oninput="updateBetPreview()">
                                 </div>
                                 <div class="form-group">
                                     <label>รูปฝ่าย A (URL)</label>
-                                    <input type="url" name="imageA" placeholder="https://...">
+                                    <input type="url" name="imageA" placeholder="https://..." oninput="updateBetPreview()">
                                 </div>
                             </div>
                             <div class="bet-side-b">
                                 <div class="bet-side-label">🔴 ฝ่าย B</div>
                                 <div class="form-group" style="margin-bottom:10px">
                                     <label>ชื่อฝ่าย B</label>
-                                    <input type="text" name="optionB" placeholder="ฝ่าย B" value="ฝ่าย B">
+                                    <input type="text" name="optionB" placeholder="ฝ่าย B" value="ฝ่าย B" oninput="updateBetPreview()">
                                 </div>
                                 <div class="form-group">
                                     <label>รูปฝ่าย B (URL)</label>
-                                    <input type="url" name="imageB" placeholder="https://...">
+                                    <input type="url" name="imageB" placeholder="https://..." oninput="updateBetPreview()">
                                 </div>
                             </div>
                         </div>
@@ -2747,8 +2760,33 @@
         form.querySelector('[name="optionB"]').value     = m.awayTeam;
         form.querySelector('[name="imageA"]').value      = m.homeLogo || '';
         form.querySelector('[name="imageB"]').value      = m.awayLogo || '';
+        // อัปเดต preview VS
+        updateBetPreview();
         // Scroll ไปที่ฟอร์ม
         formBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateBetPreview() {
+        const form = document.querySelector('#create-bet-body form');
+        if (!form) return;
+        const imgA  = form.querySelector('[name="imageA"]')?.value?.trim();
+        const imgB  = form.querySelector('[name="imageB"]')?.value?.trim();
+        const nameA = form.querySelector('[name="optionA"]')?.value?.trim();
+        const nameB = form.querySelector('[name="optionB"]')?.value?.trim();
+        const bar   = document.getElementById('bet-vs-preview');
+        if (!bar) return;
+        const hasAny = imgA || imgB;
+        bar.style.display = hasAny ? 'flex' : 'none';
+        if (hasAny) {
+            const pA = document.getElementById('bet-preview-imgA');
+            const pB = document.getElementById('bet-preview-imgB');
+            if (pA) { pA.src = imgA || ''; pA.style.display = imgA ? '' : 'none'; }
+            if (pB) { pB.src = imgB || ''; pB.style.display = imgB ? '' : 'none'; }
+            const nA = document.getElementById('bet-preview-nameA');
+            const nB = document.getElementById('bet-preview-nameB');
+            if (nA) nA.textContent = nameA || '';
+            if (nB) nB.textContent = nameB || '';
+        }
     }
 
     // ─── Store item image preview ────────────────────────

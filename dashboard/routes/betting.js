@@ -3,7 +3,7 @@ const router  = express.Router();
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const GuildConfig   = require('../../models/GuildConfig');
 const User          = require('../../models/User');
-const { getMatches, leagueLogoCache } = require('../../services/footballService');
+const { getMatches, getWCSchedule, leagueLogoCache } = require('../../services/footballService');
 
 // ─── Shared embed builder ─────────────────────────────────────────────────────
 function buildBetEmbed(bet, currencyEmoji = '🪙') {
@@ -340,18 +340,30 @@ router.get('/:guildId/football-matches', async (req, res) => {
     const { guildId } = req.params;
     try {
         const config  = await GuildConfig.findOne({ guildId });
-        const leagues = config?.sportsNotifications?.footballLeagues?.length
-            ? config.sportsNotifications.footballLeagues
-            : ['PL'];
+        const followed = (config?.sportsNotifications?.footballLeagues || []).filter(l => l !== 'WC');
 
         const allMatches = [];
-        await Promise.all(leagues.map(async league => {
+        const seenIds   = new Set();
+
+        function addMatch(match, logo) {
+            if (seenIds.has(match.id)) return;
+            seenIds.add(match.id);
+            match.leagueLogo = logo || '';
+            allMatches.push(match);
+        }
+
+        // ── บอลโลกเสมอ (14 วันข้างหน้า) ──────────────────────────────────
+        try {
+            const wcMatches = await getWCSchedule(14);
+            for (const m of wcMatches) addMatch(m, leagueLogoCache['WC']);
+        } catch (_) {}
+
+        // ── ลีกที่ติดตาม (ยกเว้น WC ที่ดึงไปแล้ว) ────────────────────────
+        const leaguesToFetch = followed.length ? followed : ['PL'];
+        await Promise.all(leaguesToFetch.map(async league => {
             try {
                 const m = await getMatches(league, 5);
-                for (const match of m) {
-                    match.leagueLogo = leagueLogoCache[league] || '';
-                    allMatches.push(match);
-                }
+                for (const match of m) addMatch(match, leagueLogoCache[league]);
             } catch (_) {}
         }));
 
