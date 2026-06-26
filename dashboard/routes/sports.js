@@ -2,6 +2,7 @@ const express = require('express');
 const router  = express.Router();
 const GuildConfig = require('../../models/GuildConfig');
 const { searchFotMob, getLeagueTeams } = require('../../services/footballService');
+const { getTeamsByRegion } = require('../../services/liquipediaService');
 
 // ─── GET channels (AJAX) ──────────────────────────────────────────────────────
 router.get('/api/:guildId/sports-channels', async (req, res) => {
@@ -43,6 +44,26 @@ router.get('/api/:guildId/football-search', async (req, res) => {
         res.json(Array.isArray(results) ? results : []);
     } catch (err) {
         console.error('[FootballSearch] unhandled:', err.message);
+        res.json([]);
+    }
+});
+
+// ─── GET ทีม Esports จาก Liquipedia (AJAX) ───────────────────────────────────
+router.get('/api/:guildId/esports-game-teams', async (req, res) => {
+    const { game } = req.query;
+    if (!['cs2', 'valorant', 'lol', 'mlbb'].includes(game)) return res.json([]);
+    try {
+        const regionMap = await getTeamsByRegion(game);
+        const all = Object.values(regionMap).flat();
+        const seen = new Set();
+        const unique = all.filter(t => {
+            if (!t.name || seen.has(t.name)) return false;
+            seen.add(t.name);
+            return true;
+        });
+        res.json(unique.slice(0, 80));
+    } catch (err) {
+        console.error('[EsportsGameTeams]', err.message);
         res.json([]);
     }
 });

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const GuildConfig = require('../models/GuildConfig');
 const {
-    getUpcomingMatches, getOngoingTournaments,
+    getUpcomingMatches, getLiveMatches, getOngoingTournaments,
     getTeamsByRegion,
     GAME_NAMES, GAME_COLORS, GAME_THUMBS,
 } = require('../services/liquipediaService');
@@ -33,6 +33,10 @@ module.exports = {
             .setName('teams')
             .setDescription('ดูทีมแบ่งตามโซน')
             .addStringOption(o => o.setName('game').setDescription('เกม').setRequired(true).addChoices(...GAME_CHOICES))
+        )
+        .addSubcommand(s => s
+            .setName('live')
+            .setDescription('แมตช์ที่กำลังแข่งอยู่ตอนนี้')
         ),
 
     async execute(interaction) {
@@ -145,6 +149,40 @@ module.exports = {
                 embeds.push(currentEmbed);
 
                 return interaction.editReply({ embeds: embeds.slice(0, 10) });
+            }
+
+            // ── live ─────────────────────────────────────────────────────────
+            if (sub === 'live') {
+                let enabledGames = ALL_GAMES;
+                if (guildId) {
+                    try {
+                        const cfg = await GuildConfig.findOne({ guildId }).lean();
+                        const g = cfg?.sportsNotifications?.esportsGames;
+                        if (g?.length) enabledGames = g;
+                    } catch {}
+                }
+
+                const liveMatches = await getLiveMatches(enabledGames);
+                if (!liveMatches.length) {
+                    return interaction.editReply({ content: '❌ ไม่มีแมตช์ Esports ที่กำลังแข่งอยู่ในขณะนี้' });
+                }
+
+                const embed = new EmbedBuilder()
+                    .setColor(0xFEE75C)
+                    .setTitle('🔴 Esports — LIVE Matches')
+                    .setThumbnail(GAME_THUMBS[liveMatches[0].game])
+                    .setTimestamp();
+
+                for (const m of liveMatches.slice(0, 10)) {
+                    const scoreStr = (m.score1 || m.score2) ? ` **(${m.score1||0} – ${m.score2||0})**` : '';
+                    embed.addFields({
+                        name: `🎮 ${GAME_NAMES[m.game]} — ${m.team1} vs ${m.team2}${scoreStr}`,
+                        value: `🏆 ${m.tournament || 'ไม่ระบุ'}${m.streamLink ? `\n📺 [ดูสด](${m.streamLink})` : ''}`,
+                        inline: false,
+                    });
+                }
+                embed.setFooter({ text: 'Liquipedia.net' });
+                return interaction.editReply({ embeds: [embed] });
             }
 
         } catch (err) {

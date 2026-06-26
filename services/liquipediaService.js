@@ -38,6 +38,15 @@ const GAME_THUMBS = {
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
+// ─── In-memory cache (TTL 5 นาที) ────────────────────────────────────────────
+const _cache = new Map();
+const _CACHE_TTL = 5 * 60 * 1000;
+function _getCached(key) {
+    const e = _cache.get(key);
+    return e && Date.now() - e.ts < _CACHE_TTL ? e.data : null;
+}
+function _setCached(key, data) { _cache.set(key, { data, ts: Date.now() }); }
+
 async function fetchPage(wiki, path) {
     await delay(2000); // Liquipedia rate limit
     const url = `${BASE}/${wiki}${path}`;
@@ -61,6 +70,8 @@ const MATCH_PAGES = {
 
 // ─── ดึง upcoming matches ─────────────────────────────────────────────────────
 async function getUpcomingMatches(game) {
+    const cached = _getCached(`matches:${game}`);
+    if (cached) return cached;
     const wiki = WIKIS[game];
     if (!wiki) return [];
 
@@ -125,11 +136,25 @@ async function getUpcomingMatches(game) {
             }
         });
 
-        return matches.slice(0, 10); // คืนแค่ 10 แมตช์แรก
+        const result = matches.slice(0, 10);
+        _setCached(`matches:${game}`, result);
+        return result;
     } catch (err) {
         console.error(`[Liquipedia ${game}] getUpcomingMatches error:`, err.message);
         return [];
     }
+}
+
+// ─── แมตช์สด (filter จาก upcoming) ──────────────────────────────────────────
+async function getLiveMatches(games = ['cs2', 'valorant', 'lol', 'mlbb']) {
+    const all = [];
+    for (const game of games) {
+        const matches = await getUpcomingMatches(game);
+        for (const m of matches) {
+            if (m.isLive) all.push(m);
+        }
+    }
+    return all;
 }
 
 // ─── ดึง ongoing tournaments ──────────────────────────────────────────────────
@@ -137,6 +162,8 @@ async function getOngoingTournaments(game) {
     const wiki = WIKIS[game];
     if (!wiki) return [];
 
+    const cachedT = _getCached(`tournaments:${game}`);
+    if (cachedT) return cachedT;
     try {
         const $ = await fetchPage(wiki, '/Portal:Tournaments');
         const tournaments = [];
@@ -166,7 +193,9 @@ async function getOngoingTournaments(game) {
             });
         });
 
-        return tournaments.slice(0, 5);
+        const result = tournaments.slice(0, 5);
+        _setCached(`tournaments:${game}`, result);
+        return result;
     } catch (err) {
         console.error(`[Liquipedia ${game}] getOngoingTournaments error:`, err.message);
         return [];
@@ -199,6 +228,8 @@ async function getTopTeams(game) {
 
 // ─── ดึงทีมแบ่งตามภูมิภาค ────────────────────────────────────────────────────
 async function getTeamsByRegion(game) {
+    const cachedR = _getCached(`teams:${game}`);
+    if (cachedR) return cachedR;
     const wiki = WIKIS[game];
     if (!wiki) return {};
     try {
@@ -231,6 +262,7 @@ async function getTeamsByRegion(game) {
             const t = teams.filter(t => t.name && t.name.length > 1).slice(0, 20);
             if (t.length > 0) cleaned[r] = t;
         }
+        _setCached(`teams:${game}`, cleaned);
         return cleaned;
     } catch (err) {
         console.error(`[Liquipedia ${game}] getTeamsByRegion:`, err.message);
@@ -254,6 +286,7 @@ module.exports = {
     GAME_COLORS,
     GAME_THUMBS,
     getUpcomingMatches,
+    getLiveMatches,
     getOngoingTournaments,
     getTopTeams,
     getTeamsByRegion,

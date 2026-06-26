@@ -4,6 +4,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const GuildConfig   = require('../../models/GuildConfig');
 const User          = require('../../models/User');
 const { getMatches, getWCSchedule, leagueLogoCache } = require('../../services/footballService');
+const { getUpcomingMatches: getEspMatches, GAME_NAMES: ESP_GAME_NAMES, GAME_THUMBS: ESP_GAME_THUMBS } = require('../../services/liquipediaService');
 
 // ─── Shared embed builder ─────────────────────────────────────────────────────
 function buildBetEmbed(bet, currencyEmoji = '🪙') {
@@ -371,6 +372,42 @@ router.get('/:guildId/football-matches', async (req, res) => {
         res.json(allMatches.slice(0, 20));
     } catch (err) {
         console.error('[Betting] football-matches:', err.message);
+        res.json([]);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET  /:guildId/esports-matches  — แมตช์ Esports จากเกมที่เปิดใช้ (AJAX)
+// ═══════════════════════════════════════════════════════════════════════════════
+router.get('/:guildId/esports-matches', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
+    const { guildId } = req.params;
+    try {
+        const config = await GuildConfig.findOne({ guildId });
+        const games  = config?.sportsNotifications?.esportsGames?.length
+            ? config.sportsNotifications.esportsGames
+            : ['cs2', 'valorant', 'lol', 'mlbb'];
+
+        const allMatches = [];
+        // Sequential fetch เพื่อเคารพ Liquipedia rate limit (cache ช่วยทำให้เร็วถ้าเคยโหลดแล้ว)
+        for (const game of games) {
+            try {
+                const matches = await getEspMatches(game);
+                for (const m of matches.slice(0, 5)) {
+                    allMatches.push({
+                        ...m,
+                        game,
+                        gameName:  ESP_GAME_NAMES[game]  || game,
+                        gameThumb: ESP_GAME_THUMBS[game] || '',
+                    });
+                }
+            } catch (_) {}
+        }
+
+        allMatches.sort((a, b) => (a.matchTime ? new Date(a.matchTime) : Infinity) - (b.matchTime ? new Date(b.matchTime) : Infinity));
+        res.json(allMatches.slice(0, 20));
+    } catch (err) {
+        console.error('[Betting] esports-matches:', err.message);
         res.json([]);
     }
 });

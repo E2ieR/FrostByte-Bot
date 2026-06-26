@@ -1612,6 +1612,22 @@
                 </div>
             </div>
 
+            <!-- ─── สร้างเดิมพันจากแมตช์ Esports ─── -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header" style="cursor:pointer" onclick="toggleEspBetSection()">
+                    <div class="card-title">🎮 สร้างเดิมพันจาก Esports</div>
+                    <span id="esp-bet-hint" style="font-size:11px;color:var(--muted)">คลิกเพื่อโหลดแมตช์ ▾</span>
+                </div>
+                <div id="esp-bet-body" class="card-body" style="display:none">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+                        แมตช์จากเกมที่เปิดใช้ในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ
+                        <br><small>⚠️ Liquipedia มี rate limit — โหลดครั้งแรกอาจใช้เวลา 10-30 วินาที</small>
+                    </div>
+                    <div id="esp-bet-loading" style="text-align:center;padding:28px;color:var(--muted)">⏳ กำลังโหลดแมตช์ Esports...</div>
+                    <div id="esp-bet-list"></div>
+                </div>
+            </div>
+
             <!-- ─── สร้างเดิมพันใหม่ ─── -->
             <div class="card" style="margin-bottom:20px">
                 <div class="card-header" style="cursor:pointer" onclick="toggleEl('create-bet-body')">
@@ -2189,17 +2205,23 @@
                             <input type="checkbox" class="sp-esp-game" value="mlbb" <%= espGames.includes('mlbb') ? 'checked' : '' %>> Mobile Legends
                         </label>
                     </div>
-                    <div class="section-label" style="margin-top:14px">ทีมที่ติดตาม (แยกตามเกม)</div>
-                    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">ว่างไว้ = แจ้งทุกแมตช์ของเกมนั้น</div>
-                    <% const trackedTeams = sn.esportsTrackedTeams || {}; %>
-                    <% [['cs2','CS2'],['valorant','VALORANT'],['lol','LoL'],['mlbb','MLBB']].forEach(([code,label]) => { %>
-                    <div class="form-group" style="margin-bottom:10px">
-                        <label><%= label %> — ชื่อทีม (คั่นด้วยคอมม่า)</label>
-                        <input type="text" id="sp-esp-teams-<%= code %>"
-                               placeholder="เช่น NAVI, G2, FaZe"
-                               value="<%= (trackedTeams[code] || []).join(', ') %>">
+                    <div class="section-label" style="margin-top:14px">ทีมที่ติดตาม</div>
+                    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">ว่างไว้ = แจ้งทุกแมตช์ของเกมนั้น | คลิกปุ่มเกมเพื่อโหลดทีม (Liquipedia)</div>
+                    <input type="hidden" id="sp-esp-teams-json">
+                    <div id="esp-teams-chips" style="margin-bottom:10px"></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+                        <% [['cs2','🎯 CS2'],['valorant','🔺 VALORANT'],['lol','⚔️ LoL'],['mlbb','📱 MLBB']].forEach(([code,label]) => { %>
+                        <button type="button" id="esp-picker-btn-<%= code %>"
+                                onclick="loadEspPicker('<%= code %>')"
+                                class="btn btn-sm btn-secondary" style="font-size:12px">
+                            <%= label %>
+                        </button>
+                        <% }) %>
                     </div>
-                    <% }) %>
+                    <div id="esp-picker-panel" style="display:none;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px">
+                        <div id="esp-picker-title" style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px"></div>
+                        <div id="esp-picker-body"></div>
+                    </div>
                 </div>
             </div>
 
@@ -2787,6 +2809,172 @@
             if (nA) nA.textContent = nameA || '';
             if (nB) nB.textContent = nameB || '';
         }
+    }
+
+    // ─── Esports Team Picker ─────────────────────────────
+    const _espSaved = <%- JSON.stringify(sn.esportsTrackedTeams || {}) %>;
+    let espTeams = {
+        cs2:      Array.isArray(_espSaved.cs2)      ? [..._espSaved.cs2]      : [],
+        valorant: Array.isArray(_espSaved.valorant) ? [..._espSaved.valorant] : [],
+        lol:      Array.isArray(_espSaved.lol)      ? [..._espSaved.lol]      : [],
+        mlbb:     Array.isArray(_espSaved.mlbb)     ? [..._espSaved.mlbb]     : [],
+    };
+    const ESP_LABEL = { cs2:'CS2', valorant:'VALORANT', lol:'League of Legends', mlbb:'Mobile Legends' };
+    let espPickerCache = {};
+    let espPickerLoading = new Set();
+    let espActiveGame = null;
+
+    function renderEspChips() {
+        const el = document.getElementById('esp-teams-chips');
+        if (!el) return;
+        const parts = [];
+        for (const g of ['cs2','valorant','lol','mlbb']) {
+            const teams = espTeams[g] || [];
+            if (!teams.length) continue;
+            const chips = teams.map(t => {
+                const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+                return `<span class="chip" style="font-size:11px">${t}<button class="chip-rm" type="button" onclick="removeEspTeam('${g}','${esc}')">×</button></span>`;
+            }).join('');
+            parts.push(`<div style="margin-bottom:6px"><span style="font-size:11px;font-weight:600;color:var(--muted)">${ESP_LABEL[g]}:</span> <span style="display:inline-flex;flex-wrap:wrap;gap:3px;margin-left:6px">${chips}</span></div>`);
+        }
+        el.innerHTML = parts.join('') || '<span style="color:var(--muted);font-size:12px">ยังไม่ได้เลือกทีม (จะแจ้งทุกแมตช์)</span>';
+        const jin = document.getElementById('sp-esp-teams-json');
+        if (jin) jin.value = JSON.stringify(espTeams);
+    }
+
+    function removeEspTeam(game, name) {
+        espTeams[game] = (espTeams[game] || []).filter(t => t !== name);
+        renderEspChips();
+        if (espActiveGame === game) renderEspPickerBody();
+    }
+
+    function toggleEspTeam(game, name) {
+        if (!espTeams[game]) espTeams[game] = [];
+        const i = espTeams[game].indexOf(name);
+        if (i >= 0) espTeams[game].splice(i, 1);
+        else espTeams[game].push(name);
+        renderEspChips();
+        renderEspPickerBody();
+    }
+
+    async function loadEspPicker(game) {
+        espActiveGame = game;
+        const panel = document.getElementById('esp-picker-panel');
+        const title = document.getElementById('esp-picker-title');
+        if (panel) panel.style.display = '';
+        if (title) title.textContent = `${ESP_LABEL[game]} — เลือกทีม`;
+        ['cs2','valorant','lol','mlbb'].forEach(g => {
+            const b = document.getElementById(`esp-picker-btn-${g}`);
+            if (b) { b.style.background = g === game ? 'var(--blurple)' : ''; b.style.color = g === game ? '#fff' : ''; }
+        });
+        if (espPickerCache[game] !== undefined) { renderEspPickerBody(); return; }
+        if (espPickerLoading.has(game)) return;
+        espPickerLoading.add(game);
+        renderEspPickerBody();
+        try {
+            const r = await fetch(`/api/<%= guildId %>/esports-game-teams?game=${game}`);
+            espPickerCache[game] = await r.json();
+        } catch { espPickerCache[game] = []; }
+        espPickerLoading.delete(game);
+        renderEspPickerBody();
+    }
+
+    function renderEspPickerBody() {
+        const body = document.getElementById('esp-picker-body');
+        if (!body || !espActiveGame) return;
+        const game = espActiveGame;
+        if (espPickerLoading.has(game)) {
+            body.innerHTML = '<span style="color:var(--muted);font-size:12px">⏳ กำลังโหลดทีมจาก Liquipedia... (5-15 วินาที)</span>';
+            return;
+        }
+        const teams = espPickerCache[game] || [];
+        if (!teams.length) {
+            body.innerHTML = '<span style="color:var(--muted);font-size:12px">ไม่พบข้อมูลทีม หรือ Liquipedia เต็ม — ลองใหม่ภายหลัง</span>';
+            return;
+        }
+        const selected = espTeams[game] || [];
+        body.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:5px">` +
+            teams.map(t => {
+                const isSel = selected.includes(t.name);
+                const style = isSel
+                    ? 'border-color:var(--blurple);background:rgba(88,101,242,0.18);color:var(--blurple)'
+                    : 'border-color:var(--border);background:var(--bg);color:var(--text)';
+                const _n = JSON.stringify(t.name).replace(/"/g,'&quot;');
+                return `<button type="button" onclick="toggleEspTeam('${game}',${_n})"
+                    style="padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .12s;border:1px solid;${style}"
+                >${isSel ? '✓ ' : ''}${t.name}</button>`;
+            }).join('') + `</div>`;
+    }
+
+    // Init esp chips on load
+    renderEspChips();
+
+    // ─── Esports Betting Section ──────────────────────────
+    let _espBetLoaded = false;
+    let _espBetMatches = [];
+
+    function toggleEspBetSection() {
+        const body = document.getElementById('esp-bet-body');
+        const hint = document.getElementById('esp-bet-hint');
+        if (!body) return;
+        const opening = body.style.display === 'none';
+        body.style.display = opening ? '' : 'none';
+        hint.textContent = opening ? 'คลิกเพื่อซ่อน ▴' : 'คลิกเพื่อโหลดแมตช์ ▾';
+        if (opening && !_espBetLoaded) { _espBetLoaded = true; loadEspBetMatches(); }
+    }
+
+    async function loadEspBetMatches() {
+        const listEl = document.getElementById('esp-bet-list');
+        const loadEl = document.getElementById('esp-bet-loading');
+        if (!listEl || !loadEl) return;
+        try {
+            const r = await fetch('/<%= guildId %>/esports-matches');
+            const matches = await r.json();
+            loadEl.style.display = 'none';
+            _espBetMatches = matches;
+            if (!matches.length) {
+                listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">ไม่พบแมตช์ Esports ในขณะนี้<br><small>ตรวจสอบว่าเปิดเกมในหน้า Sports แล้ว หรือลองใหม่ภายหลัง</small></div>';
+                return;
+            }
+            listEl.innerHTML = matches.map((m, i) => {
+                const timeStr = m.matchTime ? new Date(m.matchTime).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : 'TBD';
+                const liveTag = m.isLive ? '<span style="color:#f04747;font-size:11px;font-weight:700">🔴 LIVE </span>' : '';
+                const gameImg = m.gameThumb ? `<img src="${m.gameThumb}" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'">` : '';
+                return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:180px;display:flex;align-items:center;gap:8px;justify-content:center">
+                        <span style="font-weight:600;font-size:13px">${m.team1||'TBD'}</span>
+                        <span style="color:var(--muted);font-size:11px;font-weight:600">VS</span>
+                        <span style="font-weight:600;font-size:13px">${m.team2||'TBD'}</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);text-align:center;min-width:120px">
+                        <div>${gameImg}${m.gameName||m.game||''}</div>
+                        <div>${liveTag}⏰ ${timeStr}</div>
+                        <div style="font-size:10px;margin-top:2px">${m.tournament||''}</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="prefillEspBet(${i})" style="white-space:nowrap">🎮 สร้างเดิมพัน</button>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            if (loadEl) loadEl.textContent = '❌ เกิดข้อผิดพลาดในการโหลดแมตช์ Esports';
+        }
+    }
+
+    function prefillEspBet(idx) {
+        const m = _espBetMatches[idx];
+        if (!m) return;
+        const formBody = document.getElementById('create-bet-body');
+        if (formBody) formBody.style.display = '';
+        const form = formBody?.querySelector('form');
+        if (!form) return;
+        const dateStr = m.matchTime ? new Date(m.matchTime).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' }) : '';
+        form.querySelector('[name="title"]').value       = `${m.team1||'TBD'} vs ${m.team2||'TBD'}`;
+        form.querySelector('[name="description"]').value = `${m.gameName||m.game||''}${m.tournament ? ' — ' + m.tournament : ''}${dateStr ? ' — ' + dateStr : ''}`;
+        form.querySelector('[name="optionA"]').value     = m.team1 || 'TBD';
+        form.querySelector('[name="optionB"]').value     = m.team2 || 'TBD';
+        form.querySelector('[name="imageA"]').value      = m.gameThumb || '';
+        form.querySelector('[name="imageB"]').value      = '';
+        updateBetPreview();
+        formBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // ─── Store item image preview ────────────────────────
@@ -3908,12 +4096,7 @@
             esportsChannelId:    document.getElementById('sp-esp-channel')?.value || '',
             esportsGames,
             esportsNotifyBefore: parseInt(document.getElementById('sp-esp-before')?.value) || 30,
-            esportsTrackedTeams: {
-                cs2:      document.getElementById('sp-esp-teams-cs2')?.value.split(',').map(t=>t.trim()).filter(Boolean),
-                valorant: document.getElementById('sp-esp-teams-valorant')?.value.split(',').map(t=>t.trim()).filter(Boolean),
-                lol:      document.getElementById('sp-esp-teams-lol')?.value.split(',').map(t=>t.trim()).filter(Boolean),
-                mlbb:     document.getElementById('sp-esp-teams-mlbb')?.value.split(',').map(t=>t.trim()).filter(Boolean),
-            },
+            esportsTrackedTeams: espTeams,
             f1Enabled:      document.getElementById('sp-f1-enabled')?.checked,
             f1ChannelId:    document.getElementById('sp-f1-channel')?.value || '',
             f1NotifyBefore: parseInt(document.getElementById('sp-f1-before')?.value) || 60,
