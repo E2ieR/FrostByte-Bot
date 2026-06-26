@@ -38,12 +38,13 @@ const GAME_THUMBS = {
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
-// ─── In-memory cache (TTL 5 นาที) ────────────────────────────────────────────
+// ─── In-memory cache ─────────────────────────────────────────────────────────
 const _cache = new Map();
-const _CACHE_TTL = 5 * 60 * 1000;
-function _getCached(key) {
+const _CACHE_TTL       = 5  * 60 * 1000; // 5 min (matches / tournaments)
+const _TEAMS_CACHE_TTL = 30 * 60 * 1000; // 30 min (team lists rarely change)
+function _getCached(key, ttl = _CACHE_TTL) {
     const e = _cache.get(key);
-    return e && Date.now() - e.ts < _CACHE_TTL ? e.data : null;
+    return e && Date.now() - e.ts < ttl ? e.data : null;
 }
 function _setCached(key, data) { _cache.set(key, { data, ts: Date.now() }); }
 
@@ -226,42 +227,122 @@ async function getTopTeams(game) {
     }
 }
 
+// heading ที่ไม่ใช่ชื่อโซน (ข้าม)
+const _SKIP_HEADING = /see also|references|navigation|contents|active teams|disbanded teams|notable disbanded|notable active|^active$|^disbanded$|earnings/i;
+
+// team selector รองรับทุก Liquipedia template
+const _TEAM_SEL = '.team-template-text a, .team-template-team-bracket a, .team-template-team-standard a';
+
+function _addTeams($ctx, el, regions, curRegion, wiki) {
+    $ctx(el).find(_TEAM_SEL).each((_, a) => {
+        const name = $ctx(a).text().trim();
+        const href = $ctx(a).attr('href') || '';
+        if (!name || name.length < 2 || href.startsWith('http') || href.startsWith('//') || !href) return;
+        if (!regions[curRegion]) regions[curRegion] = [];
+        if (!regions[curRegion].find(t => t.name === name))
+            regions[curRegion].push({ name, url: `${BASE}${href}`, region: curRegion });
+    });
+    // fallback: generic wiki links (for wikis that don't use template classes)
+    if (!$ctx(el).find(_TEAM_SEL).length) {
+        $ctx(el).find(`a[href^="/${wiki}/"]`).each((_, a) => {
+            const name = $ctx(a).text().trim();
+            const href = $ctx(a).attr('href') || '';
+            const pagePart = href.slice(`/${wiki}/`.length);
+            if (!name || name.length < 2 || !pagePart || pagePart.includes(':')) return;
+            if (/^(Portal|Special|Template|Category|User|File|Talk)/.test(pagePart)) return;
+            if (!regions[curRegion]) regions[curRegion] = [];
+            if (!regions[curRegion].find(t => t.name === name))
+                regions[curRegion].push({ name, url: `${BASE}${href}`, region: curRegion });
+        });
+    }
+}
+
 // ─── ดึงทีมแบ่งตามภูมิภาค ────────────────────────────────────────────────────
+// รองรับทั้ง (1) main page h2/h3 และ (2) sub-pages (VALORANT h4, MLBB h3, CS2 earnings→ sub-name)
 async function getTeamsByRegion(game) {
-    const cachedR = _getCached(`teams:${game}`);
+    const cachedR = _getCached(`teams:${game}`, _TEAMS_CACHE_TTL);
     if (cachedR) return cachedR;
     const wiki = WIKIS[game];
     if (!wiki) return {};
     try {
         const $ = await fetchPage(wiki, '/Portal:Teams');
-        const regions = {};
-        let currentRegion = 'ทั่วไป';
 
-        $('#mw-content-text').children().each((_, el) => {
-            const tag = (el.tagName || el.name || '').toLowerCase();
-            if (tag === 'h2' || tag === 'h3') {
-                const title = $(el).find('.mw-headline').text().trim();
-                if (title && title.length > 1 && !title.toLowerCase().includes('content') && !title.toLowerCase().includes('navigation')) {
-                    currentRegion = title;
-                }
+        // ── auto-discover sub-pages ────────────────────────────────────────────
+        const wikiPrefix   = `/${wiki}/Portal:Teams/`;
+        const subPagePaths = new Set();
+        $('a[href]').each((_, el) => {
+            const href = $(el).attr('href') || '';
+            if (href.startsWith(wikiPrefix) && !href.includes('action=') && !href.includes('?')) {
+                const cleanPath = href.slice(`/${wiki}`.length).split('#')[0];
+                if (cleanPath && cleanPath !== '/Portal:Teams') subPagePaths.add(cleanPath);
             }
-            $(el).find('.team-template-text a, .team-template-team-bracket a').each((_, a) => {
-                const name = $(a).text().trim();
-                const href = $(a).attr('href');
-                if (!name || name.length < 2 || !href || href.startsWith('//') || href.startsWith('http')) return;
-                if (!regions[currentRegion]) regions[currentRegion] = [];
-                if (!regions[currentRegion].find(t => t.name === name)) {
-                    regions[currentRegion].push({ name, url: `${BASE}${href}`, region: currentRegion });
-                }
-            });
         });
 
-        // Clean empty regions, limit 20 per region
+        const regions = {};
+
+        // ── fetch sub-pages → อ่าน h2/h3/h4 ──────────────────────────────────
+        if (subPagePaths.size > 0) {
+            for (const subPath of [...subPagePaths].slice(0, 8)) {
+                try {
+                    const $s = await fetchPage(wiki, subPath);
+                    const subName     = subPath.split('/').pop().replace(/_/g, ' ');
+                    let   curRegion   = subName;  // ชื่อ sub-page เป็น default region
+                    let   inDisbanded = false;
+
+                    $s('#mw-content-text').children().each((_, el) => {
+                        const tag = (el.tagName || el.name || '').toLowerCase();
+                        if (['h2', 'h3', 'h4'].includes(tag)) {
+                            const title = $s(el).find('.mw-headline').text().trim();
+                            if (/disbanded/i.test(title)) {
+                                inDisbanded = true;          // หยุดเพิ่มทีมหลัง Disbanded section
+                            } else if (title.length > 1 && !_SKIP_HEADING.test(title)) {
+                                inDisbanded = false;
+                                curRegion   = title;         // โซนใหม่ที่ดี (North America, Brazil...)
+                            } else {
+                                inDisbanded = false;
+                                curRegion   = subName;       // generic heading → reset เป็นชื่อ sub-page
+                            }
+                            return;
+                        }
+                        if (inDisbanded) return;
+                        _addTeams($s, el, regions, curRegion, wiki);
+                    });
+                } catch (subErr) {
+                    console.error(`[Liquipedia ${game}] sub-page ${subPath}:`, subErr.message);
+                }
+            }
+        }
+
+        // ── fallback: main page h2/h3/h4 ─────────────────────────────────────
+        if (!Object.keys(regions).length) {
+            let curRegion   = 'ทั่วไป';
+            let inDisbanded = false;
+            $('#mw-content-text').children().each((_, el) => {
+                const tag = (el.tagName || el.name || '').toLowerCase();
+                if (['h2', 'h3', 'h4'].includes(tag)) {
+                    const title = $(el).find('.mw-headline').text().trim();
+                    if (/disbanded/i.test(title)) {
+                        inDisbanded = true;
+                    } else if (title.length > 1 && !_SKIP_HEADING.test(title)) {
+                        inDisbanded = false;
+                        curRegion   = title;
+                    } else {
+                        inDisbanded = false;
+                    }
+                    return;
+                }
+                if (inDisbanded) return;
+                _addTeams($, el, regions, curRegion, wiki);
+            });
+        }
+
+        // ── clean: ลบ region ว่าง, จำกัด 20 ทีมต่อโซน ────────────────────────
         const cleaned = {};
         for (const [r, teams] of Object.entries(regions)) {
             const t = teams.filter(t => t.name && t.name.length > 1).slice(0, 20);
             if (t.length > 0) cleaned[r] = t;
         }
+
         _setCached(`teams:${game}`, cleaned);
         return cleaned;
     } catch (err) {
