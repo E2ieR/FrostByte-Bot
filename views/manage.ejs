@@ -3624,10 +3624,13 @@
             return;
         }
         el.innerHTML = items.map((it, i) => {
+            const logoImg = (type === 'team' && it.logo)
+                ? `<img src="${it.logo}" style="width:16px;height:16px;object-fit:contain;margin-right:5px;vertical-align:middle" onerror="this.style.display='none'">`
+                : '';
             const sub = type === 'team'
                 ? (it.country ? ` <span style="color:var(--muted);font-size:11px">· ${it.country}</span>` : '')
                 : (it.teamName ? ` <span style="color:var(--muted);font-size:11px">· ${it.teamName}</span>` : '');
-            return `<span class="chip">${it.name}${sub}<button class="chip-rm" type="button" onclick="removeFbChip('${type}',${i})">×</button></span>`;
+            return `<span class="chip">${logoImg}${it.name}${sub}<button class="chip-rm" type="button" onclick="removeFbChip('${type}',${i})">×</button></span>`;
         }).join('');
     }
 
@@ -3684,10 +3687,14 @@
                         : 'border-color:var(--border);background:var(--bg);color:var(--text)';
                     const _n = JSON.stringify(t.name).replace(/"/g,'&quot;');
                     const _c = JSON.stringify(t.country||'').replace(/"/g,'&quot;');
-                    return `<button type="button" onclick="toggleFbTeam(${t.id},${_n},${_c})"
-                        style="padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;
+                    const _l = JSON.stringify(t.logo||'').replace(/"/g,'&quot;');
+                    const logoImg = t.logo
+                        ? `<img src="${t.logo}" style="width:18px;height:18px;object-fit:contain;margin-right:5px;vertical-align:middle" onerror="this.style.display='none'">`
+                        : '';
+                    return `<button type="button" onclick="toggleFbTeam(${t.id},${_n},${_c},${_l})"
+                        style="display:inline-flex;align-items:center;padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;
                                transition:all .12s;border:1px solid;${style}"
-                    >${sel ? '✓ ' : ''}${t.name}</button>`;
+                    >${logoImg}${sel ? '✓ ' : ''}${t.name}</button>`;
                 }).join('');
             }
             return `<div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600">${label}</div>
@@ -3695,10 +3702,10 @@
         }).join('');
     }
 
-    function toggleFbTeam(id, name, country) {
+    function toggleFbTeam(id, name, country, logo = '') {
         const idx = fbTeams.findIndex(t => t.id === id);
         if (idx >= 0) fbTeams.splice(idx, 1);
-        else fbTeams.push({ id, name, country });
+        else fbTeams.push({ id, name, country, logo });
         renderFbChips('team');
         renderFbLeaguePicker();
     }
@@ -3731,8 +3738,11 @@
             if (!list.length) { ddEl.innerHTML = '<div class="sd-empty">ไม่พบผลลัพธ์</div>'; return; }
             ddEl.innerHTML = list.map((item, idx) => {
                 const sub = type === 'team' ? (item.country||'') : (item.teamName||'');
+                const logoEl = (type === 'team' && item.logo)
+                    ? `<img src="${item.logo}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">`
+                    : `<span style="font-size:15px">${type==='team'?'🏟️':'🧑'}</span>`;
                 return `<div class="sd-item" onmousedown="pickFbResult('${type}',${idx})">
-                    <span style="font-size:15px">${type==='team'?'🏟️':'🧑'}</span>
+                    ${logoEl}
                     <div><div style="font-weight:500">${item.name||''}</div>${sub?`<div class="sd-item-sub">${sub}</div>`:''}</div>
                 </div>`;
             }).join('');

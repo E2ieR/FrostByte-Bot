@@ -54,6 +54,9 @@ const TTL_STANDINGS = 20 * 60 * 1000;  // standings — 20 min
 // matchId → leagueSlug — populated by getMatches/getLiveMatches so lineup only needs 1 request
 const matchLeagueMap = new Map();
 
+// leagueCode → logo URL — populated from ESPN API responses
+const leagueLogoCache = {};
+
 function setCache(key, data) { cache.set(key, { data, ts: Date.now() }); }
 
 // ─── ESPN GET helper ─────────────────────────────────────────────────────────
@@ -85,6 +88,8 @@ function parseEvent(ev, leagueCode) {
         awayShort:  away?.team?.abbreviation || '',
         homeTeamId: parseInt(home?.team?.id) || 0,
         awayTeamId: parseInt(away?.team?.id) || 0,
+        homeLogo:   home?.team?.logos?.[0]?.href || '',
+        awayLogo:   away?.team?.logos?.[0]?.href || '',
         dateTime:   ev.date ? new Date(ev.date) : null,
         homeScore:  parseInt(home?.score) || 0,
         awayScore:  parseInt(away?.score) || 0,
@@ -103,6 +108,8 @@ async function getMatches(leagueCode = 'PL', limit = 10) {
         if (!slug) return [];
 
         const data = await espnGet(`${ESPN_BASE}/${slug}/scoreboard`, TTL_SCHEDULE);
+        const leagueLogo = data.leagues?.[0]?.logos?.[0]?.href;
+        if (leagueLogo) leagueLogoCache[leagueCode] = leagueLogo;
         const events = data.events || [];
 
         return events
@@ -125,6 +132,8 @@ async function getLiveMatches() {
         await Promise.all(Object.entries(LEAGUE_SLUGS).map(async ([code, slug]) => {
             try {
                 const data   = await espnGet(`${ESPN_BASE}/${slug}/scoreboard`, TTL_LIVE);
+                const leagueLogo = data.leagues?.[0]?.logos?.[0]?.href;
+                if (leagueLogo) leagueLogoCache[code] = leagueLogo;
                 const events = (data.events || [])
                     .filter(e => e.competitions?.[0]?.status?.type?.name === 'STATUS_IN_PROGRESS');
                 for (const e of events) {
@@ -175,6 +184,8 @@ async function getMatchLineup(matchId) {
                 return {
                     homeTeam:      homeTeamB?.team?.displayName || '',
                     awayTeam:      awayTeamB?.team?.displayName || '',
+                    homeLogo:      homeTeamB?.team?.logos?.[0]?.href || '',
+                    awayLogo:      awayTeamB?.team?.logos?.[0]?.href || '',
                     homeFormation: data.header?.competitions?.[0]?.competitors?.find(c => c.homeAway === 'home')?.formation || '—',
                     awayFormation: data.header?.competitions?.[0]?.competitors?.find(c => c.homeAway === 'away')?.formation || '—',
                     homeLineup:    home.starters,
@@ -244,11 +255,14 @@ async function getLeagueTeams(leagueCode) {
         if (!slug) return [];
 
         const data  = await espnGet(`${ESPN_BASE}/${slug}/teams`);
+        const leagueLogo = data.sports?.[0]?.leagues?.[0]?.logos?.[0]?.href;
+        if (leagueLogo) leagueLogoCache[leagueCode] = leagueLogo;
         const teams = data.sports?.[0]?.leagues?.[0]?.teams || [];
         return teams.map(t => ({
             id:      parseInt(t.team?.id) || 0,
             name:    t.team?.displayName || '',
             country: '',
+            logo:    t.team?.logos?.[0]?.href || '',
         })).filter(t => t.name);
     } catch (err) {
         console.error(`[Football] getLeagueTeams ${leagueCode}:`, err.message);
@@ -278,6 +292,7 @@ async function searchFotMob(query, type = 'team') {
             id:      parseInt(t.id) || 0,
             name:    t.displayName  || '',
             country: SLUG_SHORT[t.defaultLeagueSlug] || t.defaultLeagueSlug || '',
+            logo:    t.images?.[0]?.href || '',
         })).filter(t => t.name);
     } catch (err) {
         console.error('[Football] searchFotMob (ESPN):', err.message);
@@ -295,6 +310,8 @@ async function getWCSchedule(daysAhead = 7) {
 
         const url  = `${ESPN_BASE}/fifa.world/scoreboard?dates=${fmt(today)}-${fmt(end)}`;
         const data = await espnGet(url, TTL_SCHEDULE);
+        const leagueLogo = data.leagues?.[0]?.logos?.[0]?.href;
+        if (leagueLogo) leagueLogoCache['WC'] = leagueLogo;
         return (data.events || [])
             .filter(e => {
                 const s = e.competitions?.[0]?.status?.type?.name || '';
@@ -342,6 +359,7 @@ module.exports = {
     LEAGUE_NAMES,
     AVAILABLE_LEAGUES,
     SEASON_START,
+    leagueLogoCache,
     getMatches,
     getLiveMatches,
     getMatchLineup,

@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getWCSchedule, getWCGroups, getLiveMatches, getMatchLineup } = require('../services/footballService');
+const { getWCSchedule, getWCGroups, getLiveMatches, getMatchLineup, leagueLogoCache } = require('../services/footballService');
+
+const WC_LOGO = 'https://a.espncdn.com/i/leaguelogos/soccer/500/1.png';
 
 function fmtTime(dt) {
     if (!dt) return 'TBD';
@@ -34,9 +36,11 @@ module.exports = {
                 const matches = await getWCSchedule(7);
                 if (!matches.length) return interaction.editReply({ content: '❌ ไม่พบแมตช์บอลโลกในช่วง 7 วันข้างหน้า' });
 
+                const wcLogo = leagueLogoCache['WC'] || WC_LOGO;
                 const embed = new EmbedBuilder()
                     .setColor(0xFFD700)
                     .setTitle('🌍 FIFA World Cup 2026 — Upcoming Matches')
+                    .setThumbnail(wcLogo)
                     .setTimestamp();
 
                 for (const m of matches.slice(0, 10)) {
@@ -59,15 +63,19 @@ module.exports = {
                 const matches = allLive.filter(m => m.leagueCode === 'WC');
                 if (!matches.length) return interaction.editReply({ content: '❌ ไม่มีแมตช์บอลโลกที่กำลังแข่งในขณะนี้' });
 
+                const wcLogo2 = leagueLogoCache['WC'] || WC_LOGO;
                 const embed = new EmbedBuilder()
                     .setColor(0xFF0000)
                     .setTitle('🔴 FIFA World Cup 2026 — LIVE')
+                    .setThumbnail(wcLogo2)
                     .setTimestamp();
 
                 for (const m of matches) {
+                    const homeLogo = m.homeLogo ? `[🏠](${m.homeLogo})` : '🏠';
+                    const awayLogo = m.awayLogo ? `[✈️](${m.awayLogo})` : '✈️';
                     embed.addFields({
                         name: `🆚 ${m.homeTeam} vs ${m.awayTeam}`,
-                        value: `**${m.homeScore} – ${m.awayScore}**${m.minute ? ` • นาที ${m.minute}'` : ''}\n🆔 Match ID: \`${m.id}\``,
+                        value: `${homeLogo} **${m.homeScore} – ${m.awayScore}** ${awayLogo}${m.minute ? ` • นาที ${m.minute}'` : ''}\n🆔 Match ID: \`${m.id}\``,
                         inline: false,
                     });
                 }
@@ -79,9 +87,11 @@ module.exports = {
                 const groups = await getWCGroups();
                 if (!groups.length) return interaction.editReply({ content: '❌ ไม่พบตารางกลุ่มบอลโลกในขณะนี้' });
 
+                const wcLogo3 = leagueLogoCache['WC'] || WC_LOGO;
                 const embed = new EmbedBuilder()
                     .setColor(0xFFD700)
                     .setTitle('🌍 FIFA World Cup 2026 — Group Standings')
+                    .setThumbnail(wcLogo3)
                     .setTimestamp();
 
                 for (const g of groups) {
@@ -116,6 +126,8 @@ module.exports = {
                     )
                     .setFooter({ text: `Match ID: ${matchId}` })
                     .setTimestamp();
+
+                if (lineup.homeLogo) embed.setThumbnail(lineup.homeLogo);
 
                 if (lineup.homeBench?.length) embed.addFields({ name: `🪑 สำรอง — ${lineup.homeTeam}`, value: lineup.homeBench.slice(0, 7).join(', '), inline: false });
                 if (lineup.awayBench?.length) embed.addFields({ name: `🪑 สำรอง — ${lineup.awayTeam}`, value: lineup.awayBench.slice(0, 7).join(', '), inline: false });

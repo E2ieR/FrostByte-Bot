@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const {
     getMatches, getLiveMatches, getMatchLineup, getStandings,
-    LEAGUE_NAMES, SEASON_START,
+    LEAGUE_NAMES, SEASON_START, leagueLogoCache,
 } = require('../services/footballService');
 
 const LEAGUE_CHOICES = [
@@ -65,6 +65,8 @@ module.exports = {
                     .setTitle(`⚽ ${LEAGUE_NAMES[league] || league} — Upcoming Matches`)
                     .setTimestamp();
 
+                if (leagueLogoCache[league]) embed.setThumbnail(leagueLogoCache[league]);
+
                 for (const m of matches.slice(0, 8)) {
                     embed.addFields({
                         name: `🆚 ${m.homeShort || m.homeTeam} vs ${m.awayShort || m.awayTeam}`,
@@ -90,9 +92,11 @@ module.exports = {
                     .setTimestamp();
 
                 for (const m of matches.slice(0, 10)) {
+                    const homeLogo = m.homeLogo ? `[🏠](${m.homeLogo})` : '🏠';
+                    const awayLogo = m.awayLogo ? `[✈️](${m.awayLogo})` : '✈️';
                     embed.addFields({
                         name: `${m.league}`,
-                        value: `**${m.homeTeam}** ${m.homeScore} – ${m.awayScore} **${m.awayTeam}**${m.minute ? ` • นาที ${m.minute}'` : ''}`,
+                        value: `${homeLogo} **${m.homeTeam}** ${m.homeScore} – ${m.awayScore} **${m.awayTeam}** ${awayLogo}${m.minute ? ` • นาที ${m.minute}'` : ''}`,
                         inline: false,
                     });
                 }
@@ -141,6 +145,8 @@ module.exports = {
                     .setFooter({ text: `Match ID: ${matchId} • espn.com` })
                     .setTimestamp();
 
+                if (lineup.homeLogo) embed.setThumbnail(lineup.homeLogo);
+
                 if (lineup.homeBench?.length) {
                     embed.addFields({
                         name: `🪑 สำรอง — ${lineup.homeTeam}`,
@@ -184,6 +190,8 @@ module.exports = {
                     ).join('\n')}\`\`\``)
                     .setFooter({ text: 'espn.com' })
                     .setTimestamp();
+
+                if (leagueLogoCache[league]) embed.setThumbnail(leagueLogoCache[league]);
 
                 return interaction.editReply({ embeds: [embed] });
             }
