@@ -285,6 +285,59 @@ async function searchFotMob(query, type = 'team') {
     }
 }
 
+// ─── บอลโลก: แมตช์ 7 วันข้างหน้า ─────────────────────────────────────────────
+async function getWCSchedule(daysAhead = 7) {
+    try {
+        const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
+        const today = new Date();
+        const end   = new Date(today);
+        end.setDate(end.getDate() + daysAhead);
+
+        const url  = `${ESPN_BASE}/fifa.world/scoreboard?dates=${fmt(today)}-${fmt(end)}`;
+        const data = await espnGet(url, TTL_SCHEDULE);
+        return (data.events || [])
+            .filter(e => {
+                const s = e.competitions?.[0]?.status?.type?.name || '';
+                return s === 'STATUS_SCHEDULED' || s === 'STATUS_IN_PROGRESS';
+            })
+            .map(e => {
+                matchLeagueMap.set(parseInt(e.id), 'fifa.world');
+                return parseEvent(e, 'WC');
+            });
+    } catch (err) {
+        console.error('[WC] getWCSchedule:', err.message);
+        return [];
+    }
+}
+
+// ─── บอลโลก: ตารางกลุ่มทั้งหมด ───────────────────────────────────────────────
+async function getWCGroups() {
+    try {
+        const data   = await espnGet(`${ESPN_BASE}/fifa.world/standings`, TTL_STANDINGS);
+        const groups = data.children || [];
+        return groups.map(g => ({
+            name: g.name || g.abbreviation || '',
+            entries: (g.standings?.entries || []).map((e, i) => {
+                const stats = {};
+                for (const s of (e.stats || [])) stats[s.name] = s.value;
+                return {
+                    pos:    i + 1,
+                    team:   e.team?.shortDisplayName || e.team?.displayName || '',
+                    played: stats.gamesPlayed || 0,
+                    won:    stats.wins        || 0,
+                    draw:   stats.ties        || 0,
+                    lost:   stats.losses      || 0,
+                    gd:     stats.pointDifferential || 0,
+                    pts:    stats.points      || 0,
+                };
+            }),
+        })).filter(g => g.entries.length);
+    } catch (err) {
+        console.error('[WC] getWCGroups:', err.message);
+        return [];
+    }
+}
+
 module.exports = {
     LEAGUE_NAMES,
     AVAILABLE_LEAGUES,
@@ -293,6 +346,8 @@ module.exports = {
     getLiveMatches,
     getMatchLineup,
     getStandings,
+    getWCSchedule,
+    getWCGroups,
     getMultiLeagueMatches,
     getLeagueTeams,
     searchFotMob,
