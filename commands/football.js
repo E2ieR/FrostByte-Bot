@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const {
     getMatches, getLiveMatches, getMatchLineup, getStandings,
-    LEAGUE_NAMES, AVAILABLE_LEAGUES,
+    LEAGUE_NAMES, SEASON_START,
 } = require('../services/footballService');
 
 const LEAGUE_CHOICES = [
@@ -49,7 +49,14 @@ module.exports = {
             if (sub === 'matches') {
                 const league  = interaction.options.getString('league');
                 const matches = await getMatches(league);
-                if (!matches.length) return interaction.editReply({ content: `❌ ไม่พบแมตช์ที่กำลังจะมาถึงของ ${LEAGUE_NAMES[league] || league}` });
+                if (!matches.length) {
+                    const startStr = SEASON_START[league];
+                    if (startStr && new Date() < new Date(startStr)) {
+                        const ts = Math.floor(new Date(startStr).getTime() / 1000);
+                        return interaction.editReply({ content: `⏸️ **${LEAGUE_NAMES[league] || league}** อยู่ในช่วง off-season\n📅 ฤดูกาลใหม่เริ่ม <t:${ts}:D> (<t:${ts}:R>)` });
+                    }
+                    return interaction.editReply({ content: `❌ ไม่พบแมตช์ที่กำลังจะมาถึงของ ${LEAGUE_NAMES[league] || league}` });
+                }
 
                 const embed = new EmbedBuilder()
                     .setColor(0x00A651)
@@ -82,7 +89,7 @@ module.exports = {
 
                 for (const m of matches.slice(0, 10)) {
                     embed.addFields({
-                        name: `${m.competition}`,
+                        name: `${m.league}`,
                         value: `**${m.homeTeam}** ${m.homeScore} – ${m.awayScore} **${m.awayTeam}**${m.minute ? ` • นาที ${m.minute}'` : ''}`,
                         inline: false,
                     });
@@ -97,6 +104,13 @@ module.exports = {
                 const matchId = interaction.options.getInteger('match_id');
                 const lineup  = await getMatchLineup(matchId);
                 if (!lineup) {
+                    const now = new Date();
+                    const allOffSeason = Object.values(SEASON_START).every(d => now < new Date(d));
+                    if (allOffSeason) {
+                        const earliest = Object.values(SEASON_START).sort()[0];
+                        const ts = Math.floor(new Date(earliest).getTime() / 1000);
+                        return interaction.editReply({ content: `⏸️ ขณะนี้อยู่ในช่วง off-season ยังไม่มี Match ID ให้ใช้งาน\n📅 ฤดูกาลใหม่เริ่มเร็วสุด <t:${ts}:D> (<t:${ts}:R>)` });
+                    }
                     return interaction.editReply({ content: `❌ ไม่พบข้อมูล lineup สำหรับ Match ID \`${matchId}\`\n(Lineup จะแสดงเมื่อใกล้เวลาแข่ง)` });
                 }
 
@@ -147,7 +161,14 @@ module.exports = {
             if (sub === 'standings') {
                 const league = interaction.options.getString('league');
                 const table  = await getStandings(league);
-                if (!table.length) return interaction.editReply({ content: `❌ ไม่พบตารางคะแนนสำหรับ ${LEAGUE_NAMES[league] || league}` });
+                if (!table.length) {
+                    const startStr = SEASON_START[league];
+                    if (startStr && new Date() < new Date(startStr)) {
+                        const ts = Math.floor(new Date(startStr).getTime() / 1000);
+                        return interaction.editReply({ content: `⏸️ **${LEAGUE_NAMES[league] || league}** อยู่ในช่วง off-season\n📅 ตารางคะแนนฤดูกาลใหม่จะพร้อม <t:${ts}:D> (<t:${ts}:R>)` });
+                    }
+                    return interaction.editReply({ content: `❌ ไม่พบตารางคะแนนสำหรับ ${LEAGUE_NAMES[league] || league}` });
+                }
 
                 const lines = table.map(t =>
                     `\`${String(t.pos).padStart(2)}\` **${t.team.substring(0, 18).padEnd(18)}** ${String(t.played).padStart(2)} | ${String(t.won).padStart(2)}W ${String(t.draw).padStart(2)}D ${String(t.lost).padStart(2)}L | GD${t.gd >= 0 ? '+' : ''}${t.gd} | **${t.pts}pts**`

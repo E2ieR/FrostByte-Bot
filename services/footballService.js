@@ -37,20 +37,34 @@ const SLUG_SHORT = {
 
 const AVAILABLE_LEAGUES = Object.entries(LEAGUE_NAMES).map(([code, name]) => ({ code, name }));
 
+const SEASON_START = {
+    PL:  '2026-08-08',
+    BL1: '2026-08-14',
+    SA:  '2026-08-22',
+    PD:  '2026-08-15',
+    FL1: '2026-08-08',
+    CL:  '2026-09-15',
+    EL:  '2026-09-17',
+    PPL: '2026-08-08',
+    DED: '2026-08-07',
+};
+
 // ─── Simple in-memory cache ──────────────────────────────────────────────────
 const cache = new Map();
-const TTL   = 3 * 60 * 1000;
+const TTL           = 3 * 60 * 1000;   // default (lineup summary)
+const TTL_LIVE      = 60 * 1000;        // live scores — 1 min
+const TTL_SCHEDULE  = 5 * 60 * 1000;   // upcoming matches — 5 min
+const TTL_STANDINGS = 20 * 60 * 1000;  // standings — 20 min
 
-function getCached(key) {
-    const e = cache.get(key);
-    return e && Date.now() - e.ts < TTL ? e.data : null;
-}
+// matchId → leagueSlug — populated by getMatches/getLiveMatches so lineup only needs 1 request
+const matchLeagueMap = new Map();
+
 function setCache(key, data) { cache.set(key, { data, ts: Date.now() }); }
 
 // ─── ESPN GET helper ─────────────────────────────────────────────────────────
-async function espnGet(url) {
-    const cached = getCached(url);
-    if (cached) return cached;
+async function espnGet(url, ttl = TTL) {
+    const e = cache.get(url);
+    if (e && Date.now() - e.ts < ttl) return e.data;
 
     const { data } = await axios.get(url, {
         headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
@@ -93,13 +107,16 @@ async function getMatches(leagueCode = 'PL', limit = 10) {
         const slug = LEAGUE_SLUGS[leagueCode];
         if (!slug) return [];
 
-        const data = await espnGet(`${ESPN_BASE}/${slug}/scoreboard`);
+        const data = await espnGet(`${ESPN_BASE}/${slug}/scoreboard`, TTL_SCHEDULE);
         const events = data.events || [];
 
         return events
             .filter(e => (e.competitions?.[0]?.status?.type?.name || '') === 'STATUS_SCHEDULED')
             .slice(0, limit)
-            .map(e => parseEvent(e, leagueCode));
+            .map(e => {
+                matchLeagueMap.set(parseInt(e.id), slug);
+                return parseEvent(e, leagueCode);
+            });
     } catch (err) {
         console.error(`[Football] getMatches ${leagueCode}:`, err.message);
         return [];
@@ -112,11 +129,14 @@ async function getLiveMatches() {
         const live = [];
         await Promise.all(Object.entries(LEAGUE_SLUGS).map(async ([code, slug]) => {
             try {
-                const data   = await espnGet(`${ESPN_BASE}/${slug}/scoreboard`);
+                const data   = await espnGet(`${ESPN_BASE}/${slug}/scoreboard`, TTL_LIVE);
                 const events = (data.events || [])
                     .filter(e => e.competitions?.[0]?.status?.type?.name === 'STATUS_IN_PROGRESS');
-                for (const e of events) live.push(parseEvent(e, code));
-            } catch { /* skip league on error */ }
+                for (const e of events) {
+                    matchLeagueMap.set(parseInt(e.id), slug);
+                    live.push(parseEvent(e, code));
+                }
+            } catch (e) { console.warn('[Football] getLiveMatches', code, e.message); }
         }));
         return live;
     } catch (err) {
@@ -127,10 +147,20 @@ async function getLiveMatches() {
 
 // ─── lineup ของแมตช์ (ESPN summary) ─────────────────────────────────────────
 async function getMatchLineup(matchId) {
+    function extractPlayers(teamBox) {
+        const stats = teamBox?.players?.[0]?.statistics;
+        if (!stats?.length) return { starters: [], bench: [] };
+        const athletes = stats[0]?.athletes || [];
+        const starters = athletes.filter(p => p.starter).map(p => p.athlete?.displayName || '').filter(Boolean);
+        const bench    = athletes.filter(p => !p.starter).map(p => p.athlete?.displayName || '').filter(Boolean);
+        return { starters, bench };
+    }
+
     try {
-        // ลอง summary จากทุกลีก — ESPN event id unique ข้ามลีก
-        const slugs = Object.values(LEAGUE_SLUGS);
-        for (const slug of slugs) {
+        const knownSlug  = matchLeagueMap.get(matchId);
+        const slugsToTry = knownSlug ? [knownSlug] : Object.values(LEAGUE_SLUGS);
+
+        for (const slug of slugsToTry) {
             try {
                 const data = await espnGet(`${ESPN_BASE}/${slug}/summary?event=${matchId}`);
                 if (!data || data.error) continue;
@@ -139,24 +169,17 @@ async function getMatchLineup(matchId) {
                 const homeTeamB = boxscore.teams?.find(t => t.homeAway === 'home');
                 const awayTeamB = boxscore.teams?.find(t => t.homeAway === 'away');
 
-                function extractPlayers(teamBox) {
-                    const players = teamBox?.players?.[0]?.statistics?.[0]?.athletes || [];
-                    const starters = players.filter(p => p.starter).map(p => p.athlete?.displayName || '');
-                    const bench    = players.filter(p => !p.starter).map(p => p.athlete?.displayName || '');
-                    return { starters, bench };
-                }
-
                 const home = extractPlayers(homeTeamB);
                 const away = extractPlayers(awayTeamB);
 
-                // ถ้าไม่มี lineup เลยให้ข้าม slug นี้
-                if (!home.starters.length && !away.starters.length) continue;
+                if (!home.starters.length && !away.starters.length) {
+                    console.warn(`[Football] lineup empty for match ${matchId} via ${slug}`);
+                    continue;
+                }
 
-                const hTeam = homeTeamB?.team?.displayName || '';
-                const aTeam = awayTeamB?.team?.displayName || '';
                 return {
-                    homeTeam:      hTeam,
-                    awayTeam:      aTeam,
+                    homeTeam:      homeTeamB?.team?.displayName || '',
+                    awayTeam:      awayTeamB?.team?.displayName || '',
                     homeFormation: data.header?.competitions?.[0]?.competitors?.find(c => c.homeAway === 'home')?.formation || '—',
                     awayFormation: data.header?.competitions?.[0]?.competitors?.find(c => c.homeAway === 'away')?.formation || '—',
                     homeLineup:    home.starters,
@@ -165,7 +188,10 @@ async function getMatchLineup(matchId) {
                     awayBench:     away.bench,
                     dateTime:      new Date(data.header?.competitions?.[0]?.date || Date.now()),
                 };
-            } catch { continue; }
+            } catch (e) {
+                console.warn(`[Football] lineup ${slug} match ${matchId}:`, e.message);
+                continue;
+            }
         }
         return null;
     } catch (err) {
@@ -180,7 +206,7 @@ async function getStandings(leagueCode = 'PL') {
         const slug = LEAGUE_SLUGS[leagueCode];
         if (!slug) return [];
 
-        const data = await espnGet(`${ESPN_BASE}/${slug}/standings`);
+        const data = await espnGet(`${ESPN_BASE}/${slug}/standings`, TTL_STANDINGS);
         const groups = data.children || [];
         const entries = [];
 
@@ -189,7 +215,6 @@ async function getStandings(leagueCode = 'PL') {
                 const stats = {};
                 for (const s of (e.stats || [])) stats[s.name] = s.value;
                 entries.push({
-                    pos:    entries.length + 1,
                     team:   e.team?.displayName || e.team?.shortDisplayName || '',
                     played: stats.gamesPlayed || 0,
                     won:    stats.wins        || 0,
@@ -201,7 +226,9 @@ async function getStandings(leagueCode = 'PL') {
             }
         }
 
-        return entries.sort((a, b) => (b.pts - a.pts) || (b.gd - a.gd));
+        return entries
+            .sort((a, b) => (b.pts - a.pts) || (b.gd - a.gd))
+            .map((e, i) => ({ ...e, pos: i + 1 }));
     } catch (err) {
         console.error(`[Football] getStandings ${leagueCode}:`, err.message);
         return [];
@@ -266,6 +293,7 @@ async function searchFotMob(query, type = 'team') {
 module.exports = {
     LEAGUE_NAMES,
     AVAILABLE_LEAGUES,
+    SEASON_START,
     getMatches,
     getLiveMatches,
     getMatchLineup,
