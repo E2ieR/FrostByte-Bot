@@ -3682,7 +3682,9 @@
                     const style = sel
                         ? 'border-color:var(--blurple);background:rgba(88,101,242,0.18);color:var(--blurple)'
                         : 'border-color:var(--border);background:var(--bg);color:var(--text)';
-                    return `<button type="button" onclick="toggleFbTeam(${t.id},${JSON.stringify(t.name)},${JSON.stringify(t.country||'')})"
+                    const _n = JSON.stringify(t.name).replace(/"/g,'&quot;');
+                    const _c = JSON.stringify(t.country||'').replace(/"/g,'&quot;');
+                    return `<button type="button" onclick="toggleFbTeam(${t.id},${_n},${_c})"
                         style="padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;
                                transition:all .12s;border:1px solid;${style}"
                     >${sel ? '✓ ' : ''}${t.name}</button>`;
