@@ -48,23 +48,17 @@ router.get('/api/:guildId/football-search', async (req, res) => {
     }
 });
 
-// ─── GET ทีม Esports จาก Liquipedia (AJAX) ───────────────────────────────────
+// ─── GET ทีม Esports จาก Liquipedia จัดตามโซน (AJAX) ────────────────────────
 router.get('/api/:guildId/esports-game-teams', async (req, res) => {
     const { game } = req.query;
-    if (!['cs2', 'valorant', 'lol', 'mlbb'].includes(game)) return res.json([]);
+    if (!['cs2', 'valorant', 'lol', 'mlbb'].includes(game)) return res.json({});
     try {
         const regionMap = await getTeamsByRegion(game);
-        const all = Object.values(regionMap).flat();
-        const seen = new Set();
-        const unique = all.filter(t => {
-            if (!t.name || seen.has(t.name)) return false;
-            seen.add(t.name);
-            return true;
-        });
-        res.json(unique.slice(0, 80));
+        // ส่งกลับเป็น { regionName: [{name, url}] } — client จะแสดง region tabs
+        res.json(regionMap);
     } catch (err) {
         console.error('[EsportsGameTeams]', err.message);
-        res.json([]);
+        res.json({});
     }
 });
 

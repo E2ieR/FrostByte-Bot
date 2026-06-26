@@ -2820,9 +2820,10 @@
         mlbb:     Array.isArray(_espSaved.mlbb)     ? [..._espSaved.mlbb]     : [],
     };
     const ESP_LABEL = { cs2:'CS2', valorant:'VALORANT', lol:'League of Legends', mlbb:'Mobile Legends' };
-    let espPickerCache = {};
+    let espPickerCache = {};       // game → { regionName: [{name,url}] }
     let espPickerLoading = new Set();
-    let espActiveGame = null;
+    let espActiveGame   = null;
+    let espActiveRegion = {};      // game → regionName
 
     function renderEspChips() {
         const el = document.getElementById('esp-teams-chips');
@@ -2874,7 +2875,7 @@
         try {
             const r = await fetch(`/api/<%= guildId %>/esports-game-teams?game=${game}`);
             espPickerCache[game] = await r.json();
-        } catch { espPickerCache[game] = []; }
+        } catch { espPickerCache[game] = {}; }
         espPickerLoading.delete(game);
         renderEspPickerBody();
     }
@@ -2883,27 +2884,61 @@
         const body = document.getElementById('esp-picker-body');
         if (!body || !espActiveGame) return;
         const game = espActiveGame;
+
         if (espPickerLoading.has(game)) {
             body.innerHTML = '<span style="color:var(--muted);font-size:12px">⏳ กำลังโหลดทีมจาก Liquipedia... (5-15 วินาที)</span>';
             return;
         }
-        const teams = espPickerCache[game] || [];
-        if (!teams.length) {
+
+        const regionMap = espPickerCache[game];
+        const regions   = regionMap ? Object.keys(regionMap) : [];
+        if (!regions.length) {
             body.innerHTML = '<span style="color:var(--muted);font-size:12px">ไม่พบข้อมูลทีม หรือ Liquipedia เต็ม — ลองใหม่ภายหลัง</span>';
             return;
         }
+
+        // กำหนด active region
+        if (!espActiveRegion[game] || !regionMap[espActiveRegion[game]]) {
+            espActiveRegion[game] = regions[0];
+        }
+        const activeRegion = espActiveRegion[game];
+        const teams    = regionMap[activeRegion] || [];
         const selected = espTeams[game] || [];
-        body.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:5px">` +
-            teams.map(t => {
-                const isSel = selected.includes(t.name);
-                const style = isSel
-                    ? 'border-color:var(--blurple);background:rgba(88,101,242,0.18);color:var(--blurple)'
-                    : 'border-color:var(--border);background:var(--bg);color:var(--text)';
-                const _n = JSON.stringify(t.name).replace(/"/g,'&quot;');
-                return `<button type="button" onclick="toggleEspTeam('${game}',${_n})"
-                    style="padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .12s;border:1px solid;${style}"
-                >${isSel ? '✓ ' : ''}${t.name}</button>`;
-            }).join('') + `</div>`;
+
+        // ── Region tabs ───────────────────────────────────────────────────────
+        const regionTabs = regions.map(r => {
+            const isActive    = r === activeRegion;
+            const selCount    = (regionMap[r] || []).filter(t => selected.includes(t.name)).length;
+            const badgeHtml   = selCount ? ` <span style="background:rgba(255,255,255,0.25);border-radius:8px;padding:0 5px;font-size:10px">${selCount}</span>` : '';
+            const activeStyle = 'background:var(--blurple);color:#fff;border-color:var(--blurple);font-weight:600';
+            const inactStyle  = 'background:var(--bg2);color:var(--text);border-color:var(--border)';
+            const _r = JSON.stringify(r).replace(/"/g,'&quot;');
+            return `<button type="button" onclick="selectEspRegion('${game}',${_r})"
+                style="padding:4px 11px;border-radius:16px;font-size:11px;cursor:pointer;font-family:inherit;border:1px solid;${isActive?activeStyle:inactStyle}"
+            >${r}${badgeHtml}</button>`;
+        }).join('');
+
+        // ── Team buttons ──────────────────────────────────────────────────────
+        const teamBtns = teams.map(t => {
+            const isSel  = selected.includes(t.name);
+            const tStyle = isSel
+                ? 'border-color:var(--blurple);background:rgba(88,101,242,0.18);color:var(--blurple)'
+                : 'border-color:var(--border);background:var(--bg);color:var(--text)';
+            const _n = JSON.stringify(t.name).replace(/"/g,'&quot;');
+            return `<button type="button" onclick="toggleEspTeam('${game}',${_n})"
+                style="padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .12s;border:1px solid;${tStyle}"
+            >${isSel ? '✓ ' : ''}${t.name}</button>`;
+        }).join('');
+
+        body.innerHTML = `
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${regionTabs}</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:7px">${activeRegion} — ${teams.length} ทีม</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">${teamBtns || '<span style="color:var(--muted);font-size:12px">ไม่มีทีมในโซนนี้</span>'}</div>`;
+    }
+
+    function selectEspRegion(game, region) {
+        espActiveRegion[game] = region;
+        renderEspPickerBody();
     }
 
     // Init esp chips on load
