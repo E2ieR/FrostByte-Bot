@@ -283,13 +283,16 @@ async function getTeamsByRegion(game) {
                 if (cleanPath && cleanPath !== '/Portal:Teams') subPagePaths.add(cleanPath);
             }
         });
+        console.log(`[Teams ${game}] sub-pages found: ${[...subPagePaths].join(', ') || 'none'}`);
 
         const regions = {};
 
         function _scanPage($ctx, defaultRegion) {
             let curRegion   = defaultRegion;
             let inDisbanded = false;
-            _contentRoot($ctx).children().each((_, el) => {
+            const root = _contentRoot($ctx);
+            console.log(`[Teams ${game}] scanning "${defaultRegion}" — root children: ${root.children().length}`);
+            root.children().each((_, el) => {
                 const tag = (el.tagName || el.name || '').toLowerCase();
                 if (['h2', 'h3', 'h4'].includes(tag)) {
                     const title = $ctx(el).find('.mw-headline').text().trim();
@@ -297,10 +300,10 @@ async function getTeamsByRegion(game) {
                         inDisbanded = true;
                     } else if (title.length > 1 && !_SKIP_HEADING.test(title)) {
                         inDisbanded = false;
-                        curRegion   = title;      // โซนจริง: North America, Korea, Philippines...
+                        curRegion   = title;
                     } else {
                         inDisbanded = false;
-                        curRegion   = defaultRegion; // generic heading → reset เป็น default
+                        curRegion   = defaultRegion;
                     }
                     return;
                 }
@@ -316,6 +319,7 @@ async function getTeamsByRegion(game) {
                     const $s     = await fetchPage(wiki, subPath);
                     const subName = subPath.split('/').pop().replace(/_/g, ' ');
                     _scanPage($s, subName);
+                    console.log(`[Teams ${game}] after "${subName}": regions=${Object.keys(regions).join(', ')}`);
                 } catch (subErr) {
                     console.error(`[Liquipedia ${game}] sub-page ${subPath}:`, subErr.message);
                 }
@@ -324,6 +328,7 @@ async function getTeamsByRegion(game) {
 
         // ── fallback: main page ────────────────────────────────────────────────
         if (!Object.keys(regions).length) {
+            console.log(`[Teams ${game}] no sub-pages yielded teams, falling back to main page`);
             _scanPage($, 'ทั่วไป');
         }
 

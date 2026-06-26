@@ -54,7 +54,9 @@ router.get('/api/:guildId/esports-game-teams', async (req, res) => {
     if (!['cs2', 'valorant', 'lol', 'mlbb'].includes(game)) return res.json({});
     try {
         const regionMap = await getTeamsByRegion(game);
-        // ส่งกลับเป็น { regionName: [{name, url}] } — client จะแสดง region tabs
+        const regionCount = Object.keys(regionMap).length;
+        const teamCount   = Object.values(regionMap).reduce((s, t) => s + t.length, 0);
+        console.log(`[EsportsGameTeams] game=${game} regions=${regionCount} teams=${teamCount}`, Object.keys(regionMap));
         res.json(regionMap);
     } catch (err) {
         console.error('[EsportsGameTeams]', err.message);
