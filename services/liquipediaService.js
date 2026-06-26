@@ -257,8 +257,14 @@ function _addTeams($ctx, el, regions, curRegion, wiki) {
     }
 }
 
+// Mediawiki wrap content ใน .mw-parser-output → ต้องใช้ children ของ div นั้น
+function _contentRoot($ctx) {
+    const inner = $ctx('#mw-content-text .mw-parser-output');
+    return inner.length ? inner : $ctx('#mw-content-text');
+}
+
 // ─── ดึงทีมแบ่งตามภูมิภาค ────────────────────────────────────────────────────
-// รองรับทั้ง (1) main page h2/h3 และ (2) sub-pages (VALORANT h4, MLBB h3, CS2 earnings→ sub-name)
+// รองรับ sub-pages (VALORANT/CS2/MLBB/LoL) และ main-page h2/h3 fallback
 async function getTeamsByRegion(game) {
     const cachedR = _getCached(`teams:${game}`, _TEAMS_CACHE_TTL);
     if (cachedR) return cachedR;
@@ -280,60 +286,45 @@ async function getTeamsByRegion(game) {
 
         const regions = {};
 
-        // ── fetch sub-pages → อ่าน h2/h3/h4 ──────────────────────────────────
+        function _scanPage($ctx, defaultRegion) {
+            let curRegion   = defaultRegion;
+            let inDisbanded = false;
+            _contentRoot($ctx).children().each((_, el) => {
+                const tag = (el.tagName || el.name || '').toLowerCase();
+                if (['h2', 'h3', 'h4'].includes(tag)) {
+                    const title = $ctx(el).find('.mw-headline').text().trim();
+                    if (/disbanded/i.test(title)) {
+                        inDisbanded = true;
+                    } else if (title.length > 1 && !_SKIP_HEADING.test(title)) {
+                        inDisbanded = false;
+                        curRegion   = title;      // โซนจริง: North America, Korea, Philippines...
+                    } else {
+                        inDisbanded = false;
+                        curRegion   = defaultRegion; // generic heading → reset เป็น default
+                    }
+                    return;
+                }
+                if (inDisbanded) return;
+                _addTeams($ctx, el, regions, curRegion, wiki);
+            });
+        }
+
+        // ── fetch sub-pages ────────────────────────────────────────────────────
         if (subPagePaths.size > 0) {
             for (const subPath of [...subPagePaths].slice(0, 8)) {
                 try {
-                    const $s = await fetchPage(wiki, subPath);
-                    const subName     = subPath.split('/').pop().replace(/_/g, ' ');
-                    let   curRegion   = subName;  // ชื่อ sub-page เป็น default region
-                    let   inDisbanded = false;
-
-                    $s('#mw-content-text').children().each((_, el) => {
-                        const tag = (el.tagName || el.name || '').toLowerCase();
-                        if (['h2', 'h3', 'h4'].includes(tag)) {
-                            const title = $s(el).find('.mw-headline').text().trim();
-                            if (/disbanded/i.test(title)) {
-                                inDisbanded = true;          // หยุดเพิ่มทีมหลัง Disbanded section
-                            } else if (title.length > 1 && !_SKIP_HEADING.test(title)) {
-                                inDisbanded = false;
-                                curRegion   = title;         // โซนใหม่ที่ดี (North America, Brazil...)
-                            } else {
-                                inDisbanded = false;
-                                curRegion   = subName;       // generic heading → reset เป็นชื่อ sub-page
-                            }
-                            return;
-                        }
-                        if (inDisbanded) return;
-                        _addTeams($s, el, regions, curRegion, wiki);
-                    });
+                    const $s     = await fetchPage(wiki, subPath);
+                    const subName = subPath.split('/').pop().replace(/_/g, ' ');
+                    _scanPage($s, subName);
                 } catch (subErr) {
                     console.error(`[Liquipedia ${game}] sub-page ${subPath}:`, subErr.message);
                 }
             }
         }
 
-        // ── fallback: main page h2/h3/h4 ─────────────────────────────────────
+        // ── fallback: main page ────────────────────────────────────────────────
         if (!Object.keys(regions).length) {
-            let curRegion   = 'ทั่วไป';
-            let inDisbanded = false;
-            $('#mw-content-text').children().each((_, el) => {
-                const tag = (el.tagName || el.name || '').toLowerCase();
-                if (['h2', 'h3', 'h4'].includes(tag)) {
-                    const title = $(el).find('.mw-headline').text().trim();
-                    if (/disbanded/i.test(title)) {
-                        inDisbanded = true;
-                    } else if (title.length > 1 && !_SKIP_HEADING.test(title)) {
-                        inDisbanded = false;
-                        curRegion   = title;
-                    } else {
-                        inDisbanded = false;
-                    }
-                    return;
-                }
-                if (inDisbanded) return;
-                _addTeams($, el, regions, curRegion, wiki);
-            });
+            _scanPage($, 'ทั่วไป');
         }
 
         // ── clean: ลบ region ว่าง, จำกัด 20 ทีมต่อโซน ────────────────────────
