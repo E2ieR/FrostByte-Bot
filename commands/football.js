@@ -10,7 +10,9 @@ const LEAGUE_CHOICES = [
     { name: '🇩🇪 Bundesliga',            value: 'BL1' },
     { name: '🇮🇹 Serie A',               value: 'SA'  },
     { name: '🇪🇸 La Liga',               value: 'PD'  },
+    { name: '🇫🇷 Ligue 1',               value: 'FL1' },
     { name: '⭐ UEFA Champions League',   value: 'CL'  },
+    { name: '🟠 UEFA Europa League',      value: 'EL'  },
 ];
 
 function fmtTime(dt) {

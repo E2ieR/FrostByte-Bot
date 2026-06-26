@@ -13,8 +13,6 @@ const LEAGUE_SLUGS = {
     FL1: 'fra.1',
     CL:  'uefa.champions',
     EL:  'uefa.europa',
-    PPL: 'por.1',
-    DED: 'ned.1',
 };
 
 const LEAGUE_NAMES = {
@@ -26,15 +24,12 @@ const LEAGUE_NAMES = {
     FL1: '🇫🇷 Ligue 1',
     CL:  '⭐ UEFA Champions League',
     EL:  '🟠 UEFA Europa League',
-    PPL: '🇵🇹 Primeira Liga',
-    DED: '🇳🇱 Eredivisie',
 };
 
 // ESPN league slug → short name (for team search display)
 const SLUG_SHORT = {
-    'fifa.world': 'WC', 'eng.1': 'PL',  'ger.1': 'BL1', 'ita.1': 'SA',
-    'esp.1': 'PD',  'fra.1': 'FL1', 'uefa.champions': 'UCL',
-    'uefa.europa': 'UEL', 'por.1': 'PPL', 'ned.1': 'DED',
+    'fifa.world': 'WC', 'eng.1': 'PL', 'ger.1': 'BL1', 'ita.1': 'SA',
+    'esp.1': 'PD', 'fra.1': 'FL1', 'uefa.champions': 'UCL', 'uefa.europa': 'UEL',
 };
 
 const AVAILABLE_LEAGUES = Object.entries(LEAGUE_NAMES).map(([code, name]) => ({ code, name }));
@@ -47,8 +42,6 @@ const SEASON_START = {
     FL1: '2026-08-08',
     CL:  '2026-09-15',
     EL:  '2026-09-17',
-    PPL: '2026-08-08',
-    DED: '2026-08-07',
 };
 
 // ─── Simple in-memory cache ──────────────────────────────────────────────────
