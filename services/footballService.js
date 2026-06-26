@@ -100,8 +100,8 @@ function parseEvent(ev, leagueCode) {
         awayShort:  away?.team?.abbreviation || '',
         homeTeamId: parseInt(home?.team?.id) || 0,
         awayTeamId: parseInt(away?.team?.id) || 0,
-        homeLogo:   home?.team?.logos?.[0]?.href || '',
-        awayLogo:   away?.team?.logos?.[0]?.href || '',
+        homeLogo:   home?.team?.logos?.[0]?.href || (home?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${home.team.id}.png` : ''),
+        awayLogo:   away?.team?.logos?.[0]?.href || (away?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${away.team.id}.png` : ''),
         dateTime:   ev.date ? new Date(ev.date) : null,
         homeScore:  parseInt(home?.score) || 0,
         awayScore:  parseInt(away?.score) || 0,
@@ -196,8 +196,8 @@ async function getMatchLineup(matchId) {
                 return {
                     homeTeam:      homeTeamB?.team?.displayName || '',
                     awayTeam:      awayTeamB?.team?.displayName || '',
-                    homeLogo:      homeTeamB?.team?.logos?.[0]?.href || '',
-                    awayLogo:      awayTeamB?.team?.logos?.[0]?.href || '',
+                    homeLogo:      homeTeamB?.team?.logos?.[0]?.href || (homeTeamB?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${homeTeamB.team.id}.png` : ''),
+                    awayLogo:      awayTeamB?.team?.logos?.[0]?.href || (awayTeamB?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${awayTeamB.team.id}.png` : ''),
                     homeFormation: data.header?.competitions?.[0]?.competitors?.find(c => c.homeAway === 'home')?.formation || '—',
                     awayFormation: data.header?.competitions?.[0]?.competitors?.find(c => c.homeAway === 'away')?.formation || '—',
                     homeLineup:    home.starters,
@@ -274,7 +274,7 @@ async function getLeagueTeams(leagueCode) {
             id:      parseInt(t.team?.id) || 0,
             name:    t.team?.displayName || '',
             country: '',
-            logo:    t.team?.logos?.[0]?.href || '',
+            logo:    t.team?.logos?.[0]?.href || (t.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${t.team.id}.png` : ''),
         })).filter(t => t.name);
     } catch (err) {
         console.error(`[Football] getLeagueTeams ${leagueCode}:`, err.message);
