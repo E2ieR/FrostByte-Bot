@@ -44,7 +44,7 @@ router.get('/manage/:guildId', async (req, res) => {
             query: req.query
         });
     } catch (err) {
-        console.error(err);
+        console.error(`[Manage] failed: status=${err.response?.status} msg=${err.response?.data?.message || err.message}`);
         res.redirect('/selector');
     }
 });
@@ -72,8 +72,18 @@ router.get('/auth/discord/callback', async (req, res) => {
         const accessToken = tokenResponse.data.access_token;
         const userResponse = await axios.get('https://discord.com/api/v10/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
         const guildsResponse = await axios.get('https://discord.com/api/v10/users/@me/guilds', { headers: { Authorization: `Bearer ${accessToken}` } });
-        const botGuildsResponse = await axios.get('https://discord.com/api/v10/users/@me/guilds', { headers: { Authorization: `Bot ${process.env.TOKEN}` } });
-        const botGuildIds = botGuildsResponse.data.map(g => g.id);
+
+        // bot guilds — optional; failure must not block login
+        let botGuildIds = [];
+        try {
+            const botGuildsResponse = await axios.get('https://discord.com/api/v10/users/@me/guilds', {
+                headers: { Authorization: `Bot ${process.env.TOKEN}` },
+                timeout: 5000
+            });
+            botGuildIds = botGuildsResponse.data.map(g => g.id);
+        } catch (botErr) {
+            console.warn('[Auth] bot guilds fetch failed:', botErr.response?.status || botErr.message);
+        }
 
         const adminGuilds = guildsResponse.data.filter(guild => {
             const perms = BigInt(guild.permissions);
@@ -89,7 +99,12 @@ router.get('/auth/discord/callback', async (req, res) => {
         }));
         res.redirect('/selector');
     } catch (err) {
-        console.error(err);
+        const status = err.response?.status;
+        const msg = err.response?.data?.message || err.message;
+        console.error(`[Auth] callback failed: status=${status} msg=${msg}`);
+        if (status === 429) {
+            return res.status(429).send('Discord rate limit — รอ ~1 นาทีแล้วลอง login ใหม่อีกครั้ง');
+        }
         res.status(500).send('Auth Error');
     }
 });
