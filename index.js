@@ -33,6 +33,9 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('🍃 MongoDB เชื่อมต่อสำเร็จ'))
     .catch(err => console.error('MongoDB error:', err));
 
+// start dashboard immediately so health-check / login page works even if Discord is down
+try { startServer(client); } catch (err) { console.error('Dashboard start error:', err); }
+
 // ─── โหลด commands ──────────────────────────────────────────────────────────
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
@@ -50,7 +53,6 @@ for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) 
 // ─── Ready ───────────────────────────────────────────────────────────────────
 client.once('ready', () => {
     console.log(`🤖 บอทออนไลน์: ${client.user.tag}`);
-    try { startServer(client); } catch (err) { console.error('Dashboard error:', err); }
     try { sportsScheduler.init(client); } catch (err) { console.error('SportsScheduler error:', err); }
 });
 
@@ -296,4 +298,6 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)
+    .then(() => console.log('🔐 Discord login OK'))
+    .catch(err => console.error('Discord login failed:', err.message));
