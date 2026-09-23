@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const GuildConfig = require('../../models/GuildConfig');
+const discordOAuth = require('../discordOAuth');
+const activeLogins = new Set();
 
 // หน้าแรก — Login
 router.get('/', (req, res) => {
@@ -57,33 +59,32 @@ router.get('/logout', (req, res) => {
 
 // Discord OAuth callback — path ต้องตรงกับ redirect_uri ใน Discord Developer Portal
 router.get('/auth/discord/callback', async (req, res) => {
+    if (req.session.user) return res.redirect('/selector');
     const code = req.query.code;
-    if (!code) return res.redirect('/');
+    if (typeof code !== 'string' || !code) return res.redirect('/');
+    if (activeLogins.has(req.sessionID)) {
+        return res.status(409).send('Login is already in progress. Please wait for the first request.');
+    }
+    activeLogins.add(req.sessionID);
+    let stage = 'token';
     try {
-        const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', new URLSearchParams({
+        const tokenResponse = await discordOAuth.request({ method: 'POST', url: 'https://discord.com/api/v10/oauth2/token', data: new URLSearchParams({
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
             code: code,
             grant_type: 'authorization_code',
             redirect_uri: `${process.env.BASE_URL || 'http://localhost:3000'}/auth/discord/callback`,
             scope: 'identify guilds'
-        }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
         const accessToken = tokenResponse.data.access_token;
-        const userResponse = await axios.get('https://discord.com/api/v10/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
-        const guildsResponse = await axios.get('https://discord.com/api/v10/users/@me/guilds', { headers: { Authorization: `Bearer ${accessToken}` } });
+        stage = 'user';
+        const userResponse = await discordOAuth.request({ url: 'https://discord.com/api/v10/users/@me', headers: { Authorization: `Bearer ${accessToken}` } });
+        stage = 'guilds';
+        const guildsResponse = await discordOAuth.request({ url: 'https://discord.com/api/v10/users/@me/guilds', headers: { Authorization: `Bearer ${accessToken}` } });
 
-        // bot guilds — optional; failure must not block login
-        let botGuildIds = [];
-        try {
-            const botGuildsResponse = await axios.get('https://discord.com/api/v10/users/@me/guilds', {
-                headers: { Authorization: `Bot ${process.env.TOKEN}` },
-                timeout: 5000
-            });
-            botGuildIds = botGuildsResponse.data.map(g => g.id);
-        } catch (botErr) {
-            console.warn('[Auth] bot guilds fetch failed:', botErr.response?.status || botErr.message);
-        }
+        // Gateway already maintains this list; no extra bot-token REST request per login.
+        const botGuildIds = new Set(req.app.locals.discordClient?.guilds.cache.keys() || []);
 
         const adminGuilds = guildsResponse.data.filter(guild => {
             const perms = BigInt(guild.permissions);
@@ -95,17 +96,22 @@ router.get('/auth/discord/callback', async (req, res) => {
             id: g.id,
             name: g.name,
             icon: g.icon,
-            hasBot: botGuildIds.includes(g.id)
+            hasBot: botGuildIds.has(g.id)
         }));
         res.redirect('/selector');
     } catch (err) {
         const status = err.response?.status;
         const msg = err.response?.data?.message || err.message;
-        console.error(`[Auth] callback failed: status=${status} msg=${msg}`);
+        console.error(`[Auth] callback failed: stage=${stage} status=${status} msg=${msg}`);
         if (status === 429) {
-            return res.status(429).send('Discord rate limit — รอ ~1 นาทีแล้วลอง login ใหม่อีกครั้ง');
+            const seconds = discordOAuth.retrySeconds(err.response);
+            console.warn(`[Auth] Discord cooldown: retry_after=${seconds}s`);
+            res.set('Retry-After', String(seconds));
+            return res.status(429).send(`Discord จำกัดคำขอชั่วคราว กรุณารออย่างน้อย ${seconds} วินาที แล้วกลับหน้าแรกเพื่อเริ่ม Login ใหม่ อย่ารีเฟรชหน้า callback ซ้ำ`);
         }
         res.status(500).send('Auth Error');
+    } finally {
+        activeLogins.delete(req.sessionID);
     }
 });
 
