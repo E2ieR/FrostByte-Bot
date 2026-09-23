@@ -1,0 +1,84 @@
+views/manage.ejs:600: <input type="text" name="currencyName" value="<%= config.currencyName || '' %>" placeholder="เช่น Coins, Baht, Gems">
+views/manage.ejs:635: <div class="form-group"><label>วัน</label><input type="number" name="cooldownDays"    value="<%= config.cooldownDays    || 0 %>" min="0"></div>
+views/manage.ejs:636: <div class="form-group"><label>ชั่วโมง</label><input type="number" name="cooldownHours"   value="<%= config.cooldownHours   || 0 %>" min="0"></div>
+views/manage.ejs:637: <div class="form-group"><label>นาที</label><input type="number" name="cooldownMinutes" value="<%= config.cooldownMinutes || 0 %>" min="0"></div>
+views/manage.ejs:638: <div class="form-group"><label>วินาที</label><input type="number" name="cooldownSeconds" value="<%= config.cooldownSeconds || 0 %>" min="0"></div>
+views/manage.ejs:642: <div class="form-group"><label>ขั้นต่ำ</label><input type="number" name="minWorkGain" value="<%= config.minWorkGain || 0 %>" min="0"></div>
+views/manage.ejs:643: <div class="form-group"><label>สูงสุด</label><input type="number" name="maxWorkGain" value="<%= config.maxWorkGain || 0 %>" min="0"></div>
+views/manage.ejs:653: <span class="badge badge-blurple"><%= (config.workSituations || []).length %> ข้อความ</span>
+views/manage.ejs:672: <a href="/<%= guildId %>/delete-reply/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบข้อความนี้?')">ลบ</a>
+views/manage.ejs:734: <span class="badge badge-green"><%= (config.roleIncomes || []).length %> ยศ</span>
+views/manage.ejs:743: <div class="list-item-name"><%= role.roleName || 'ไม่ทราบชื่อ' %></div>
+views/manage.ejs:746: ทุกๆ <%= role.intervalValue %> <%= ({seconds:'วินาที',minutes:'นาที',hours:'ชั่วโมง',days:'วัน'})[role.intervalType] || role.intervalType %>
+views/manage.ejs:747: <% if (role.startDate) { %><span style="color:#aaa;font-size:11px"> · เริ่ม <%= new Date(role.startDate).toLocaleString('th-TH') %></span><% } %>
+views/manage.ejs:751: <a href="/<%= guildId %>/delete-role-income/<%= index %>" class="btn btn-danger btn-sm" onclick="return confirm('ยกเลิกรายได้ยศนี้?')">ลบ</a>
+views/manage.ejs:770: <span class="badge badge-blue"><%= (config.storeItemTypes || []).length %> ประเภท</span>
+views/manage.ejs:783: <a href="/<%= guildId %>/delete-store-type/<%= t.typeId || t._id %>" onclick="return confirm('ลบประเภท <%= t.name %>?')" style="color:var(--danger);font-size:16px;line-height:1;text-decoration:none;ma
+views/manage.ejs:797: <span class="badge badge-blue"><%= (config.storeCategories || []).length %> หมวด</span>
+views/manage.ejs:810: <a href="/<%= guildId %>/delete-store-category/<%= cat.catId || cat._id %>" onclick="return confirm('ลบหมวด <%= cat.name %>?')" style="color:var(--danger);font-size:16px;line-height:1;text-decoration:
+views/manage.ejs:963: <span class="badge badge-yellow"><%= (config.storeItems || []).length %> รายการ</span>
+views/manage.ejs:985: <% if (item.marketEnabled) { %>&nbsp;<span class="badge" style="background:#1a2a1a;color:#57F287"><%= mArrow %><%= mPct >= 0 ? '+' : '' %><%= mPct %>% ตลาด</span><% } %>
+views/manage.ejs:988: &nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>
+views/manage.ejs:989: <% if (item.maxPerUser > 0) { %>&nbsp;· จำกัด <%= item.maxPerUser %>/คน<% } %>
+views/manage.ejs:990: &nbsp;· ขายคืน <%= item.sellPercent || 50 %>%
+views/manage.ejs:996: <a href="/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบสินค้านี้?')">🗑️ ลบ</a>
+views/manage.ejs:1272: <input type="text" class="form-input" id="lv-up-msg" value="<%= config.levelUpMessage || '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!' %>">
+views/manage.ejs:1341: <input type="text" class="form-input" id="rc-footer" placeholder="เช่น: FrostByte Server" value="<%= config.rankCardFooter||'' %>">
+views/manage.ejs:1370: <button type="button" class="btn btn-danger btn-sm" onclick="removeRcRoleStyle(<%= i %>)">ลบ</button>
+views/manage.ejs:1749: 🎲 <%= bet.title || 'เดิมพัน' %>
+views/manage.ejs:1762: <%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>
+views/manage.ejs:1771: onclick="return confirm('ลบการเดิมพัน <%= (bet.title||'นี้').replace(/'/g,'') %>?')">🗑️ ลบ</a>
+views/manage.ejs:1784: <div style="font-weight:700;color:#7b8df8;font-size:14px"><%= bet.optionA||'ฝ่าย A' %></div>
+views/manage.ejs:1794: <div style="font-weight:700;color:#f28f8f;font-size:14px"><%= bet.optionB||'ฝ่าย B' %></div>
+views/manage.ejs:1802: <span style="color:var(--muted)"><%= total.toLocaleString() %> <%= config.currencyEmoji||'🪙' %> · <%= (bet.bets||[]).length %> คน</span>
+views/manage.ejs:1812: <span>💰 ขั้นต่ำ <%= (bet.minBet||1).toLocaleString() %><% if(bet.maxBet>0){%> · สูงสุด <%= bet.maxBet.toLocaleString() %><%}%> <%= config.currencyEmoji||'🪙' %></span>
+views/manage.ejs:1821: <span style="font-weight:700;color:var(--yellow)">🏆 ผู้ชนะ: <%= bet.winner==='A'?(bet.optionA||'ฝ่าย A'):(bet.optionB||'ฝ่าย B') %></span>
+views/manage.ejs:1829: <button type="submit" class="btn btn-block btn-sm" style="background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)" onclick="return confirm('ประกาศ <%= (bet.optionA||'ฝ่าย 
+views/manage.ejs:1830: 🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ
+views/manage.ejs:1835: <button type="submit" class="btn btn-block btn-sm" style="background:rgba(237,66,69,0.12);color:#f28f8f;border:1px solid rgba(237,66,69,0.3)" onclick="return confirm('ประกาศ <%= (bet.optionB||'ฝ่าย B'
+views/manage.ejs:1836: 🏆 <%= bet.optionB||'ฝ่าย B' %> ชนะ
+views/manage.ejs:1845: 👥 รายการผู้เดิมพัน (<%= bet.bets.length %> คน)
+views/manage.ejs:1880: <div class="form-group"><label>Cooldown (นาที)</label><input type="number" name="robCooldownMin" value="<%= config.robCooldownMin||30 %>" min="1"></div>
+views/manage.ejs:1881: <div class="form-group"><label>โอกาสสำเร็จ (%)</label><input type="number" name="robSuccessChance" value="<%= config.robSuccessChance||50 %>" min="1" max="99"></div>
+views/manage.ejs:1884: <div class="form-group"><label>เหยื่อต้องมีเงินขั้นต่ำ</label><input type="number" name="robMinCoins" value="<%= config.robMinCoins||50 %>" min="1"></div>
+views/manage.ejs:1885: <div class="form-group"><label>ค่าปรับเมื่อปล้นพลาด</label><input type="number" name="robPenalty" value="<%= config.robPenalty||100 %>" min="0"></div>
+views/manage.ejs:1888: <div class="form-group"><label>ปล้นได้ขั้นต่ำ (%)</label><input type="number" name="robMinPercent" value="<%= config.robMinPercent||20 %>" min="1" max="99"></div>
+views/manage.ejs:1889: <div class="form-group"><label>ปล้นได้สูงสุด (%)</label><input type="number" name="robMaxPercent" value="<%= config.robMaxPercent||50 %>" min="1" max="99"></div>
+views/manage.ejs:1914: <div class="form-group"><label>ต้องส่งกี่ข้อความ/วัน</label><input type="number" name="activeBonusThreshold" value="<%= config.activeBonusThreshold||20 %>" min="1"></div>
+views/manage.ejs:1915: <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="activeBonusAmount" value="<%= config.activeBonusAmount||100 %>" min="1"></div>
+views/manage.ejs:1938: <div class="form-group"><label>ต้องอยู่กี่นาที/วัน</label><input type="number" name="voiceBonusThreshold" value="<%= config.voiceBonusThreshold||30 %>" min="1"></div>
+views/manage.ejs:1939: <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="voiceBonusAmount" value="<%= config.voiceBonusAmount||150 %>" min="1"></div>
+views/manage.ejs:1962: <div class="form-group"><label>ต้องใช้กี่คำสั่ง/วัน</label><input type="number" name="commandBonusThreshold" value="<%= config.commandBonusThreshold||10 %>" min="1"></div>
+views/manage.ejs:1963: <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="commandBonusAmount" value="<%= config.commandBonusAmount||80 %>" min="1"></div>
+views/manage.ejs:1980: <div class="form-group"><label>ต้อง react กี่ครั้ง/วัน</label><input type="number" name="reactBonusThreshold" value="<%= config.reactBonusThreshold||15 %>" min="1"></div>
+views/manage.ejs:1981: <div class="form-group"><label>โบนัสที่ได้รับ</label><input type="number" name="reactBonusAmount" value="<%= config.reactBonusAmount||60 %>" min="1"></div>
+views/manage.ejs:2025: <div class="list-item-name">อยู่มา <%= tier.minDays %> วันขึ้นไป</div>
+views/manage.ejs:2026: <div class="list-item-meta"><span class="badge badge-yellow">+<%= tier.amount.toLocaleString() %> <%= config.currencyEmoji||'💰' %> /วัน</span></div>
+views/manage.ejs:2029: <a href="/<%= guildId %>/delete-seniority-tier/<%= i %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบ tier นี้?')">ลบ</a>
+views/manage.ejs:2055: <div class="form-group"><label>สุ่มกี่ภารกิจต่อวัน</label><input type="number" name="dailyQuestCount" value="<%= config.dailyQuestCount||3 %>" min="1" max="10"></div>
+views/manage.ejs:2086: <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Pool มีทั้งหมด <%= config.questPool.length %> ภารกิจ</div>
+views/manage.ejs:2095: &nbsp;เป้า <%= q.target %> &nbsp;|&nbsp;
+views/manage.ejs:2100: <a href="/<%= guildId %>/delete-quest/<%= q.questId %>" class="btn btn-danger btn-sm" onclick="return confirm('ลบภารกิจนี้?')">ลบ</a>
+views/selector.ejs:228: <span>สวัสดี, <strong><%= user.username %></strong></span>
+views/selector.ejs:245: <button class="tab-btn active" onclick="filterTab(this,'all')">ทั้งหมด (<%= guilds.length %>)</button>
+views/selector.ejs:246: <button class="tab-btn" onclick="filterTab(this,'active')">บอทอยู่แล้ว (<%= guilds.filter(g=>g.hasBot).length %>)</button>
+views/selector.ejs:247: <button class="tab-btn" onclick="filterTab(this,'inactive')">ยังไม่มีบอท (<%= guilds.filter(g=>!g.hasBot).length %>)</button>
+views/selector.ejs:273: <a href="/manage/<%= guild.id %>" class="btn btn-primary">⚙️ จัดการ</a>
+views/selector.ejs:275: <a href="https://discord.com/api/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands&guild_id=<%= guild.id %>&disable_guild_select=true" target="_blank" class="b
+views/betting-tab.ejs:27: <div class="stat-value" style="font-size:20px"><%= (bet.bets||[]).length %> <span style="font-size:13px;color:var(--muted)">คน</span></div>
+views/betting-tab.ejs:55: <%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>
+views/betting-tab.ejs:71: <div style="font-weight:700;font-size:15px;color:#7b8df8"><%= bet.optionA||'ฝ่าย A' %></div>
+views/betting-tab.ejs:81: <div style="font-weight:700;font-size:15px;color:#f28f8f"><%= bet.optionB||'ฝ่าย B' %></div>
+views/betting-tab.ejs:102: <span>หมดเวลา: <strong><%= new Date(bet.expiresAt).toLocaleString('th-TH') %></strong></span>
+views/betting-tab.ejs:110: 📢 โพสต์ใน channel: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">#<%= bet.channelId %></code>
+views/betting-tab.ejs:122: <button type="submit" class="btn btn-block" style="background:rgba(88,101,242,0.2);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)" onclick="return confirm('ประกาศ <%= bet.optionA||'ฝ่าย A' %> ชนะ
+views/betting-tab.ejs:123: 🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ
+views/betting-tab.ejs:128: <button type="submit" class="btn btn-block" style="background:rgba(237,66,69,0.15);color:#f28f8f;border:1px solid rgba(237,66,69,0.3)" onclick="return confirm('ประกาศ <%= bet.optionB||'ฝ่าย B' %> ชนะ?
+views/betting-tab.ejs:129: 🏆 <%= bet.optionB||'ฝ่าย B' %> ชนะ
+views/betting-tab.ejs:138: <div style="font-weight:700;font-size:16px;color:var(--yellow)">ผู้ชนะ: <%= bet.winner==='A' ? (bet.optionA||'ฝ่าย A') : (bet.optionB||'ฝ่าย B') %></div>
+views/betting-tab.ejs:149: <div class="card-title">⚙️ <%= bet.title ? 'แก้ไข / รีเซ็ต' : 'ตั้งค่า' %>การเดิมพัน</div>
+views/betting-tab.ejs:157: <input type="text" name="title" value="<%= bet.title||'' %>" placeholder="เช่น ใครจะชนะ Season นี้?" required>
+views/betting-tab.ejs:166: <input type="text" name="optionA" value="<%= bet.optionA||'' %>" placeholder="ฝ่าย A">
+views/betting-tab.ejs:182: <input type="text" name="optionB" value="<%= bet.optionB||'' %>" placeholder="ฝ่าย B">
+views/betting-tab.ejs:223: 🚀 <%= bet.title ? 'รีเซ็ตและสร้างใหม่' : 'สร้างการเดิมพัน' %>
+views/betting-tab.ejs:234: <span class="badge badge-blurple"><%= bet.bets.length %> รายการ</span>

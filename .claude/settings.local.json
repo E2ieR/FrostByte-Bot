@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node deploy-commands.js)",
+      "Bash(node -e \"require\\('./models/GuildConfig'\\); require\\('./dashboard/routes/commands'\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"require\\('./services/liquipediaService'\\); require\\('./dashboard/server'\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"require\\('./commands/esports'\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"require\\('./commands/esports'\\); require\\('./dashboard/routes/commands'\\); require\\('./services/liquipediaService'\\); console.log\\('OK'\\)\")",
+      "Bash(node -e \"require\\('./services/liquipediaService'\\); console.log\\('OK'\\)\")"
+    ]
+  }
+}

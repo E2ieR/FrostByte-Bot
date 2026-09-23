@@ -1,0 +1,2647 @@
+[
+  {
+    "key": "กด \"เพิ่ม\" เพื่อตั้งค่า role ที่ได้ XP เพิ่ม",
+    "count": 2,
+    "sample": "<div id=\"lv-mult-empty\" style=\"color:var(--muted);font-size:13px;padding:4px 0\">ยังไม่มี — กด \"เพิ่ม\" เพื่อตั้งค่า role ที่ได้ XP เพิ่ม</div>"
+  },
+  {
+    "key": "กด \"เพิ่ม\" เพื่อเพิ่ม",
+    "count": 2,
+    "sample": "<div id=\"level-roles-empty\" style=\"color:var(--muted);font-size:13px;padding:4px 0\">ยังไม่มี Role รางวัล — กด \"เพิ่ม\" เพื่อเพิ่ม</div>"
+  },
+  {
+    "key": "กดสร้างด้านบน!",
+    "count": 1,
+    "sample": "<div>ยังไม่มีกิจกรรมเดิมพัน — กดสร้างด้านบน!</div>"
+  },
+  {
+    "key": "กด react เพื่อรับ role\"",
+    "count": 1,
+    "sample": "<input type=\"text\" id=\"rr-desc\" class=\"form-input\" placeholder=\"กด react เพื่อรับ role\">"
+  },
+  {
+    "key": "กรอกข้อมูล",
+    "count": 1,
+    "sample": "// กรอกข้อมูล"
+  },
+  {
+    "key": "กระเป๋า",
+    "count": 1,
+    "sample": "<div class=\"member-stat-label\">💰 กระเป๋า</div>"
+  },
+  {
+    "key": "กระเป๋า (Coins)",
+    "count": 1,
+    "sample": "<label>💰 กระเป๋า (Coins)</label>"
+  },
+  {
+    "key": "กรุณากรอกชื่อสินค้า')",
+    "count": 1,
+    "sample": "if (!itemName) return alert('กรุณากรอกชื่อสินค้า');"
+  },
+  {
+    "key": "กรุณากรอกตัวเลขที่ถูกต้อง (",
+    "count": 1,
+    "sample": "return alert('กรุณากรอกตัวเลขที่ถูกต้อง (≥ 0)');"
+  },
+  {
+    "key": "กรุณาเพิ่มอย่างน้อย 1 role'",
+    "count": 1,
+    "sample": "status.textContent = '❌ กรุณาเพิ่มอย่างน้อย 1 role';"
+  },
+  {
+    "key": "กรุณาเลือกยศ')",
+    "count": 1,
+    "sample": "if (!roleId) return alert('กรุณาเลือกยศ');"
+  },
+  {
+    "key": "กรุณาเลือก channel'",
+    "count": 1,
+    "sample": "status.textContent = '❌ กรุณาเลือก channel';"
+  },
+  {
+    "key": "กลับหน้าเลือกเซิร์ฟ",
+    "count": 1,
+    "sample": "← กลับหน้าเลือกเซิร์ฟ"
+  },
+  {
+    "key": "การ์ดหัวข้อปัจจุบัน",
+    "count": 1,
+    "sample": "<!-- ─── การ์ดหัวข้อปัจจุบัน ─── -->"
+  },
+  {
+    "key": "การเดิมพัน",
+    "count": 1,
+    "sample": "<div class=\"card-title\">⚙️ <%= bet.title ? 'แก้ไข / รีเซ็ต' : 'ตั้งค่า' %>การเดิมพัน</div>"
+  },
+  {
+    "key": "การตั้งค่า Spotify (ทำครั้งเดียว)",
+    "count": 1,
+    "sample": "<div class=\"section-label\">การตั้งค่า Spotify (ทำครั้งเดียว)</div>"
+  },
+  {
+    "key": "การพนัน',   cmds:",
+    "count": 1,
+    "sample": "gambling: { label: '🎰 การพนัน',   cmds: [] },"
+  },
+  {
+    "key": "กำลังค้นหา...",
+    "count": 1,
+    "sample": "ddEl.innerHTML = '<div class=\"sd-empty\">🔍 กำลังค้นหา...</div>';"
+  },
+  {
+    "key": "กำลังบันทึก...'",
+    "count": 3,
+    "sample": "status.textContent = '⏳ กำลังบันทึก...';"
+  },
+  {
+    "key": "กำลังบันทึก",
+    "count": 1,
+    "sample": "status.textContent = 'กำลังบันทึก…';"
+  },
+  {
+    "key": "กำลังส่ง",
+    "count": 1,
+    "sample": "status.textContent = 'กำลังส่ง…';"
+  },
+  {
+    "key": "กำลังโหลด...",
+    "count": 3,
+    "sample": "<option value=\"\">⏳ กำลังโหลด...</option>"
+  },
+  {
+    "key": "กำลังโหลด",
+    "count": 3,
+    "sample": "<option value=\"\">— กำลังโหลด —</option>"
+  },
+  {
+    "key": "กำลังโหลดข้อมูล...",
+    "count": 1,
+    "sample": "กำลังโหลดข้อมูล..."
+  },
+  {
+    "key": "กำลังโหลดทีมจาก Liquipedia... (5-15 วินาที)",
+    "count": 1,
+    "sample": "body.innerHTML = '<span style=\"color:var(--muted);font-size:12px\">⏳ กำลังโหลดทีมจาก Liquipedia... (5-15 วินาที)</span>';"
+  },
+  {
+    "key": "กำลังโหลดแมตช์...",
+    "count": 1,
+    "sample": "<div id=\"fb-bet-loading\" style=\"text-align:center;padding:28px;color:var(--muted)\">⏳ กำลังโหลดแมตช์...</div>"
+  },
+  {
+    "key": "กำลังโหลดแมตช์ Esports...",
+    "count": 1,
+    "sample": "<div id=\"esp-bet-loading\" style=\"text-align:center;padding:28px;color:var(--muted)\">⏳ กำลังโหลดแมตช์ Esports...</div>"
+  },
+  {
+    "key": "กำลังโหลด channels...",
+    "count": 1,
+    "sample": "<option value=\"\">⏳ กำลังโหลด channels...</option>"
+  },
+  {
+    "key": "กำหนดเอง",
+    "count": 1,
+    "sample": "<option value=\"custom\">กำหนดเอง</option>"
+  },
+  {
+    "key": "กำหนด active region",
+    "count": 1,
+    "sample": "// กำหนด active region"
+  },
+  {
+    "key": "กีฬา",
+    "count": 2,
+    "sample": "<div class=\"nav-section\">กีฬา & Esports</div>"
+  },
+  {
+    "key": "กีฬา',       cmds:",
+    "count": 1,
+    "sample": "sports:   { label: '🏆 กีฬา',       cmds: [] },"
+  },
+  {
+    "key": "เก็บใน Inv",
+    "count": 2,
+    "sample": "<div><div class=\"toggle-label\" style=\"font-size:12px\">เก็บใน Inv</div></div>"
+  },
+  {
+    "key": "เกมที่ต้องการติดตาม",
+    "count": 1,
+    "sample": "<div class=\"section-label\">เกมที่ต้องการติดตาม</div>"
+  },
+  {
+    "key": "เกิดข้อผิดพลาด:",
+    "count": 1,
+    "sample": "ddEl.innerHTML = `<div class=\"sd-empty\">เกิดข้อผิดพลาด: ${err.message}</div>`;"
+  },
+  {
+    "key": "เกิดข้อผิดพลาดในการโหลดแมตช์'",
+    "count": 1,
+    "sample": "if (loadEl) loadEl.textContent = '❌ เกิดข้อผิดพลาดในการโหลดแมตช์';"
+  },
+  {
+    "key": "เกิดข้อผิดพลาดในการโหลดแมตช์ Esports'",
+    "count": 1,
+    "sample": "if (loadEl) loadEl.textContent = '❌ เกิดข้อผิดพลาดในการโหลดแมตช์ Esports';"
+  },
+  {
+    "key": "แก้ไข",
+    "count": 2,
+    "sample": "<button class=\"btn btn-primary btn-sm\" data-item=\"<%- JSON.stringify({id:(item.itemId||item._id).toString(),name:item.itemName,price:item.price,desc:item.descri"
+  },
+  {
+    "key": "แก้ไขข้อมูลสมาชิก",
+    "count": 1,
+    "sample": "<span>✏️ แก้ไขข้อมูลสมาชิก</span>"
+  },
+  {
+    "key": "แก้ไข / รีเซ็ต' : 'ตั้งค่า' %",
+    "count": 1,
+    "sample": "<div class=\"card-title\">⚙️ <%= bet.title ? 'แก้ไข / รีเซ็ต' : 'ตั้งค่า' %>การเดิมพัน</div>"
+  },
+  {
+    "key": "แก้ไขสมาชิก",
+    "count": 1,
+    "sample": "MODAL: แก้ไขสมาชิก"
+  },
+  {
+    "key": "แก้ไขสินค้า",
+    "count": 2,
+    "sample": "MODAL: แก้ไขสินค้า"
+  },
+  {
+    "key": "ขยายฟอร์มสร้างเดิมพัน",
+    "count": 1,
+    "sample": "// ขยายฟอร์มสร้างเดิมพัน"
+  },
+  {
+    "key": "ข้อความ",
+    "count": 1,
+    "sample": "<span class=\"badge badge-blurple\"><%= (config.workSituations || []).length %> ข้อความ</span>"
+  },
+  {
+    "key": "ข้อความแจ้งเตือน (Embed Description)",
+    "count": 1,
+    "sample": "<label class=\"form-label\">ข้อความแจ้งเตือน (Embed Description)</label>"
+  },
+  {
+    "key": "ข้อความท้ายการ์ด (Footer)",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">ข้อความท้ายการ์ด (Footer)</label>"
+  },
+  {
+    "key": "ข้อความเมื่อใช้ /use (useMessage)",
+    "count": 2,
+    "sample": "<label>ข้อความเมื่อใช้ /use (useMessage)</label>"
+  },
+  {
+    "key": "ข้อความสุ่ม /work",
+    "count": 1,
+    "sample": "<div class=\"card-title\">📝 ข้อความสุ่ม /work</div>"
+  },
+  {
+    "key": "ข้อความใหม่ (ใช้",
+    "count": 1,
+    "sample": "<label>ข้อความใหม่ (ใช้ {amount} แทนจำนวนเงิน)</label>"
+  },
+  {
+    "key": "ข้อผิดพลาด HTTP",
+    "count": 1,
+    "sample": "ddEl.innerHTML = `<div class=\"sd-empty\">ข้อผิดพลาด HTTP ${resp.status}</div>`;"
+  },
+  {
+    "key": "ข้อมูล",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">ข้อมูล</div>"
+  },
+  {
+    "key": "ข้อมูลจาก",
+    "count": 1,
+    "sample": "📡 ข้อมูลจาก <strong style=\"color:var(--text)\">FotMob</strong> — ไม่ต้องใช้ API key ครอบคลุมทุกลีก ทีมชาติ และนักเตะทั่วโลก"
+  },
+  {
+    "key": "ข้อมูล F1 ใช้ API ฟรีจาก",
+    "count": 1,
+    "sample": "📡 ข้อมูล F1 ใช้ API ฟรีจาก <strong>Jolpica (Ergast)</strong> + <strong>OpenF1</strong> — ไม่ต้องใช้ API key"
+  },
+  {
+    "key": "ขั้นต่ำ",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>ขั้นต่ำ</label><input type=\"number\" name=\"minWorkGain\" value=\"<%= config.minWorkGain || 0 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "ข้ามเพลงปัจจุบัน',                               icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/skip',          desc:'ข้ามเพลงปัจจุบัน',                               icon:'⏭' },"
+  },
+  {
+    "key": "ขายคืน",
+    "count": 1,
+    "sample": "&nbsp;· ขายคืน <%= item.sellPercent || 50 %>%"
+  },
+  {
+    "key": "ขายคืนได้",
+    "count": 2,
+    "sample": "<div><div class=\"toggle-label\" style=\"font-size:12px\">ขายคืนได้</div></div>"
+  },
+  {
+    "key": "เข้าสู่ระบบ",
+    "count": 1,
+    "sample": "<title>FrostByte Dashboard — เข้าสู่ระบบ</title>"
+  },
+  {
+    "key": "เข้าสู่ระบบด้วยบัญชี Discord ที่มีสิทธิ์ Admin เท่านั้น",
+    "count": 1,
+    "sample": "เข้าสู่ระบบด้วยบัญชี Discord ที่มีสิทธิ์ Admin เท่านั้น"
+  },
+  {
+    "key": "เข้าสู่ระบบด้วย Discord",
+    "count": 1,
+    "sample": "เข้าสู่ระบบด้วย Discord"
+  },
+  {
+    "key": "คน",
+    "count": 4,
+    "sample": "<% if (item.maxPerUser > 0) { %>&nbsp;· จำกัด <%= item.maxPerUser %>/คน<% } %>"
+  },
+  {
+    "key": "คน)",
+    "count": 1,
+    "sample": "👥 รายการผู้เดิมพัน (<%= bet.bets.length %> คน)"
+  },
+  {
+    "key": "ค้นหาชื่อสมาชิก...\"",
+    "count": 1,
+    "sample": "<input type=\"text\" id=\"member-search\" placeholder=\"🔍 ค้นหาชื่อสมาชิก...\""
+  },
+  {
+    "key": "ค้นหาเซิร์ฟเวอร์...\" oninput",
+    "count": 1,
+    "sample": "<input type=\"text\" id=\"search-input\" placeholder=\"ค้นหาเซิร์ฟเวอร์...\" oninput=\"filterGuilds()\">"
+  },
+  {
+    "key": "ค้นหาทีมชาติ / ทีมอื่น --",
+    "count": 1,
+    "sample": "<!-- ค้นหาทีมชาติ / ทีมอื่น -->"
+  },
+  {
+    "key": "ค้นหาทีมชาติหรือทีมอื่น",
+    "count": 1,
+    "sample": "<div class=\"section-label\">ค้นหาทีมชาติหรือทีมอื่น <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)\">(ที่ไม่อยู่ในลีกข้างต้น"
+  },
+  {
+    "key": "คลัง:",
+    "count": 1,
+    "sample": "&nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>"
+  },
+  {
+    "key": "คลิก",
+    "count": 2,
+    "sample": "แมตช์จากลีกที่ติดตามในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ"
+  },
+  {
+    "key": "คลิกปุ่มเกมเพื่อโหลดทีม (Liquipedia)",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-bottom:10px\">ว่างไว้ = แจ้งทุกแมตช์ของเกมนั้น | คลิกปุ่มเกมเพื่อโหลดทีม (Liquipedia)</div>"
+  },
+  {
+    "key": "คลิกเพื่อขยาย",
+    "count": 1,
+    "sample": "<span style=\"font-size:11px;color:var(--muted)\">คลิกเพื่อขยาย ▾</span>"
+  },
+  {
+    "key": "คลิกเพื่อซ่อน",
+    "count": 2,
+    "sample": "hint.textContent = opening ? 'คลิกเพื่อซ่อน ▴' : 'คลิกเพื่อโหลดแมตช์ ▾';"
+  },
+  {
+    "key": "คลิกเพื่อเลือก/ยกเลิก",
+    "count": 1,
+    "sample": "เลือกทีมจากลีก <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px\">— คลิกเพื่อเลือก/ยกเลิก</span>"
+  },
+  {
+    "key": "คลิกเพื่อโหลดแมตช์",
+    "count": 4,
+    "sample": "<span id=\"fb-bet-hint\" style=\"font-size:11px;color:var(--muted)\">คลิกเพื่อโหลดแมตช์ ▾</span>"
+  },
+  {
+    "key": "ความผันผวน (Volatility)",
+    "count": 1,
+    "sample": "<label>ความผันผวน (Volatility) <span style=\"color:var(--muted)\">1–100, default 10</span></label>"
+  },
+  {
+    "key": "ความผันผวน (Volatility) 1",
+    "count": 1,
+    "sample": "<label>ความผันผวน (Volatility) 1–100</label>"
+  },
+  {
+    "key": "คัดลอก",
+    "count": 1,
+    "sample": "<li>คัดลอก <strong style=\"color:var(--text)\">Client ID</strong> และ <strong style=\"color:var(--text)\">Client Secret</strong></li>"
+  },
+  {
+    "key": "ค่าต่ำ",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-top:3px\">ค่าสูง = ราคาเปลี่ยนแปลงมาก | ค่าต่ำ = ราคาเสถียร</div>"
+  },
+  {
+    "key": "ค่าปรับเมื่อปล้นพลาด",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ค่าปรับเมื่อปล้นพลาด</label><input type=\"number\" name=\"robPenalty\" value=\"<%= config.robPenalty||100 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "ค่าสูง",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-top:3px\">ค่าสูง = ราคาเปลี่ยนแปลงมาก | ค่าต่ำ = ราคาเสถียร</div>"
+  },
+  {
+    "key": "คำสั่ง /",
+    "count": 1,
+    "sample": "<span class=\"icon\">⚙️</span> คำสั่ง /"
+  },
+  {
+    "key": "คำสั่ง:",
+    "count": 1,
+    "sample": "📌 คำสั่ง: <code>/esports matches</code> • <code>/f1 schedule</code> • <code>/f1 live</code> • <code>/football matches</code> • <code>/football lineup</code>"
+  },
+  {
+    "key": "คำสั่งที่ใช้งานได้",
+    "count": 1,
+    "sample": "<div class=\"section-label\">คำสั่งที่ใช้งานได้</div>"
+  },
+  {
+    "key": "คำสั่ง /rob",
+    "count": 1,
+    "sample": "<span class=\"icon\">🥷</span> คำสั่ง /rob"
+  },
+  {
+    "key": "คำสั่ง /work",
+    "count": 1,
+    "sample": "<span class=\"icon\">💼</span> คำสั่ง /work"
+  },
+  {
+    "key": "คำอธิบาย",
+    "count": 2,
+    "sample": "<label>คำอธิบาย</label>"
+  },
+  {
+    "key": "คำอธิบายภารกิจ",
+    "count": 1,
+    "sample": "<label>คำอธิบายภารกิจ</label>"
+  },
+  {
+    "key": "คำอธิบาย (ไม่บังคับ)",
+    "count": 2,
+    "sample": "<label class=\"form-label\">คำอธิบาย (ไม่บังคับ)</label>"
+  },
+  {
+    "key": "คำอธิบาย (ไม่บังคับ)\" style",
+    "count": 1,
+    "sample": "<input type=\"text\" class=\"form-input rr-rdesc\" placeholder=\"คำอธิบาย (ไม่บังคับ)\" style=\"flex:1\">"
+  },
+  {
+    "key": "คำอธิบายสินค้า...\"",
+    "count": 1,
+    "sample": "<textarea name=\"description\" placeholder=\"คำอธิบายสินค้า...\"></textarea>"
+  },
+  {
+    "key": "คืนเงินเมื่อขาย",
+    "count": 1,
+    "sample": "<label>% คืนเงินเมื่อขาย</label>"
+  },
+  {
+    "key": "คืนเงินเมื่อขาย (sellPercent)",
+    "count": 1,
+    "sample": "<label>% คืนเงินเมื่อขาย (sellPercent)</label>"
+  },
+  {
+    "key": "คืน role ให้สมาชิกเมื่อกลับเข้าเซิร์ฟ",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted);margin-top:2px\">คืน role ให้สมาชิกเมื่อกลับเข้าเซิร์ฟ</div>"
+  },
+  {
+    "key": "คุณทำงานหนักและได้รับ",
+    "count": 1,
+    "sample": "<textarea name=\"newReply\" placeholder=\"คุณทำงานหนักและได้รับ {amount} เหรียญ!\" required></textarea>"
+  },
+  {
+    "key": "เงินตั้งต้น (Bank)",
+    "count": 1,
+    "sample": "<label>เงินตั้งต้น (Bank)</label>"
+  },
+  {
+    "key": "เงินตั้งต้น (Cash)",
+    "count": 1,
+    "sample": "<label>เงินตั้งต้น (Cash)</label>"
+  },
+  {
+    "key": "เงินโบนัสต่อวัน",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>เงินโบนัสต่อวัน</label><input type=\"number\" name=\"amount\" min=\"1\" placeholder=\"500\" required></div>"
+  },
+  {
+    "key": "จบแล้ว",
+    "count": 2,
+    "sample": "<span class=\"badge badge-yellow\">🏆 จบแล้ว</span>"
+  },
+  {
+    "key": "จัดการ",
+    "count": 1,
+    "sample": "<a href=\"/manage/<%= guild.id %>\" class=\"btn btn-primary\">⚙️ จัดการ</a>"
+  },
+  {
+    "key": "จัดการเซิร์ฟเวอร์ Discord ของคุณ",
+    "count": 1,
+    "sample": "<p>จัดการเซิร์ฟเวอร์ Discord ของคุณ<br>ระบบ Economy, Store, Betting และอีกมากมาย</p>"
+  },
+  {
+    "key": "จำกัด",
+    "count": 1,
+    "sample": "<% if (item.maxPerUser > 0) { %>&nbsp;· จำกัด <%= item.maxPerUser %>/คน<% } %>"
+  },
+  {
+    "key": "จำกัดต่อผู้ใช้ (0",
+    "count": 2,
+    "sample": "<label>จำกัดต่อผู้ใช้ (0 = ไม่จำกัด)</label>"
+  },
+  {
+    "key": "จำนวนเงินต่อรอบ",
+    "count": 1,
+    "sample": "<label>จำนวนเงินต่อรอบ</label>"
+  },
+  {
+    "key": "จำนวนในคลัง",
+    "count": 2,
+    "sample": "<label>จำนวนในคลัง</label>"
+  },
+  {
+    "key": "แจ้งก่อนแข่ง (นาที)",
+    "count": 1,
+    "sample": "<label>⏰ แจ้งก่อนแข่ง (นาที)</label>"
+  },
+  {
+    "key": "แจ้งก่อนแมตช์ (นาที)",
+    "count": 1,
+    "sample": "<label>⏰ แจ้งก่อนแมตช์ (นาที)</label>"
+  },
+  {
+    "key": "แจ้งเตือน",
+    "count": 3,
+    "sample": "<label>📢 Channel แจ้งเตือน</label>"
+  },
+  {
+    "key": "แจ้งเตือนก่อนแมตช์ (นาที)",
+    "count": 1,
+    "sample": "<label>⏰ แจ้งเตือนก่อนแมตช์ (นาที)</label>"
+  },
+  {
+    "key": "แจ้งเตือนกีฬา",
+    "count": 1,
+    "sample": "<span class=\"icon\">🏆</span> แจ้งเตือนกีฬา"
+  },
+  {
+    "key": "แจ้งเตือนเมื่อแข่งเริ่ม (Live)",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">แจ้งเตือนเมื่อแข่งเริ่ม (Live)</div>"
+  },
+  {
+    "key": "แจ้งเตือนเมื่อ Lineup ประกาศ)",
+    "count": 1,
+    "sample": "<div class=\"section-label\">นักเตะที่ติดตาม <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)\">(แจ้งเตือนเมื่อ Lineup ประกาศ)<"
+  },
+  {
+    "key": "แจ้งเตือนแมตช์สด",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">แจ้งเตือนแมตช์สด</div>"
+  },
+  {
+    "key": "แจ้งเตือน Lineup",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">แจ้งเตือน Lineup</div>"
+  },
+  {
+    "key": "แจ้งทุกแมตช์ของเกมนั้น",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-bottom:10px\">ว่างไว้ = แจ้งทุกแมตช์ของเกมนั้น | คลิกปุ่มเกมเพื่อโหลดทีม (Liquipedia)</div>"
+  },
+  {
+    "key": "แจ้งทุกแมตช์ของลีกที่เลือก)",
+    "count": 1,
+    "sample": "<div class=\"section-label\" style=\"margin-top:14px\">ทีมที่เลือก <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)\">(เว้นว่าง ="
+  },
+  {
+    "key": "แจ้งในช่องที่พิมพ์ข้อความ",
+    "count": 2,
+    "sample": "<option value=\"\">— แจ้งในช่องที่พิมพ์ข้อความ —</option>"
+  },
+  {
+    "key": "ชนะ?')\"",
+    "count": 4,
+    "sample": "<button type=\"submit\" class=\"btn btn-block btn-sm\" style=\"background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)\" onclick=\"return "
+  },
+  {
+    "key": "ชนะ",
+    "count": 4,
+    "sample": "🏆 <%= bet.optionA||'ฝ่าย A' %> ชนะ"
+  },
+  {
+    "key": "ช่องข้อความ Discord",
+    "count": 1,
+    "sample": "<label>ช่องข้อความ Discord *</label>"
+  },
+  {
+    "key": "ช่องข้อความ Discord --",
+    "count": 1,
+    "sample": "<!-- ช่องข้อความ Discord -->"
+  },
+  {
+    "key": "ช่องข้อความ Discord (โพสต์ embed)",
+    "count": 1,
+    "sample": "<label>ช่องข้อความ Discord (โพสต์ embed)</label>"
+  },
+  {
+    "key": "ช่องแจ้งเตือน Level Up",
+    "count": 1,
+    "sample": "<label class=\"form-label\">ช่องแจ้งเตือน Level Up</label>"
+  },
+  {
+    "key": "ช่อง Discord --",
+    "count": 1,
+    "sample": "<!-- ช่อง Discord -->"
+  },
+  {
+    "key": "ช่อง voice ที่ออก)",
+    "count": 1,
+    "sample": "<label>ส่งแจ้งเตือนในช่องนี้ (ว่าง = ช่อง voice ที่ออก)</label>"
+  },
+  {
+    "key": "ช่อง voice ที่ออก",
+    "count": 2,
+    "sample": "<option value=\"\">— ช่อง voice ที่ออก —</option>"
+  },
+  {
+    "key": "ชั่วโมง",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>ชั่วโมง</label><input type=\"number\" name=\"cooldownHours\"   value=\"<%= config.cooldownHours   || 0 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "ชั่วโมง\"",
+    "count": 2,
+    "sample": "<input type=\"number\" name=\"expiryMinutes\" min=\"1\" placeholder=\"เช่น 60 = 1 ชั่วโมง\">"
+  },
+  {
+    "key": "ชื่อ",
+    "count": 2,
+    "sample": "<div class=\"form-hint\"><code>{level}</code> level ใหม่ &nbsp;·&nbsp; <code>{username}</code> ชื่อ</div>"
+  },
+  {
+    "key": "ชื่อกลุ่ม",
+    "count": 1,
+    "sample": "<label class=\"form-label\">ชื่อกลุ่ม</label>"
+  },
+  {
+    "key": "ชื่อประเภท เช่น ของสะสม\" required style",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"name\" placeholder=\"ชื่อประเภท เช่น ของสะสม\" required style=\"flex:1;min-width:140px\">"
+  },
+  {
+    "key": "ชื่อฝ่าย A",
+    "count": 2,
+    "sample": "<label>ชื่อฝ่าย A</label>"
+  },
+  {
+    "key": "ชื่อฝ่าย B",
+    "count": 2,
+    "sample": "<label>ชื่อฝ่าย B</label>"
+  },
+  {
+    "key": "ชื่อสกุลเงิน",
+    "count": 1,
+    "sample": "<label>ชื่อสกุลเงิน</label>"
+  },
+  {
+    "key": "ชื่อสินค้า",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>ชื่อสินค้า</label><input type=\"text\" name=\"itemName\" required placeholder=\"VIP Pass\"></div>"
+  },
+  {
+    "key": "ชื่อหมวดหมู่ เช่น VIP\" required style",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"name\" placeholder=\"ชื่อหมวดหมู่ เช่น VIP\" required style=\"flex:1;min-width:140px\">"
+  },
+  {
+    "key": "เช่น",
+    "count": 1,
+    "sample": "<input type=\"text\" class=\"form-input rr-emoji\" placeholder=\"Emoji (เช่น 🎮)\" style=\"width:90px;text-align:center\">"
+  },
+  {
+    "key": "เช่น 60",
+    "count": 2,
+    "sample": "<input type=\"number\" name=\"expiryMinutes\" min=\"1\" placeholder=\"เช่น 60 = 1 ชั่วโมง\">"
+  },
+  {
+    "key": "เช่น ใครจะชนะ Season นี้?\" required",
+    "count": 2,
+    "sample": "<input type=\"text\" name=\"title\" placeholder=\"เช่น ใครจะชนะ Season นี้?\" required>"
+  },
+  {
+    "key": "เช่น เลือกเกมที่เล่น\"",
+    "count": 1,
+    "sample": "<input type=\"text\" id=\"rr-title\" class=\"form-input\" placeholder=\"เช่น เลือกเกมที่เล่น\">"
+  },
+  {
+    "key": "เช่น ส่งรูปแมวในช่องแชท 1 รูป\" required",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"description\" placeholder=\"เช่น ส่งรูปแมวในช่องแชท 1 รูป\" required>"
+  },
+  {
+    "key": "เช่น Coins, Baht, Gems\"",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"currencyName\" value=\"<%= config.currencyName || '' %>\" placeholder=\"เช่น Coins, Baht, Gems\">"
+  },
+  {
+    "key": "เช่น: FrostByte Server\" value",
+    "count": 1,
+    "sample": "<input type=\"text\" class=\"form-input\" id=\"rc-footer\" placeholder=\"เช่น: FrostByte Server\" value=\"<%= config.rankCardFooter||'' %>\">"
+  },
+  {
+    "key": "เช่น Haaland, Mbappe, Salah...\" autocomplete",
+    "count": 1,
+    "sample": "<input type=\"text\" id=\"fb-player-search\" placeholder=\"🔍 เช่น Haaland, Mbappe, Salah...\" autocomplete=\"off\" oninput=\"debounceFbSearch('player',this.value)\">"
+  },
+  {
+    "key": "เช่น Thailand, Brazil, Japan...\" autocomplete",
+    "count": 1,
+    "sample": "<input type=\"text\" id=\"fb-team-search\" placeholder=\"🔍 เช่น Thailand, Brazil, Japan...\" autocomplete=\"off\" oninput=\"debounceFbSearch('team',this.value)\">"
+  },
+  {
+    "key": "เชิญบอท",
+    "count": 1,
+    "sample": "<a href=\"https://discord.com/api/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands&guild_id=<%= guild.id %>&disable_gui"
+  },
+  {
+    "key": "ใช้",
+    "count": 2,
+    "sample": "<input type=\"text\" name=\"useMessage\" placeholder=\"ใช้ {user} เพื่อแสดงชื่อผู้ใช้\">"
+  },
+  {
+    "key": "ใช้คำสั่ง",
+    "count": 1,
+    "sample": "<option value=\"use_command\">ใช้คำสั่ง</option>"
+  },
+  {
+    "key": "ใช้งานได้",
+    "count": 2,
+    "sample": "<div><div class=\"toggle-label\" style=\"font-size:12px\">ใช้งานได้</div></div>"
+  },
+  {
+    "key": "ใช้ใน Voice Channel",
+    "count": 1,
+    "sample": "<span style=\"font-size:12px;color:var(--muted)\">YouTube & Spotify — ใช้ใน Voice Channel</span>"
+  },
+  {
+    "key": "เซิร์ฟเวอร์ที่คุณมีสิทธิ์ผู้ดูแลระบบ",
+    "count": 1,
+    "sample": "<p>เซิร์ฟเวอร์ที่คุณมีสิทธิ์ผู้ดูแลระบบ</p>"
+  },
+  {
+    "key": "ฐาน",
+    "count": 1,
+    "sample": "curPriceEl.textContent = `ราคาปัจจุบัน: ${(d.currentPrice || d.price).toLocaleString()} (ฐาน ${(d.basePrice || d.price).toLocaleString()}, ${pct >= 0 ? '+' : ''"
+  },
+  {
+    "key": "เดิมพัน' %",
+    "count": 1,
+    "sample": "🎲 <%= bet.title || 'เดิมพัน' %>"
+  },
+  {
+    "key": "เดิมพันขั้นต่ำ",
+    "count": 1,
+    "sample": "<label>เดิมพันขั้นต่ำ</label>"
+  },
+  {
+    "key": "เดิมพันสูงสุด",
+    "count": 1,
+    "sample": "<label>เดิมพันสูงสุด <span style=\"color:var(--muted)\">(0 = ไม่จำกัด)</span></label>"
+  },
+  {
+    "key": "ตรวจสอบว่าเปิดเกมในหน้า Sports แล้ว หรือลองใหม่ภายหลัง",
+    "count": 1,
+    "sample": "listEl.innerHTML = '<div style=\"text-align:center;padding:20px;color:var(--muted)\">ไม่พบแมตช์ Esports ในขณะนี้<br><small>ตรวจสอบว่าเปิดเกมในหน้า Sports แล้ว หรื"
+  },
+  {
+    "key": "ตรวจสอบว่าเลือกลีกในหน้า Sports แล้ว หรืออาจอยู่ใน off-season",
+    "count": 1,
+    "sample": "listEl.innerHTML = '<div style=\"text-align:center;padding:20px;color:var(--muted)\">ไม่พบแมตช์ที่จะมาถึง<br><small>ตรวจสอบว่าเลือกลีกในหน้า Sports แล้ว หรืออาจอย"
+  },
+  {
+    "key": "ตลาด",
+    "count": 1,
+    "sample": "<% if (item.marketEnabled) { %>&nbsp;<span class=\"badge\" style=\"background:#1a2a1a;color:#57F287\"><%= mArrow %><%= mPct >= 0 ? '+' : '' %><%= mPct %>% ตลาด</spa"
+  },
+  {
+    "key": "ต้องใช้กี่คำสั่ง/วัน",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ต้องใช้กี่คำสั่ง/วัน</label><input type=\"number\" name=\"commandBonusThreshold\" value=\"<%= config.commandBonusThreshold||10 %>\" min"
+  },
+  {
+    "key": "ต้องส่งกี่ข้อความ/วัน",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ต้องส่งกี่ข้อความ/วัน</label><input type=\"number\" name=\"activeBonusThreshold\" value=\"<%= config.activeBonusThreshold||20 %>\" min="
+  },
+  {
+    "key": "ต้องอยู่กี่นาที/วัน",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ต้องอยู่กี่นาที/วัน</label><input type=\"number\" name=\"voiceBonusThreshold\" value=\"<%= config.voiceBonusThreshold||30 %>\" min=\"1\">"
+  },
+  {
+    "key": "ต้อง react กี่ครั้ง/วัน",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ต้อง react กี่ครั้ง/วัน</label><input type=\"number\" name=\"reactBonusThreshold\" value=\"<%= config.reactBonusThreshold||15 %>\" min="
+  },
+  {
+    "key": "ต่อนาที",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">XP ต่อนาที</label>"
+  },
+  {
+    "key": "ต่อ Reaction",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">XP ต่อ Reaction</label>"
+  },
+  {
+    "key": "ตั้งค่าระบบ /rob",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">🥷 ตั้งค่าระบบ /rob</div></div>"
+  },
+  {
+    "key": "ตั้งค่าสกุลเงิน",
+    "count": 1,
+    "sample": "<div class=\"card-title\">🪙 ตั้งค่าสกุลเงิน</div>"
+  },
+  {
+    "key": "ตามยศ",
+    "count": 1,
+    "sample": "<div style=\"margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase\">Rank Card ตามยศ</div>"
+  },
+  {
+    "key": "ตาม Role",
+    "count": 1,
+    "sample": "<span>⚡ Multiplier ตาม Role</span>"
+  },
+  {
+    "key": "ถ้ากรอก Emoji จะแสดงแทนรูปภาพใน /shop",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-top:3px\">ถ้ากรอก Emoji จะแสดงแทนรูปภาพใน /shop</div>"
+  },
+  {
+    "key": "ถ้ามีจะทับสี)",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">Background Image URL <span style=\"color:var(--muted)\">(ถ้ามีจะทับสี)</span></label>"
+  },
+  {
+    "key": "ทั้งหมด (",
+    "count": 1,
+    "sample": "<button class=\"tab-btn active\" onclick=\"filterTab(this,'all')\">ทั้งหมด (<%= guilds.length %>)</button>"
+  },
+  {
+    "key": "ทั้ง Queue)',    icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/loop',          desc:'สลับโหมด Loop (ปิด → เพลงนี้ → ทั้ง Queue)',    icon:'🔁' },"
+  },
+  {
+    "key": "ทำ Authorization Code Flow เพื่อรับ",
+    "count": 1,
+    "sample": "<li>ทำ Authorization Code Flow เพื่อรับ <strong style=\"color:var(--text)\">Refresh Token</strong></li>"
+  },
+  {
+    "key": "ทีม",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-bottom:7px\">${activeRegion} — ${teams.length} ทีม</div>"
+  },
+  {
+    "key": "ทีมจากลีกที่เลือก --",
+    "count": 1,
+    "sample": "<!-- ทีมจากลีกที่เลือก -->"
+  },
+  {
+    "key": "ทีมที่ติดตาม",
+    "count": 1,
+    "sample": "<div class=\"section-label\" style=\"margin-top:14px\">ทีมที่ติดตาม</div>"
+  },
+  {
+    "key": "ทีมที่เลือก",
+    "count": 1,
+    "sample": "<div class=\"section-label\" style=\"margin-top:14px\">ทีมที่เลือก <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)\">(เว้นว่าง ="
+  },
+  {
+    "key": "ทีมที่เลือกแล้ว --",
+    "count": 1,
+    "sample": "<!-- ทีมที่เลือกแล้ว -->"
+  },
+  {
+    "key": "ที่ไม่อยู่ในลีกข้างต้น)",
+    "count": 1,
+    "sample": "<div class=\"section-label\">ค้นหาทีมชาติหรือทีมอื่น <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)\">(ที่ไม่อยู่ในลีกข้างต้น"
+  },
+  {
+    "key": "ทุกๆ",
+    "count": 1,
+    "sample": "ทุกๆ <%= role.intervalValue %> <%= ({seconds:'วินาที',minutes:'นาที',hours:'ชั่วโมง',days:'วัน'})[role.intervalType] || role.intervalType %>"
+  },
+  {
+    "key": "ทุกช่อง)",
+    "count": 1,
+    "sample": "<label>นับเฉพาะช่องนี้ (ว่าง = ทุกช่อง)</label>"
+  },
+  {
+    "key": "ทุกช่องข้อความ",
+    "count": 2,
+    "sample": "<option value=\"\">— ทุกช่องข้อความ —</option>"
+  },
+  {
+    "key": "ทุกๆ (ตัวเลข)",
+    "count": 1,
+    "sample": "<label>ทุกๆ (ตัวเลข)</label>"
+  },
+  {
+    "key": "ทุกวันระบบจะสุ่มภารกิจจาก Pool ให้สมาชิก ใช้",
+    "count": 1,
+    "sample": "💡 ทุกวันระบบจะสุ่มภารกิจจาก Pool ให้สมาชิก ใช้ <code style=\"background:var(--surface2);padding:2px 6px;border-radius:4px\">/daily</code> เพื่อดูและรับรางวัล"
+  },
+  {
+    "key": "แทนจำนวนเงิน)",
+    "count": 1,
+    "sample": "<label>ข้อความใหม่ (ใช้ {amount} แทนจำนวนเงิน)</label>"
+  },
+  {
+    "key": "แทนที่ส่วน",
+    "count": 1,
+    "sample": "แทนที่ส่วน <div id=\"tab-betting\" class=\"tab-panel\"> ... </div>"
+  },
+  {
+    "key": "ธนาคาร",
+    "count": 1,
+    "sample": "<div class=\"member-stat-label\">🏦 ธนาคาร</div>"
+  },
+  {
+    "key": "ธนาคาร (Bank)",
+    "count": 1,
+    "sample": "<label>🏦 ธนาคาร (Bank)</label>"
+  },
+  {
+    "key": "นักเตะ --",
+    "count": 1,
+    "sample": "<!-- นักเตะ -->"
+  },
+  {
+    "key": "นักเตะที่ติดตาม",
+    "count": 1,
+    "sample": "<div class=\"section-label\">นักเตะที่ติดตาม <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)\">(แจ้งเตือนเมื่อ Lineup ประกาศ)<"
+  },
+  {
+    "key": "นับเฉพาะช่องนี้ (ว่าง",
+    "count": 1,
+    "sample": "<label>นับเฉพาะช่องนี้ (ว่าง = ทุกช่อง)</label>"
+  },
+  {
+    "key": "นาที",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>นาที</label><input type=\"number\" name=\"cooldownMinutes\" value=\"<%= config.cooldownMinutes || 0 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "นาที)",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>Cooldown (นาที)</label><input type=\"number\" name=\"robCooldownMin\" value=\"<%= config.robCooldownMin||30 %>\" min=\"1\"></div>"
+  },
+  {
+    "key": "นี้').replace(/'/g,'') %",
+    "count": 1,
+    "sample": "onclick=\"return confirm('ลบการเดิมพัน <%= (bet.title||'นี้').replace(/'/g,'') %>?')\">🗑️ ลบ</a>"
+  },
+  {
+    "key": "แนบรูป rank card ไปพร้อม embed แจ้งเตือน",
+    "count": 1,
+    "sample": "<div><div class=\"toggle-label\">ส่ง Rank Card เมื่อ Level Up</div><div style=\"font-size:12px;color:var(--muted)\">แนบรูป rank card ไปพร้อม embed แจ้งเตือน</div></"
+  },
+  {
+    "key": "ในกลุ่ม",
+    "count": 1,
+    "sample": "<div style=\"font-weight:600;font-size:13px;margin:12px 0 8px\">Roles ในกลุ่ม</div>"
+  },
+  {
+    "key": "ใน manage.ejs ด้วยโค้ดด้านล่างนี้ทั้งหมด",
+    "count": 1,
+    "sample": "ใน manage.ejs ด้วยโค้ดด้านล่างนี้ทั้งหมด"
+  },
+  {
+    "key": "บอทจะส่งการแจ้งเตือนอัตโนมัติก่อนแมตช์เริ่ม",
+    "count": 1,
+    "sample": "🏆 <strong>ระบบแจ้งเตือนกีฬา & Esports</strong> — บอทจะส่งการแจ้งเตือนอัตโนมัติก่อนแมตช์เริ่ม"
+  },
+  {
+    "key": "บอทอยู่แล้ว (",
+    "count": 1,
+    "sample": "<button class=\"tab-btn\" onclick=\"filterTab(this,'active')\">บอทอยู่แล้ว (<%= guilds.filter(g=>g.hasBot).length %>)</button>"
+  },
+  {
+    "key": "บอทออนไลน์",
+    "count": 1,
+    "sample": "<span class=\"guild-status status-active\"><span class=\"status-dot\"></span>บอทออนไลน์</span>"
+  },
+  {
+    "key": "บันทึก",
+    "count": 5,
+    "sample": "<button type=\"submit\" class=\"btn btn-primary btn-sm\" style=\"margin-top:10px\">💾 บันทึก</button>"
+  },
+  {
+    "key": "บันทึกการตั้งค่า",
+    "count": 4,
+    "sample": "<button type=\"submit\" class=\"btn btn-primary\">💾 บันทึกการตั้งค่า</button>"
+  },
+  {
+    "key": "บันทึกการตั้งค่าทั้งหมด",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-primary\">💾 บันทึกการตั้งค่าทั้งหมด</button>"
+  },
+  {
+    "key": "บันทึกการตั้งค่าเรียบร้อยแล้ว",
+    "count": 1,
+    "sample": "<div class=\"toast success\" id=\"page-toast\">✅ บันทึกการตั้งค่าเรียบร้อยแล้ว</div>"
+  },
+  {
+    "key": "บันทึกข้อมูลสมาชิกสำเร็จ')",
+    "count": 1,
+    "sample": "showToastMsg('✅ บันทึกข้อมูลสมาชิกสำเร็จ');"
+  },
+  {
+    "key": "บันทึกทั้งหมด",
+    "count": 1,
+    "sample": "💾 บันทึกทั้งหมด"
+  },
+  {
+    "key": "บันทึกไม่สำเร็จ')",
+    "count": 1,
+    "sample": "if (!res.ok) throw new Error(data.error || 'บันทึกไม่สำเร็จ');"
+  },
+  {
+    "key": "บันทึกแล้ว!'",
+    "count": 1,
+    "sample": "status.textContent = '✅ บันทึกแล้ว!';"
+  },
+  {
+    "key": "บันทึกสำเร็จ'",
+    "count": 1,
+    "sample": "status.textContent = '✅ บันทึกสำเร็จ';"
+  },
+  {
+    "key": "บันทึกสำเร็จ!'",
+    "count": 1,
+    "sample": "status.textContent = '✅ บันทึกสำเร็จ!';"
+  },
+  {
+    "key": "บันทึกสำเร็จแล้ว!'",
+    "count": 1,
+    "sample": "status.textContent = '✅ บันทึกสำเร็จแล้ว!';"
+  },
+  {
+    "key": "บันทึก Join Roles",
+    "count": 1,
+    "sample": "<button class=\"btn btn-primary\" style=\"min-width:130px\" onclick=\"saveJoinRoles(this)\">💾 บันทึก Join Roles</button>"
+  },
+  {
+    "key": "บันเทิง",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">บันเทิง</div>"
+  },
+  {
+    "key": "โบนัสคนใช้คำสั่งบ่อย",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">⚡ Command Bonus — โบนัสคนใช้คำสั่งบ่อย</div></div>"
+  },
+  {
+    "key": "โบนัสคนที่ react บ่อย",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">🎭 React Bonus — โบนัสคนที่ react บ่อย</div></div>"
+  },
+  {
+    "key": "โบนัสคนพิมพ์บ่อย",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">💬 Message Bonus — โบนัสคนพิมพ์บ่อย</div></div>"
+  },
+  {
+    "key": "โบนัสคนอยู่ใน Voice",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">🎤 Voice Bonus — โบนัสคนอยู่ใน Voice</div></div>"
+  },
+  {
+    "key": "โบนัสความอาวุโส",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">🏅 Seniority Bonus — โบนัสความอาวุโส</div></div>"
+  },
+  {
+    "key": "โบนัสที่ได้รับ",
+    "count": 4,
+    "sample": "<div class=\"form-group\"><label>โบนัสที่ได้รับ</label><input type=\"number\" name=\"activeBonusAmount\" value=\"<%= config.activeBonusAmount||100 %>\" min=\"1\"></div>"
+  },
+  {
+    "key": "ประกาศ",
+    "count": 4,
+    "sample": "<button type=\"submit\" class=\"btn btn-block btn-sm\" style=\"background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)\" onclick=\"return "
+  },
+  {
+    "key": "ประกาศผล --",
+    "count": 1,
+    "sample": "<!-- ประกาศผล -->"
+  },
+  {
+    "key": "ประกาศผลการเดิมพันเรียบร้อยแล้ว",
+    "count": 1,
+    "sample": "<div class=\"toast success\" id=\"page-toast\">🏆 ประกาศผลการเดิมพันเรียบร้อยแล้ว</div>"
+  },
+  {
+    "key": "ประกาศผลผู้ชนะ",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-bottom:8px\">ประกาศผลผู้ชนะ — ระบบปิดรับและส่งผลเข้า channel อัตโนมัติ</div>"
+  },
+  {
+    "key": "ประกาศผลผู้ชนะ (จะปิดรับและแจกเงินอัตโนมัติ):",
+    "count": 1,
+    "sample": "<div style=\"font-size:13px;color:var(--muted);margin-bottom:10px\">ประกาศผลผู้ชนะ (จะปิดรับและแจกเงินอัตโนมัติ):</div>"
+  },
+  {
+    "key": "ประเภท",
+    "count": 1,
+    "sample": "<span class=\"badge badge-blue\"><%= (config.storeItemTypes || []).length %> ประเภท</span>"
+  },
+  {
+    "key": "ประเภทภารกิจ",
+    "count": 1,
+    "sample": "<label>ประเภทภารกิจ</label>"
+  },
+  {
+    "key": "ประเภทสินค้า",
+    "count": 3,
+    "sample": "<div class=\"card-title\">🏷️ ประเภทสินค้า</div>"
+  },
+  {
+    "key": "ปรับระดับเสียง',                                 icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/volume <1-100>',desc:'ปรับระดับเสียง',                                 icon:'🔊' },"
+  },
+  {
+    "key": "ปรับสี Rank Card ตามยศ",
+    "count": 1,
+    "sample": "<div class=\"card-title\">🎨 ปรับสี Rank Card ตามยศ</div>"
+  },
+  {
+    "key": "ปล้นได้ขั้นต่ำ (%)",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ปล้นได้ขั้นต่ำ (%)</label><input type=\"number\" name=\"robMinPercent\" value=\"<%= config.robMinPercent||20 %>\" min=\"1\" max=\"99\"></di"
+  },
+  {
+    "key": "ปล้นได้สูงสุด (%)",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>ปล้นได้สูงสุด (%)</label><input type=\"number\" name=\"robMaxPercent\" value=\"<%= config.robMaxPercent||50 %>\" min=\"1\" max=\"99\"></div"
+  },
+  {
+    "key": "ปิด",
+    "count": 2,
+    "sample": "<span class=\"badge badge-red\">🔴 ปิด</span>"
+  },
+  {
+    "key": "ปิดคำสั่งที่ไม่ต้องการในเซิร์ฟนี้",
+    "count": 1,
+    "sample": "<span style=\"font-size:12px;color:var(--muted)\">ปิดคำสั่งที่ไม่ต้องการในเซิร์ฟนี้</span>"
+  },
+  {
+    "key": "ปิดเพื่อกำหนดจำนวนในคลัง",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ปิดเพื่อกำหนดจำนวนในคลัง</div>"
+  },
+  {
+    "key": "ปิดเพื่อปิดการใช้คำสั่ง /rob ทั้งหมด",
+    "count": 1,
+    "sample": "<div><div class=\"toggle-label\">เปิดใช้ระบบปล้น</div><div class=\"toggle-desc\">ปิดเพื่อปิดการใช้คำสั่ง /rob ทั้งหมด</div></div>"
+  },
+  {
+    "key": "ปิดเพื่อสร้างกิจกรรมแบบ draft ก่อน",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ปิดเพื่อสร้างกิจกรรมแบบ draft ก่อน</div>"
+  },
+  {
+    "key": "ปิดเพื่อสร้างเป็น draft ก่อน",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ปิดเพื่อสร้างเป็น draft ก่อน</div>"
+  },
+  {
+    "key": "ปิดรับ' : '",
+    "count": 2,
+    "sample": "<%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>"
+  },
+  {
+    "key": "เป้า",
+    "count": 1,
+    "sample": "&nbsp;เป้า <%= q.target %> &nbsp;|&nbsp;"
+  },
+  {
+    "key": "เป้าหมาย (จำนวน)",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>เป้าหมาย (จำนวน)</label><input type=\"number\" name=\"target\" value=\"1\" min=\"1\"></div>"
+  },
+  {
+    "key": "เปิดใช้ระบบปล้น",
+    "count": 1,
+    "sample": "<div><div class=\"toggle-label\">เปิดใช้ระบบปล้น</div><div class=\"toggle-desc\">ปิดเพื่อปิดการใช้คำสั่ง /rob ทั้งหมด</div></div>"
+  },
+  {
+    "key": "เปิดใช้ Command Bonus",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">เปิดใช้ Command Bonus</div>"
+  },
+  {
+    "key": "เปิดใช้ Daily Quests",
+    "count": 1,
+    "sample": "<div><div class=\"toggle-label\">เปิดใช้ Daily Quests</div></div>"
+  },
+  {
+    "key": "เปิดใช้ Message Bonus",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">เปิดใช้ Message Bonus</div>"
+  },
+  {
+    "key": "เปิดใช้ React Bonus",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">เปิดใช้ React Bonus</div>"
+  },
+  {
+    "key": "เปิดใช้ Seniority Bonus",
+    "count": 1,
+    "sample": "<div><div class=\"toggle-label\">เปิดใช้ Seniority Bonus</div></div>"
+  },
+  {
+    "key": "เปิดใช้ Voice Bonus",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">เปิดใช้ Voice Bonus</div>"
+  },
+  {
+    "key": "เปิด/ปิดคำสั่ง /",
+    "count": 1,
+    "sample": "<div class=\"card-title\">⚙️ เปิด/ปิดคำสั่ง /</div>"
+  },
+  {
+    "key": "เปิดรับ",
+    "count": 2,
+    "sample": "<span class=\"badge badge-green\">🟢 เปิดรับ</span>"
+  },
+  {
+    "key": "เปิดรับ' %",
+    "count": 2,
+    "sample": "<%= bet.isOpen ? '🔒 ปิดรับ' : '🔓 เปิดรับ' %>"
+  },
+  {
+    "key": "เปิดรับเดิมพันทันที",
+    "count": 2,
+    "sample": "<div class=\"toggle-label\">เปิดรับเดิมพันทันที</div>"
+  },
+  {
+    "key": "ไปที่",
+    "count": 1,
+    "sample": "<li>ไปที่ <strong style=\"color:var(--text)\">developer.spotify.com/dashboard</strong> → สร้าง App ใหม่</li>"
+  },
+  {
+    "key": "ไปที่ฟอร์ม",
+    "count": 1,
+    "sample": "// Scroll ไปที่ฟอร์ม"
+  },
+  {
+    "key": "ผู้ชนะ:",
+    "count": 2,
+    "sample": "<span style=\"font-weight:700;color:var(--yellow)\">🏆 ผู้ชนะ: <%= bet.winner==='A'?(bet.optionA||'ฝ่าย A'):(bet.optionB||'ฝ่าย B') %></span>"
+  },
+  {
+    "key": "ผู้เดิมพัน",
+    "count": 1,
+    "sample": "<div class=\"stat-label\">ผู้เดิมพัน</div>"
+  },
+  {
+    "key": "ฝ่าย A",
+    "count": 2,
+    "sample": "<div class=\"bet-side-label\">🔵 ฝ่าย A</div>"
+  },
+  {
+    "key": "ฝ่าย A' %",
+    "count": 5,
+    "sample": "<div style=\"font-weight:700;color:#7b8df8;font-size:14px\"><%= bet.optionA||'ฝ่าย A' %></div>"
+  },
+  {
+    "key": "ฝ่าย A\"",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"optionA\" value=\"<%= bet.optionA||'' %>\" placeholder=\"ฝ่าย A\">"
+  },
+  {
+    "key": "ฝ่าย A + B --",
+    "count": 1,
+    "sample": "<!-- ฝ่าย A + B -->"
+  },
+  {
+    "key": "ฝ่าย A'):(bet.optionB",
+    "count": 1,
+    "sample": "<span style=\"font-weight:700;color:var(--yellow)\">🏆 ผู้ชนะ: <%= bet.winner==='A'?(bet.optionA||'ฝ่าย A'):(bet.optionB||'ฝ่าย B') %></span>"
+  },
+  {
+    "key": "ฝ่าย A') : (bet.optionB",
+    "count": 1,
+    "sample": "<div style=\"font-weight:700;font-size:16px;color:var(--yellow)\">ผู้ชนะ: <%= bet.winner==='A' ? (bet.optionA||'ฝ่าย A') : (bet.optionB||'ฝ่าย B') %></div>"
+  },
+  {
+    "key": "ฝ่าย A\" oninput",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"optionA\" placeholder=\"ฝ่าย A\" value=\"ฝ่าย A\" oninput=\"updateBetPreview()\">"
+  },
+  {
+    "key": "ฝ่าย A').replace(/'/g,'') %",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-block btn-sm\" style=\"background:rgba(88,101,242,0.15);color:#7b8df8;border:1px solid rgba(88,101,242,0.3)\" onclick=\"return "
+  },
+  {
+    "key": "ฝ่าย A\" value",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"optionA\" placeholder=\"ฝ่าย A\" value=\"ฝ่าย A\" oninput=\"updateBetPreview()\">"
+  },
+  {
+    "key": "ฝ่าย B",
+    "count": 2,
+    "sample": "<div class=\"bet-side-label\">🔴 ฝ่าย B</div>"
+  },
+  {
+    "key": "ฝ่าย B' %",
+    "count": 5,
+    "sample": "<div style=\"font-weight:700;color:#f28f8f;font-size:14px\"><%= bet.optionB||'ฝ่าย B' %></div>"
+  },
+  {
+    "key": "ฝ่าย B') %",
+    "count": 2,
+    "sample": "<span style=\"font-weight:700;color:var(--yellow)\">🏆 ผู้ชนะ: <%= bet.winner==='A'?(bet.optionA||'ฝ่าย A'):(bet.optionB||'ฝ่าย B') %></span>"
+  },
+  {
+    "key": "ฝ่าย B\"",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"optionB\" value=\"<%= bet.optionB||'' %>\" placeholder=\"ฝ่าย B\">"
+  },
+  {
+    "key": "ฝ่าย B\" oninput",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"optionB\" placeholder=\"ฝ่าย B\" value=\"ฝ่าย B\" oninput=\"updateBetPreview()\">"
+  },
+  {
+    "key": "ฝ่าย B').replace(/'/g,'') %",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-block btn-sm\" style=\"background:rgba(237,66,69,0.12);color:#f28f8f;border:1px solid rgba(237,66,69,0.3)\" onclick=\"return co"
+  },
+  {
+    "key": "ฝ่าย B\" value",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"optionB\" placeholder=\"ฝ่าย B\" value=\"ฝ่าย B\" oninput=\"updateBetPreview()\">"
+  },
+  {
+    "key": "เพลงนี้",
+    "count": 1,
+    "sample": "{ cmd:'/loop',          desc:'สลับโหมด Loop (ปิด → เพลงนี้ → ทั้ง Queue)',    icon:'🔁' },"
+  },
+  {
+    "key": "เพิ่ม",
+    "count": 6,
+    "sample": "<button type=\"submit\" class=\"btn btn-success btn-sm\">+ เพิ่ม</button>"
+  },
+  {
+    "key": "เพิ่มข้อความ",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-success\">➕ เพิ่มข้อความ</button>"
+  },
+  {
+    "key": "เพิ่มด้านบนเพื่อจัดกลุ่มสินค้า",
+    "count": 2,
+    "sample": "<div style=\"color:var(--muted);font-size:13px\">ยังไม่มีประเภท — เพิ่มด้านบนเพื่อจัดกลุ่มสินค้า</div>"
+  },
+  {
+    "key": "เพิ่มได้เลย",
+    "count": 1,
+    "sample": "<div class=\"empty-state\"><div class=\"e-icon\">🏅</div>ยังไม่มี Tier — เพิ่มได้เลย</div>"
+  },
+  {
+    "key": "เพิ่มภารกิจ",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-success\">➕ เพิ่มภารกิจ</button>"
+  },
+  {
+    "key": "เพิ่มภารกิจใหม่ใน Pool",
+    "count": 1,
+    "sample": "<div style=\"font-size:13px;font-weight:600;margin-bottom:12px\">เพิ่มภารกิจใหม่ใน Pool</div>"
+  },
+  {
+    "key": "เพิ่มรายได้ยศ",
+    "count": 2,
+    "sample": "<div class=\"card-title\">👑 เพิ่มรายได้ยศ</div>"
+  },
+  {
+    "key": "เพิ่มสไตล์ตามยศ",
+    "count": 1,
+    "sample": "<div style=\"font-size:13px;font-weight:600;margin-bottom:12px\">เพิ่มสไตล์ตามยศ</div>"
+  },
+  {
+    "key": "เพิ่มสไตล์ยศ",
+    "count": 1,
+    "sample": "<button type=\"button\" class=\"btn btn-success btn-sm\" onclick=\"addRcRoleStyle()\">➕ เพิ่มสไตล์ยศ</button>"
+  },
+  {
+    "key": "เพิ่มสินค้า",
+    "count": 1,
+    "sample": "<div class=\"card-title\">🛒 เพิ่มสินค้า</div>"
+  },
+  {
+    "key": "เพิ่มสินค้าในร้าน",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-success btn-block\">💾 เพิ่มสินค้าในร้าน</button>"
+  },
+  {
+    "key": "เพิ่ม Role",
+    "count": 2,
+    "sample": "<button class=\"btn btn-ghost btn-sm\" onclick=\"addJoinRoleRow()\">+ เพิ่ม Role</button>"
+  },
+  {
+    "key": "เพิ่ม Role บอท",
+    "count": 1,
+    "sample": "<button class=\"btn btn-ghost btn-sm\" onclick=\"addBotJoinRoleRow()\">+ เพิ่ม Role บอท</button>"
+  },
+  {
+    "key": "เพิ่ม Tier",
+    "count": 1,
+    "sample": "<button type=\"submit\" class=\"btn btn-success\">➕ เพิ่ม Tier</button>"
+  },
+  {
+    "key": "เพิ่ม Tier ใหม่",
+    "count": 1,
+    "sample": "<div style=\"font-size:13px;font-weight:600;margin-bottom:12px\">เพิ่ม Tier ใหม่</div>"
+  },
+  {
+    "key": "เพื่อกรอกฟอร์มอัตโนมัติ",
+    "count": 2,
+    "sample": "แมตช์จากลีกที่ติดตามในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ"
+  },
+  {
+    "key": "เพื่อดูและรับรางวัล",
+    "count": 1,
+    "sample": "💡 ทุกวันระบบจะสุ่มภารกิจจาก Pool ให้สมาชิก ใช้ <code style=\"background:var(--surface2);padding:2px 6px;border-radius:4px\">/daily</code> เพื่อดูและรับรางวัล"
+  },
+  {
+    "key": "เพื่อแสดงชื่อผู้ใช้\"",
+    "count": 2,
+    "sample": "<input type=\"text\" name=\"useMessage\" placeholder=\"ใช้ {user} เพื่อแสดงชื่อผู้ใช้\">"
+  },
+  {
+    "key": "โพสต์ใน channel:",
+    "count": 1,
+    "sample": "📢 โพสต์ใน channel: <code style=\"background:var(--surface2);padding:2px 6px;border-radius:4px\">#<%= bet.channelId %></code>"
+  },
+  {
+    "key": "โพสต์ embed ใหม่\"",
+    "count": 1,
+    "sample": "<button class=\"btn btn-sm btn-secondary\" title=\"โพสต์ embed ใหม่\">📢 repost</button>"
+  },
+  {
+    "key": "ฟอร์มตั้งค่าใหม่",
+    "count": 1,
+    "sample": "<!-- ─── ฟอร์มตั้งค่าใหม่ ─── -->"
+  },
+  {
+    "key": "ฟุตบอล",
+    "count": 1,
+    "sample": "<div class=\"card-title\">⚽ ฟุตบอล</div>"
+  },
+  {
+    "key": "ภารกิจ",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted);margin-bottom:10px\">Pool มีทั้งหมด <%= config.questPool.length %> ภารกิจ</div>"
+  },
+  {
+    "key": "ภารกิจประจำวัน",
+    "count": 1,
+    "sample": "<div class=\"card-header\"><div class=\"card-title\">📋 Daily Quests — ภารกิจประจำวัน</div></div>"
+  },
+  {
+    "key": "มอบ role อัตโนมัติเมื่อสมาชิกเข้าเซิร์ฟ",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted)\">มอบ role อัตโนมัติเมื่อสมาชิกเข้าเซิร์ฟ</div>"
+  },
+  {
+    "key": "มินิเกม",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">มินิเกม</div>"
+  },
+  {
+    "key": "มีทั้งหมด",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted);margin-bottom:10px\">Pool มีทั้งหมด <%= config.questPool.length %> ภารกิจ</div>"
+  },
+  {
+    "key": "มี rate limit",
+    "count": 1,
+    "sample": "<br><small>⚠️ Liquipedia มี rate limit — โหลดครั้งแรกอาจใช้เวลา 10-30 วินาที</small>"
+  },
+  {
+    "key": "เมื่อสมาชิกใช้ slash command ครบกำหนดในวันเดียว จะได้รับโบนัส",
+    "count": 1,
+    "sample": "💡 เมื่อสมาชิกใช้ slash command ครบกำหนดในวันเดียว จะได้รับโบนัส"
+  },
+  {
+    "key": "เมื่อสมาชิกส่งข้อความครบกำหนดในวันเดียว จะได้รับเงินโบนัสอัตโนมัติ (จ่ายครั้งเดียวต่อวัน)",
+    "count": 1,
+    "sample": "💡 เมื่อสมาชิกส่งข้อความครบกำหนดในวันเดียว จะได้รับเงินโบนัสอัตโนมัติ (จ่ายครั้งเดียวต่อวัน)"
+  },
+  {
+    "key": "เมื่อสมาชิกอยู่ใน voice channel ครบกำหนด (นาที) จะได้รับโบนัส (ไม่นับเมื่อ mute/deafen)",
+    "count": 1,
+    "sample": "💡 เมื่อสมาชิกอยู่ใน voice channel ครบกำหนด (นาที) จะได้รับโบนัส (ไม่นับเมื่อ mute/deafen)"
+  },
+  {
+    "key": "เมื่อสมาชิก react ครบกำหนดในวันเดียว จะได้รับโบนัส",
+    "count": 1,
+    "sample": "💡 เมื่อสมาชิก react ครบกำหนดในวันเดียว จะได้รับโบนัส"
+  },
+  {
+    "key": "แมตช์จากเกมที่เปิดใช้ในหน้า Sports",
+    "count": 1,
+    "sample": "แมตช์จากเกมที่เปิดใช้ในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ"
+  },
+  {
+    "key": "แมตช์จากลีกที่ติดตามในหน้า Sports",
+    "count": 1,
+    "sample": "แมตช์จากลีกที่ติดตามในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ"
+  },
+  {
+    "key": "ไม่กำหนด)",
+    "count": 1,
+    "sample": "<label>หมดเวลาใน (นาที — เว้นว่าง = ไม่กำหนด)</label>"
+  },
+  {
+    "key": "ไม่จำกัด)",
+    "count": 3,
+    "sample": "<label>จำกัดต่อผู้ใช้ (0 = ไม่จำกัด)</label>"
+  },
+  {
+    "key": "ไม่จำกัด' :",
+    "count": 1,
+    "sample": "&nbsp;<%= item.unlimitedStock ? '♾️ ไม่จำกัด' : `📦 คลัง: ${item.stock}` %>"
+  },
+  {
+    "key": "ไม่ต้องใช้ API key",
+    "count": 1,
+    "sample": "📡 ข้อมูล F1 ใช้ API ฟรีจาก <strong>Jolpica (Ergast)</strong> + <strong>OpenF1</strong> — ไม่ต้องใช้ API key"
+  },
+  {
+    "key": "ไม่ต้องใช้ API key ครอบคลุมทุกลีก ทีมชาติ และนักเตะทั่วโลก",
+    "count": 1,
+    "sample": "📡 ข้อมูลจาก <strong style=\"color:var(--text)\">FotMob</strong> — ไม่ต้องใช้ API key ครอบคลุมทุกลีก ทีมชาติ และนักเตะทั่วโลก"
+  },
+  {
+    "key": "ไม่ทราบชื่อ' %",
+    "count": 1,
+    "sample": "<div class=\"list-item-name\"><%= role.roleName || 'ไม่ทราบชื่อ' %></div>"
+  },
+  {
+    "key": "ไม่บังคับ)",
+    "count": 1,
+    "sample": "<label>Background Image URL <span style=\"color:var(--muted)\">(ไม่บังคับ)</span></label>"
+  },
+  {
+    "key": "ไม่พบ' %",
+    "count": 1,
+    "sample": "&nbsp;·&nbsp; Message: <code style=\"font-size:11px\"><%- grp.messageId || 'ไม่พบ' %></code>"
+  },
+  {
+    "key": "ไม่พบข้อมูลทีม",
+    "count": 1,
+    "sample": "inner = '<span style=\"color:var(--muted);font-size:12px\">ไม่พบข้อมูลทีม</span>';"
+  },
+  {
+    "key": "ไม่พบข้อมูลทีม หรือ Liquipedia เต็ม",
+    "count": 1,
+    "sample": "body.innerHTML = '<span style=\"color:var(--muted);font-size:12px\">ไม่พบข้อมูลทีม หรือ Liquipedia เต็ม — ลองใหม่ภายหลัง</span>';"
+  },
+  {
+    "key": "ไม่พบเซิร์ฟเวอร์ที่ค้นหา",
+    "count": 1,
+    "sample": "<div>ไม่พบเซิร์ฟเวอร์ที่ค้นหา</div>"
+  },
+  {
+    "key": "ไม่พบผลลัพธ์",
+    "count": 1,
+    "sample": "if (!list.length) { ddEl.innerHTML = '<div class=\"sd-empty\">ไม่พบผลลัพธ์</div>'; return; }"
+  },
+  {
+    "key": "ไม่พบแมตช์ที่จะมาถึง",
+    "count": 1,
+    "sample": "listEl.innerHTML = '<div style=\"text-align:center;padding:20px;color:var(--muted)\">ไม่พบแมตช์ที่จะมาถึง<br><small>ตรวจสอบว่าเลือกลีกในหน้า Sports แล้ว หรืออาจอย"
+  },
+  {
+    "key": "ไม่พบแมตช์ Esports ในขณะนี้",
+    "count": 1,
+    "sample": "listEl.innerHTML = '<div style=\"text-align:center;padding:20px;color:var(--muted)\">ไม่พบแมตช์ Esports ในขณะนี้<br><small>ตรวจสอบว่าเปิดเกมในหน้า Sports แล้ว หรื"
+  },
+  {
+    "key": "ไม่พบสมาชิกที่มีข้อมูล",
+    "count": 1,
+    "sample": "ไม่พบสมาชิกที่มีข้อมูล"
+  },
+  {
+    "key": "ไม่มอบยศ",
+    "count": 2,
+    "sample": "<option value=\"\">— ไม่มอบยศ —</option>"
+  },
+  {
+    "key": "ไม่มีทีมในโซนนี้",
+    "count": 1,
+    "sample": "<div style=\"display:flex;flex-wrap:wrap;gap:5px\">${teamBtns || '<span style=\"color:var(--muted);font-size:12px\">ไม่มีทีมในโซนนี้</span>'}</div>`;"
+  },
+  {
+    "key": "ไม่มียศ",
+    "count": 1,
+    "sample": ": '<span style=\"color:var(--muted);font-size:11px\">ไม่มียศ</span>';"
+  },
+  {
+    "key": "ไม่มีหมวดหมู่",
+    "count": 2,
+    "sample": "<option value=\"\">— ไม่มีหมวดหมู่ —</option>"
+  },
+  {
+    "key": "ไม่มีไอเทม",
+    "count": 2,
+    "sample": ": '<div style=\"font-size:11px;color:var(--muted);margin-top:6px\">🎒 ไม่มีไอเทม</div>';"
+  },
+  {
+    "key": "ไม่ระบุ",
+    "count": 2,
+    "sample": "<option value=\"\">— ไม่ระบุ —</option>"
+  },
+  {
+    "key": "ยกเลิก",
+    "count": 2,
+    "sample": "<button class=\"btn btn-danger btn-sm\" onclick=\"closeModal('modal-member')\">ยกเลิก</button>"
+  },
+  {
+    "key": "ยกเลิกรายได้ยศนี้?')\"",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-role-income/<%= index %>\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm('ยกเลิกรายได้ยศนี้?')\">ลบ</a>"
+  },
+  {
+    "key": "ยศ",
+    "count": 3,
+    "sample": "<label>ยศ</label>"
+  },
+  {
+    "key": "ยศที่จะมอบให้เมื่อซื้อ/ใช้ (Role Reward)",
+    "count": 2,
+    "sample": "<label>ยศที่จะมอบให้เมื่อซื้อ/ใช้ (Role Reward)</label>"
+  },
+  {
+    "key": "ยศที่สูงกว่าจะ override ค่าเริ่มต้นด้านบน",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted)\">ยศที่สูงกว่าจะ override ค่าเริ่มต้นด้านบน</div>"
+  },
+  {
+    "key": "ยังไม่ได้เลือก",
+    "count": 1,
+    "sample": "el.innerHTML = '<span style=\"color:var(--muted);font-size:12px\">ยังไม่ได้เลือก</span>';"
+  },
+  {
+    "key": "ยังไม่ได้เลือกทีม (จะแจ้งทุกแมตช์)",
+    "count": 1,
+    "sample": "el.innerHTML = parts.join('') || '<span style=\"color:var(--muted);font-size:12px\">ยังไม่ได้เลือกทีม (จะแจ้งทุกแมตช์)</span>';"
+  },
+  {
+    "key": "ยังไม่มี",
+    "count": 2,
+    "sample": "<div id=\"lv-mult-empty\" style=\"color:var(--muted);font-size:13px;padding:4px 0\">ยังไม่มี — กด \"เพิ่ม\" เพื่อตั้งค่า role ที่ได้ XP เพิ่ม</div>"
+  },
+  {
+    "key": "ยังไม่มีการตั้งค่าตามยศ",
+    "count": 2,
+    "sample": "<div class=\"empty-state\" id=\"rc-rs-empty\"><div class=\"e-icon\">🎨</div>ยังไม่มีการตั้งค่าตามยศ</div>"
+  },
+  {
+    "key": "ยังไม่มีการตั้งค่ารายได้ยศ",
+    "count": 1,
+    "sample": "<div class=\"empty-state\"><div class=\"e-icon\">👑</div>ยังไม่มีการตั้งค่ารายได้ยศ</div>"
+  },
+  {
+    "key": "ยังไม่มีกิจกรรมเดิมพัน",
+    "count": 1,
+    "sample": "<div>ยังไม่มีกิจกรรมเดิมพัน — กดสร้างด้านบน!</div>"
+  },
+  {
+    "key": "ยังไม่มีข้อความสุ่ม",
+    "count": 1,
+    "sample": "<div class=\"empty-state\"><div class=\"e-icon\">📭</div>ยังไม่มีข้อความสุ่ม</div>"
+  },
+  {
+    "key": "ยังไม่มีบอท (",
+    "count": 1,
+    "sample": "<button class=\"tab-btn\" onclick=\"filterTab(this,'inactive')\">ยังไม่มีบอท (<%= guilds.filter(g=>!g.hasBot).length %>)</button>"
+  },
+  {
+    "key": "ยังไม่มีบอท",
+    "count": 1,
+    "sample": "<span class=\"guild-status status-inactive\"><span class=\"status-dot\"></span>ยังไม่มีบอท</span>"
+  },
+  {
+    "key": "ยังไม่มีประเภท",
+    "count": 1,
+    "sample": "<div style=\"color:var(--muted);font-size:13px\">ยังไม่มีประเภท — เพิ่มด้านบนเพื่อจัดกลุ่มสินค้า</div>"
+  },
+  {
+    "key": "ยังไม่มีภารกิจใน Pool",
+    "count": 1,
+    "sample": "<div class=\"empty-state\"><div class=\"e-icon\">📋</div>ยังไม่มีภารกิจใน Pool</div>"
+  },
+  {
+    "key": "ยังไม่มีสินค้าในร้าน",
+    "count": 1,
+    "sample": "<div class=\"empty-state\"><div class=\"e-icon\">🛒</div>ยังไม่มีสินค้าในร้าน</div>"
+  },
+  {
+    "key": "ยังไม่มีหมวดหมู่",
+    "count": 1,
+    "sample": "<div style=\"color:var(--muted);font-size:13px\">ยังไม่มีหมวดหมู่ — เพิ่มด้านบนเพื่อจัดกลุ่มสินค้า</div>"
+  },
+  {
+    "key": "ยังไม่มี Reaction Role Group",
+    "count": 1,
+    "sample": "<div class=\"empty-state\" style=\"padding:24px\"><div class=\"e-icon\">🎭</div>ยังไม่มี Reaction Role Group</div>"
+  },
+  {
+    "key": "ยังไม่มี Role รางวัล",
+    "count": 2,
+    "sample": "<div id=\"level-roles-empty\" style=\"color:var(--muted);font-size:13px;padding:4px 0\">ยังไม่มี Role รางวัล — กด \"เพิ่ม\" เพื่อเพิ่ม</div>"
+  },
+  {
+    "key": "ยังไม่มี Tier",
+    "count": 1,
+    "sample": "<div class=\"empty-state\"><div class=\"e-icon\">🏅</div>ยังไม่มี Tier — เพิ่มได้เลย</div>"
+  },
+  {
+    "key": "รวม",
+    "count": 2,
+    "sample": "<div class=\"member-stat-label\">💎 รวม</div>"
+  },
+  {
+    "key": "ระบบ",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">ระบบ</div>"
+  },
+  {
+    "key": "ระบบแจ้งเตือนกีฬา",
+    "count": 1,
+    "sample": "🏆 <strong>ระบบแจ้งเตือนกีฬา & Esports</strong> — บอทจะส่งการแจ้งเตือนอัตโนมัติก่อนแมตช์เริ่ม"
+  },
+  {
+    "key": "ระบบเดิมพัน",
+    "count": 3,
+    "sample": "<span class=\"icon\">🎲</span> ระบบเดิมพัน"
+  },
+  {
+    "key": "ระบบปิดรับและส่งผลเข้า channel อัตโนมัติ",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-bottom:8px\">ประกาศผลผู้ชนะ — ระบบปิดรับและส่งผลเข้า channel อัตโนมัติ</div>"
+  },
+  {
+    "key": "ระบบเพลง",
+    "count": 3,
+    "sample": "<span class=\"icon\">🎵</span> ระบบเพลง"
+  },
+  {
+    "key": "ระบบราคาตลาด",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">📈 ระบบราคาตลาด</div>"
+  },
+  {
+    "key": "ระบบราคาตลาด (Supply",
+    "count": 1,
+    "sample": "<div class=\"toggle-label\">📈 ระบบราคาตลาด (Supply & Demand)</div>"
+  },
+  {
+    "key": "ระบบรายได้",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">ระบบรายได้</div>"
+  },
+  {
+    "key": "ระบบเศรษฐกิจ",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">ระบบเศรษฐกิจ</div>"
+  },
+  {
+    "key": "ระบบสมาชิก",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">ระบบสมาชิก</div>"
+  },
+  {
+    "key": "ระบบไอเทม",
+    "count": 1,
+    "sample": "<div class=\"nav-section\">ระบบไอเทม</div>"
+  },
+  {
+    "key": "ระบบ Economy, Store, Betting และอีกมากมาย",
+    "count": 1,
+    "sample": "<p>จัดการเซิร์ฟเวอร์ Discord ของคุณ<br>ระบบ Economy, Store, Betting และอีกมากมาย</p>"
+  },
+  {
+    "key": "ระบบ Level",
+    "count": 3,
+    "sample": "<span class=\"icon\">🎖️</span> ระบบ Level"
+  },
+  {
+    "key": "รับ / un-react ถอน",
+    "count": 1,
+    "sample": "<option value=\"toggle\">Toggle — react รับ / un-react ถอน</option>"
+  },
+  {
+    "key": "ราคา",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>ราคา</label><input type=\"number\" name=\"price\" required min=\"0\" placeholder=\"1000\"></div>"
+  },
+  {
+    "key": "ราคาขึ้น/ลงตามการซื้อ-ขาย",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ราคาขึ้น/ลงตามการซื้อ-ขาย</div>"
+  },
+  {
+    "key": "ราคาปัจจุบัน:",
+    "count": 1,
+    "sample": "curPriceEl.textContent = `ราคาปัจจุบัน: ${(d.currentPrice || d.price).toLocaleString()} (ฐาน ${(d.basePrice || d.price).toLocaleString()}, ${pct >= 0 ? '+' : ''"
+  },
+  {
+    "key": "ราคาเปลี่ยนแปลงมาก",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-top:3px\">ค่าสูง = ราคาเปลี่ยนแปลงมาก | ค่าต่ำ = ราคาเสถียร</div>"
+  },
+  {
+    "key": "ราคาเสถียร",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-top:3px\">ค่าสูง = ราคาเปลี่ยนแปลงมาก | ค่าต่ำ = ราคาเสถียร</div>"
+  },
+  {
+    "key": "รางวัล (เหรียญ)",
+    "count": 1,
+    "sample": "<label>รางวัล (เหรียญ)</label>"
+  },
+  {
+    "key": "รางวัล Role เมื่อถึง Level",
+    "count": 1,
+    "sample": "<span>👑 รางวัล Role เมื่อถึง Level</span>"
+  },
+  {
+    "key": "ร้านค้า",
+    "count": 2,
+    "sample": "<span class=\"icon\">🛒</span> ร้านค้า"
+  },
+  {
+    "key": "ร้านค้าและไอเทม",
+    "count": 1,
+    "sample": "<div class=\"desc\">ร้านค้าและไอเทม</div>"
+  },
+  {
+    "key": "รายการ",
+    "count": 2,
+    "sample": "<span class=\"badge badge-yellow\"><%= (config.storeItems || []).length %> รายการ</span>"
+  },
+  {
+    "key": "รายการเดิมพัน",
+    "count": 1,
+    "sample": "<div class=\"card-title\">👥 รายการเดิมพัน</div>"
+  },
+  {
+    "key": "รายการเดิมพันทั้งหมด",
+    "count": 1,
+    "sample": "<!-- ─── รายการเดิมพันทั้งหมด ─── -->"
+  },
+  {
+    "key": "รายการผู้เดิมพัน (",
+    "count": 1,
+    "sample": "👥 รายการผู้เดิมพัน (<%= bet.bets.length %> คน)"
+  },
+  {
+    "key": "รายการผู้เดิมพัน",
+    "count": 1,
+    "sample": "<!-- ─── รายการผู้เดิมพัน ─── -->"
+  },
+  {
+    "key": "รายการผู้เดิมพัน (collapsible) --",
+    "count": 1,
+    "sample": "<!-- รายการผู้เดิมพัน (collapsible) -->"
+  },
+  {
+    "key": "รายการยศที่มีรายได้",
+    "count": 1,
+    "sample": "<div class=\"card-title\">📋 รายการยศที่มีรายได้</div>"
+  },
+  {
+    "key": "รายชื่อสมาชิก",
+    "count": 1,
+    "sample": "<div class=\"card-title\">👥 รายชื่อสมาชิก</div>"
+  },
+  {
+    "key": "รายได้จากยศ",
+    "count": 2,
+    "sample": "<span class=\"icon\">👑</span> รายได้จากยศ"
+  },
+  {
+    "key": "รายละเอียดเพิ่มเติม...\"",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"description\" placeholder=\"รายละเอียดเพิ่มเติม...\">"
+  },
+  {
+    "key": "รีเซ็ตและสร้างใหม่' : 'สร้างการเดิมพัน' %",
+    "count": 1,
+    "sample": "🚀 <%= bet.title ? 'รีเซ็ตและสร้างใหม่' : 'สร้างการเดิมพัน' %>"
+  },
+  {
+    "key": "รีเฟรช",
+    "count": 1,
+    "sample": "<button class=\"btn btn-primary btn-sm\" onclick=\"loadMembers(1)\">🔄 รีเฟรช</button>"
+  },
+  {
+    "key": "รูป",
+    "count": 1,
+    "sample": "// preview รูป"
+  },
+  {
+    "key": "รูปฝ่าย A (URL)",
+    "count": 2,
+    "sample": "<label>รูปฝ่าย A (URL)</label>"
+  },
+  {
+    "key": "รูปฝ่าย B (URL)",
+    "count": 2,
+    "sample": "<label>รูปฝ่าย B (URL)</label>"
+  },
+  {
+    "key": "รูปและชื่อฝ่าย --",
+    "count": 1,
+    "sample": "<!-- รูปและชื่อฝ่าย -->"
+  },
+  {
+    "key": "เรทเงิน",
+    "count": 1,
+    "sample": "<div class=\"section-label\" style=\"margin-top:8px\">เรทเงิน</div>"
+  },
+  {
+    "key": "เริ่ม",
+    "count": 1,
+    "sample": "<% if (role.startDate) { %><span style=\"color:#aaa;font-size:11px\"> · เริ่ม <%= new Date(role.startDate).toLocaleString('th-TH') %></span><% } %>"
+  },
+  {
+    "key": "เริ่มต้นวันที่/เวลา",
+    "count": 1,
+    "sample": "<label>เริ่มต้นวันที่/เวลา</label>"
+  },
+  {
+    "key": "ลบ",
+    "count": 9,
+    "sample": "<a href=\"/<%= guildId %>/delete-reply/<%= index %>\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm('ลบข้อความนี้?')\">ลบ</a>"
+  },
+  {
+    "key": "ลบการเดิมพัน",
+    "count": 1,
+    "sample": "onclick=\"return confirm('ลบการเดิมพัน <%= (bet.title||'นี้').replace(/'/g,'') %>?')\">🗑️ ลบ</a>"
+  },
+  {
+    "key": "ลบข้อความนี้?')\"",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-reply/<%= index %>\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm('ลบข้อความนี้?')\">ลบ</a>"
+  },
+  {
+    "key": "ลบประเภท",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-store-type/<%= t.typeId || t._id %>\" onclick=\"return confirm('ลบประเภท <%= t.name %>?')\" style=\"color:var(--danger);font-size:16"
+  },
+  {
+    "key": "ลบเพลงออกจาก Queue ตามลำดับ',                   icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/remove <pos>',  desc:'ลบเพลงออกจาก Queue ตามลำดับ',                   icon:'🗑️' },"
+  },
+  {
+    "key": "ลบภารกิจนี้?')\"",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-quest/<%= q.questId %>\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm('ลบภารกิจนี้?')\">ลบ</a>"
+  },
+  {
+    "key": "ลบรายการเรียบร้อยแล้ว",
+    "count": 1,
+    "sample": "<div class=\"toast success\" id=\"page-toast\">🗑️ ลบรายการเรียบร้อยแล้ว</div>"
+  },
+  {
+    "key": "ลบสินค้านี้?')\"",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-store-item/<%= item.itemId || item._id || index %>\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm('ลบสินค้านี้?')\">🗑️ ล"
+  },
+  {
+    "key": "ลบหมวด",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-store-category/<%= cat.catId || cat._id %>\" onclick=\"return confirm('ลบหมวด <%= cat.name %>?')\" style=\"color:var(--danger);font-"
+  },
+  {
+    "key": "ลบ group นี้? ข้อความบอทในช่องจะถูกลบด้วย')) return",
+    "count": 1,
+    "sample": "if (!confirm('ลบ group นี้? ข้อความบอทในช่องจะถูกลบด้วย')) return;"
+  },
+  {
+    "key": "ลบ tier นี้?')\"",
+    "count": 1,
+    "sample": "<a href=\"/<%= guildId %>/delete-seniority-tier/<%= i %>\" class=\"btn btn-danger btn-sm\" onclick=\"return confirm('ลบ tier นี้?')\">ลบ</a>"
+  },
+  {
+    "key": "ลองใหม่ภายหลัง",
+    "count": 1,
+    "sample": "body.innerHTML = '<span style=\"color:var(--muted);font-size:12px\">ไม่พบข้อมูลทีม หรือ Liquipedia เต็ม — ลองใหม่ภายหลัง</span>';"
+  },
+  {
+    "key": "ล้าง XP เมื่อสมาชิกถูก ban",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted)\">ล้าง XP เมื่อสมาชิกถูก ban</div>"
+  },
+  {
+    "key": "ล้าง XP เมื่อสมาชิกออกจากเซิร์ฟ",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted)\">ล้าง XP เมื่อสมาชิกออกจากเซิร์ฟ</div>"
+  },
+  {
+    "key": "ลิงก์รูปภาพ (URL / GIF / WebP)",
+    "count": 1,
+    "sample": "<label>ลิงก์รูปภาพ (URL / GIF / WebP)</label>"
+  },
+  {
+    "key": "ลีกที่ต้องการติดตาม",
+    "count": 1,
+    "sample": "<div class=\"section-label\">ลีกที่ต้องการติดตาม</div>"
+  },
+  {
+    "key": "เล่นเพลงจาก YouTube หรือ Spotify (URL/ชื่อเพลง)', icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/play <query>', desc:'เล่นเพลงจาก YouTube หรือ Spotify (URL/ชื่อเพลง)', icon:'▶️' },"
+  },
+  {
+    "key": "เล่นเพลงต่อจากที่หยุดไว้',                       icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/resume',        desc:'เล่นเพลงต่อจากที่หยุดไว้',                       icon:'▶️' },"
+  },
+  {
+    "key": "เลือกช่องข้อความ",
+    "count": 3,
+    "sample": "sel.innerHTML = '<option value=\"\">— เลือกช่องข้อความ —</option>';"
+  },
+  {
+    "key": "เลือกเซิร์ฟเวอร์",
+    "count": 2,
+    "sample": "<title>เลือกเซิร์ฟเวอร์ — FrostByte Dashboard</title>"
+  },
+  {
+    "key": "เลือกได้แค่ 1",
+    "count": 1,
+    "sample": "<option value=\"unique\">Unique — เลือกได้แค่ 1</option>"
+  },
+  {
+    "key": "เลือกทีม",
+    "count": 1,
+    "sample": "if (title) title.textContent = `${ESP_LABEL[game]} — เลือกทีม`;"
+  },
+  {
+    "key": "เลือกทีมจากลีก",
+    "count": 1,
+    "sample": "เลือกทีมจากลีก <span style=\"font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px\">— คลิกเพื่อเลือก/ยกเลิก</span>"
+  },
+  {
+    "key": "เลือกยศ",
+    "count": 2,
+    "sample": "<option value=\"\">— เลือกยศ —</option>"
+  },
+  {
+    "key": "เลือก channel",
+    "count": 2,
+    "sample": "<option value=\"\">— เลือก channel —</option>"
+  },
+  {
+    "key": "เลือก Channel",
+    "count": 1,
+    "sample": "<option value=\"\">— เลือก Channel —</option>"
+  },
+  {
+    "key": "เลือก role",
+    "count": 1,
+    "sample": "<option value=\"\">— เลือก role —</option>"
+  },
+  {
+    "key": "เลือก Role",
+    "count": 8,
+    "sample": "<option value=\"\">— เลือก Role —</option>"
+  },
+  {
+    "key": "เลือก Role',",
+    "count": 1,
+    "sample": "title:       document.getElementById('rr-title').value.trim() || 'เลือก Role',"
+  },
+  {
+    "key": "เลื่อนระดับเป็น",
+    "count": 1,
+    "sample": "<input type=\"text\" class=\"form-input\" id=\"lv-up-msg\" value=\"<%= config.levelUpMessage || '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!' %>\">"
+  },
+  {
+    "key": "แล้ว!' %",
+    "count": 1,
+    "sample": "<input type=\"text\" class=\"form-input\" id=\"lv-up-msg\" value=\"<%= config.levelUpMessage || '{user} เลื่อนระดับเป็น **Level {level}** แล้ว!' %>\">"
+  },
+  {
+    "key": "แล้วถอนไม่ได้",
+    "count": 1,
+    "sample": "<option value=\"verify\">Verify — react แล้วถอนไม่ได้</option>"
+  },
+  {
+    "key": "และ",
+    "count": 1,
+    "sample": "<li>คัดลอก <strong style=\"color:var(--text)\">Client ID</strong> และ <strong style=\"color:var(--text)\">Client Secret</strong></li>"
+  },
+  {
+    "key": "และเรทเงิน",
+    "count": 1,
+    "sample": "<div class=\"card-title\">⏱️ Cooldown และเรทเงิน</div>"
+  },
+  {
+    "key": "วัน",
+    "count": 3,
+    "sample": "<div class=\"form-group\"><label>วัน</label><input type=\"number\" name=\"cooldownDays\"    value=\"<%= config.cooldownDays    || 0 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "วันขึ้นไป",
+    "count": 1,
+    "sample": "<div class=\"list-item-name\">อยู่มา <%= tier.minDays %> วันขึ้นไป</div>"
+  },
+  {
+    "key": "ว่าง",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">Accent Color <span style=\"color:var(--muted)\">(ว่าง = สี top role)</span></label>"
+  },
+  {
+    "key": "ว่างไว้",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-bottom:10px\">ว่างไว้ = แจ้งทุกแมตช์ของเกมนั้น | คลิกปุ่มเกมเพื่อโหลดทีม (Liquipedia)</div>"
+  },
+  {
+    "key": "วิ",
+    "count": 2,
+    "sample": "<span style=\"font-size:12px;color:var(--muted)\">วิ</span>"
+  },
+  {
+    "key": "วิธีเปิดใช้งาน Spotify",
+    "count": 1,
+    "sample": "<div style=\"font-weight:600;color:#1ed760;margin-bottom:8px\">🎧 วิธีเปิดใช้งาน Spotify</div>"
+  },
+  {
+    "key": "วินาที",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>วินาที</label><input type=\"number\" name=\"cooldownSeconds\" value=\"<%= config.cooldownSeconds || 0 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "วินาที)",
+    "count": 3,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">Cooldown (วินาที)</label>"
+  },
+  {
+    "key": "วินาที\"",
+    "count": 2,
+    "sample": "<input type=\"number\" class=\"form-input jr-delay\" value=\"<%- jr.delaySeconds || 0 %>\" min=\"0\" style=\"width:70px;text-align:center\" placeholder=\"วินาที\">"
+  },
+  {
+    "key": "วินาที',minutes:'นาที',hours:'ชั่วโมง',days:'วัน'",
+    "count": 1,
+    "sample": "ทุกๆ <%= role.intervalValue %> <%= ({seconds:'วินาที',minutes:'นาที',hours:'ชั่วโมง',days:'วัน'})[role.intervalType] || role.intervalType %>"
+  },
+  {
+    "key": "เว้นว่าง",
+    "count": 2,
+    "sample": "<label>หมดเวลาใน (นาที — เว้นว่าง = ไม่กำหนด)</label>"
+  },
+  {
+    "key": "เว้นว่างถ้าไม่ต้องการกำหนด",
+    "count": 1,
+    "sample": "<label>หมดเวลาใน (นาที) — เว้นว่างถ้าไม่ต้องการกำหนด</label>"
+  },
+  {
+    "key": "เวลาหมด --",
+    "count": 1,
+    "sample": "<!-- เวลาหมด -->"
+  },
+  {
+    "key": "เวลาหมดกิจกรรม --",
+    "count": 1,
+    "sample": "<!-- เวลาหมดกิจกรรม -->"
+  },
+  {
+    "key": "เวลา Cooldown",
+    "count": 1,
+    "sample": "<div class=\"section-label\">เวลา Cooldown</div>"
+  },
+  {
+    "key": "เศรษฐกิจ',  cmds:",
+    "count": 1,
+    "sample": "economy:  { label: '💰 เศรษฐกิจ',  cmds: [] },"
+  },
+  {
+    "key": "สกุลเงิน",
+    "count": 2,
+    "sample": "<span class=\"icon\">🪙</span> สกุลเงิน"
+  },
+  {
+    "key": "สกุลเงิน, งาน, ยศ",
+    "count": 1,
+    "sample": "<div class=\"desc\">สกุลเงิน, งาน, ยศ</div>"
+  },
+  {
+    "key": "ส่งข้อความ X ครั้ง",
+    "count": 1,
+    "sample": "<option value=\"message_count\">ส่งข้อความ X ครั้ง</option>"
+  },
+  {
+    "key": "ส่งแจ้งเตือนในช่องนี้ (ว่าง",
+    "count": 1,
+    "sample": "<label>ส่งแจ้งเตือนในช่องนี้ (ว่าง = ช่อง voice ที่ออก)</label>"
+  },
+  {
+    "key": "ส่งรูปภาพ",
+    "count": 1,
+    "sample": "<option value=\"send_image\">ส่งรูปภาพ</option>"
+  },
+  {
+    "key": "ส่ง embed แล้ว! รีเฟรชหน้าเพื่อดู group'",
+    "count": 1,
+    "sample": "status.textContent = '✅ ส่ง embed แล้ว! รีเฟรชหน้าเพื่อดู group';"
+  },
+  {
+    "key": "ส่ง embed ใหม่? ข้อความเก่าจะถูกลบ')) return",
+    "count": 1,
+    "sample": "if (!confirm('ส่ง embed ใหม่? ข้อความเก่าจะถูกลบ')) return;"
+  },
+  {
+    "key": "ส่ง embed ใหม่แล้ว (message ID: ' + data.messageId + ')')",
+    "count": 1,
+    "sample": "alert('✅ ส่ง embed ใหม่แล้ว (message ID: ' + data.messageId + ')');"
+  },
+  {
+    "key": "ส่ง lineup ของทีมที่ติดตามเมื่อประกาศ",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ส่ง lineup ของทีมที่ติดตามเมื่อประกาศ</div>"
+  },
+  {
+    "key": "ส่ง notification เมื่อ kick-off",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ส่ง notification เมื่อ kick-off</div>"
+  },
+  {
+    "key": "ส่ง notification เมื่อ race session เริ่ม",
+    "count": 1,
+    "sample": "<div class=\"toggle-desc\">ส่ง notification เมื่อ race session เริ่ม</div>"
+  },
+  {
+    "key": "ส่ง Rank Card เมื่อ Level Up",
+    "count": 1,
+    "sample": "<div><div class=\"toggle-label\">ส่ง Rank Card เมื่อ Level Up</div><div style=\"font-size:12px;color:var(--muted)\">แนบรูป rank card ไปพร้อม embed แจ้งเตือน</div></"
+  },
+  {
+    "key": "สถานะ",
+    "count": 1,
+    "sample": "<div class=\"stat-label\">สถานะ</div>"
+  },
+  {
+    "key": "สถานะ --",
+    "count": 1,
+    "sample": "<!-- สถานะ -->"
+  },
+  {
+    "key": "สถิติ live",
+    "count": 1,
+    "sample": "<!-- ─── สถิติ live ─── -->"
+  },
+  {
+    "key": "สมาชิก",
+    "count": 2,
+    "sample": "<span class=\"icon\">👥</span> สมาชิก"
+  },
+  {
+    "key": "สมาชิกกด react เพื่อรับ role ที่ต้องการ",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted)\">สมาชิกกด react เพื่อรับ role ที่ต้องการ</div>"
+  },
+  {
+    "key": "สมาชิกที่อยู่ในเซิร์ฟนานกว่ากำหนดจะได้รับเงินเพิ่มเมื่อใช้คำสั่ง",
+    "count": 1,
+    "sample": "💡 สมาชิกที่อยู่ในเซิร์ฟนานกว่ากำหนดจะได้รับเงินเพิ่มเมื่อใช้คำสั่ง <code style=\"background:var(--surface2);padding:2px 6px;border-radius:4px\">/daily</code>"
+  },
+  {
+    "key": "สร้างกิจกรรมเดิมพัน",
+    "count": 1,
+    "sample": "🎲 สร้างกิจกรรมเดิมพัน"
+  },
+  {
+    "key": "สร้างเดิมพัน",
+    "count": 4,
+    "sample": "แมตช์จากลีกที่ติดตามในหน้า Sports — คลิก <strong>สร้างเดิมพัน</strong> เพื่อกรอกฟอร์มอัตโนมัติ"
+  },
+  {
+    "key": "สร้างเดิมพันจากการแข่งขัน",
+    "count": 1,
+    "sample": "<div class=\"card-title\">⚽ สร้างเดิมพันจากการแข่งขัน</div>"
+  },
+  {
+    "key": "สร้างเดิมพันจากการแข่งขันฟุตบอล",
+    "count": 1,
+    "sample": "<!-- ─── สร้างเดิมพันจากการแข่งขันฟุตบอล ─── -->"
+  },
+  {
+    "key": "สร้างเดิมพันจากแมตช์ Esports",
+    "count": 1,
+    "sample": "<!-- ─── สร้างเดิมพันจากแมตช์ Esports ─── -->"
+  },
+  {
+    "key": "สร้างเดิมพันจาก Esports",
+    "count": 1,
+    "sample": "<div class=\"card-title\">🎮 สร้างเดิมพันจาก Esports</div>"
+  },
+  {
+    "key": "สร้างเดิมพันใหม่",
+    "count": 2,
+    "sample": "<!-- ─── สร้างเดิมพันใหม่ ─── -->"
+  },
+  {
+    "key": "สร้างและส่ง Embed",
+    "count": 1,
+    "sample": "<button class=\"btn btn-primary\" style=\"min-width:160px\" onclick=\"createReactionGroup(this)\">📢 สร้างและส่ง Embed</button>"
+  },
+  {
+    "key": "สร้าง App ใหม่",
+    "count": 1,
+    "sample": "<li>ไปที่ <strong style=\"color:var(--text)\">developer.spotify.com/dashboard</strong> → สร้าง App ใหม่</li>"
+  },
+  {
+    "key": "สร้าง Group ใหม่",
+    "count": 1,
+    "sample": "<div style=\"font-weight:700;font-size:14px;margin-bottom:14px\">➕ สร้าง Group ใหม่</div>"
+  },
+  {
+    "key": "สลับโหมด Loop (ปิด",
+    "count": 1,
+    "sample": "{ cmd:'/loop',          desc:'สลับโหมด Loop (ปิด → เพลงนี้ → ทั้ง Queue)',    icon:'🔁' },"
+  },
+  {
+    "key": "สวัสดี,",
+    "count": 1,
+    "sample": "<span>สวัสดี, <strong><%= user.username %></strong></span>"
+  },
+  {
+    "key": "สำหรับบอท",
+    "count": 1,
+    "sample": "<div style=\"font-weight:600;font-size:13px;margin-bottom:8px\">Role สำหรับบอท</div>"
+  },
+  {
+    "key": "สำหรับสมาชิกใหม่",
+    "count": 1,
+    "sample": "<div style=\"font-weight:600;font-size:13px;margin-bottom:8px\">Role สำหรับสมาชิกใหม่</div>"
+  },
+  {
+    "key": "สินค้าในร้านปัจจุบัน",
+    "count": 1,
+    "sample": "<div class=\"card-title\">📦 สินค้าในร้านปัจจุบัน</div>"
+  },
+  {
+    "key": "สินค้าไม่จำกัด",
+    "count": 2,
+    "sample": "<div class=\"toggle-label\">สินค้าไม่จำกัด</div>"
+  },
+  {
+    "key": "สี 1",
+    "count": 2,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">Background สี 1</label>"
+  },
+  {
+    "key": "สี 2",
+    "count": 1,
+    "sample": "<label>BG สี 2</label>"
+  },
+  {
+    "key": "สี 2 (gradient)",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">Background สี 2 (gradient)</label>"
+  },
+  {
+    "key": "สีธีม Embed",
+    "count": 1,
+    "sample": "<label>สีธีม Embed</label>"
+  },
+  {
+    "key": "สี Embed",
+    "count": 1,
+    "sample": "<label class=\"form-label\">สี Embed</label>"
+  },
+  {
+    "key": "สี top role)",
+    "count": 1,
+    "sample": "<label class=\"form-label\" style=\"font-size:11px\">Accent Color <span style=\"color:var(--muted)\">(ว่าง = สี top role)</span></label>"
+  },
+  {
+    "key": "สุ่มกี่ภารกิจต่อวัน",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>สุ่มกี่ภารกิจต่อวัน</label><input type=\"number\" name=\"dailyQuestCount\" value=\"<%= config.dailyQuestCount||3 %>\" min=\"1\" max=\"10\">"
+  },
+  {
+    "key": "สุ่มลำดับเพลงใน Queue',                          icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/shuffle',       desc:'สุ่มลำดับเพลงใน Queue',                          icon:'🔀' },"
+  },
+  {
+    "key": "สูงสุด",
+    "count": 2,
+    "sample": "<div class=\"form-group\"><label>สูงสุด</label><input type=\"number\" name=\"maxWorkGain\" value=\"<%= config.maxWorkGain || 0 %>\" min=\"0\"></div>"
+  },
+  {
+    "key": "แสดงในร้าน",
+    "count": 2,
+    "sample": "<div><div class=\"toggle-label\" style=\"font-size:12px\">แสดงในร้าน</div></div>"
+  },
+  {
+    "key": "แสดงเพลงปัจจุบัน พร้อม progress bar',            icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/nowplaying',    desc:'แสดงเพลงปัจจุบัน พร้อม progress bar',            icon:'🎵' },"
+  },
+  {
+    "key": "แสดงรายการเพลงใน Queue (pagination ทุก 10)',     icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/queue',         desc:'แสดงรายการเพลงใน Queue (pagination ทุก 10)',     icon:'📋' },"
+  },
+  {
+    "key": "แสดงโลโก้ทีมก่อน submit --",
+    "count": 1,
+    "sample": "<!-- VS preview bar — แสดงโลโก้ทีมก่อน submit -->"
+  },
+  {
+    "key": "ใส่ทั้งสามค่าใน",
+    "count": 1,
+    "sample": "<li>ใส่ทั้งสามค่าใน <code style=\"background:var(--surface);padding:1px 5px;border-radius:4px\">.env</code></li>"
+  },
+  {
+    "key": "หน่วงเวลา",
+    "count": 2,
+    "sample": "<span style=\"font-size:12px;color:var(--muted)\">หน่วงเวลา</span>"
+  },
+  {
+    "key": "หน่วยเวลา",
+    "count": 1,
+    "sample": "<label>หน่วยเวลา</label>"
+  },
+  {
+    "key": "หน้าหลัก",
+    "count": 1,
+    "sample": "<a href=\"/selector\">หน้าหลัก</a>"
+  },
+  {
+    "key": "หมดเวลา:",
+    "count": 1,
+    "sample": "<span>หมดเวลา: <strong><%= new Date(bet.expiresAt).toLocaleString('th-TH') %></strong></span>"
+  },
+  {
+    "key": "หมดเวลาใน (นาที",
+    "count": 1,
+    "sample": "<label>หมดเวลาใน (นาที — เว้นว่าง = ไม่กำหนด)</label>"
+  },
+  {
+    "key": "หมดเวลาใน (นาที)",
+    "count": 1,
+    "sample": "<label>หมดเวลาใน (นาที) — เว้นว่างถ้าไม่ต้องการกำหนด</label>"
+  },
+  {
+    "key": "หมดเวลาแล้ว'",
+    "count": 1,
+    "sample": "if (diff <= 0) { el.textContent = '⏰ หมดเวลาแล้ว'; return; }"
+  },
+  {
+    "key": "หมวด",
+    "count": 1,
+    "sample": "<span class=\"badge badge-blue\"><%= (config.storeCategories || []).length %> หมวด</span>"
+  },
+  {
+    "key": "หมวดหมู่สินค้า",
+    "count": 1,
+    "sample": "<div class=\"card-title\">🗂️ หมวดหมู่สินค้า</div>"
+  },
+  {
+    "key": "หมวดหมู่ (category)",
+    "count": 2,
+    "sample": "<label>หมวดหมู่ (category)</label>"
+  },
+  {
+    "key": "หยุดเพลงชั่วคราว',                               icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/pause',         desc:'หยุดเพลงชั่วคราว',                               icon:'⏸' },"
+  },
+  {
+    "key": "หยุดเพลงและล้าง Queue ทั้งหมด',                  icon:'",
+    "count": 1,
+    "sample": "{ cmd:'/stop',          desc:'หยุดเพลงและล้าง Queue ทั้งหมด',                  icon:'⏹' },"
+  },
+  {
+    "key": "หรือ",
+    "count": 2,
+    "sample": "<input type=\"text\" name=\"itemEmoji\" placeholder=\"🎁 หรือ <:custom:id>\" maxlength=\"100\">"
+  },
+  {
+    "key": "หรือปุ่มประกาศผล --",
+    "count": 1,
+    "sample": "<!-- Winner banner หรือปุ่มประกาศผล -->"
+  },
+  {
+    "key": "หรือลิงก์รูปภาพ (URL)",
+    "count": 1,
+    "sample": "<label>หรือลิงก์รูปภาพ (URL)</label>"
+  },
+  {
+    "key": "หรือ GIF/PNG/WebP\" oninput",
+    "count": 1,
+    "sample": "<input type=\"text\" name=\"itemImage\" placeholder=\"https://i.imgur.com/abc.jpg หรือ GIF/PNG/WebP\" oninput=\"previewStoreImg(this)\">"
+  },
+  {
+    "key": "หัวข้อ --",
+    "count": 1,
+    "sample": "<!-- หัวข้อ -->"
+  },
+  {
+    "key": "หัวข้อการเดิมพัน",
+    "count": 2,
+    "sample": "<label>หัวข้อการเดิมพัน *</label>"
+  },
+  {
+    "key": "หัวข้อแจ้งเตือน (Embed Title)",
+    "count": 1,
+    "sample": "<label class=\"form-label\">หัวข้อแจ้งเตือน (Embed Title)</label>"
+  },
+  {
+    "key": "เหยื่อต้องมีเงินขั้นต่ำ",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>เหยื่อต้องมีเงินขั้นต่ำ</label><input type=\"number\" name=\"robMinCoins\" value=\"<%= config.robMinCoins||50 %>\" min=\"1\"></div>"
+  },
+  {
+    "key": "เหรียญ!\" required",
+    "count": 1,
+    "sample": "<textarea name=\"newReply\" placeholder=\"คุณทำงานหนักและได้รับ {amount} เหรียญ!\" required></textarea>"
+  },
+  {
+    "key": "แหล่ง XP",
+    "count": 1,
+    "sample": "<div style=\"margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase\">แหล่ง XP</div>"
+  },
+  {
+    "key": "โหลดครั้งแรกอาจใช้เวลา 10-30 วินาที",
+    "count": 1,
+    "sample": "<br><small>⚠️ Liquipedia มี rate limit — โหลดครั้งแรกอาจใช้เวลา 10-30 วินาที</small>"
+  },
+  {
+    "key": "โหลดทีมลีกที่บันทึกไว้แล้ว",
+    "count": 1,
+    "sample": "// init football section — โหลดทีมลีกที่บันทึกไว้แล้ว"
+  },
+  {
+    "key": "โหลดไม่สำเร็จ:",
+    "count": 1,
+    "sample": "container.innerHTML = `<div style=\"color:var(--red)\">❌ โหลดไม่สำเร็จ: ${e.message}</div>`;"
+  },
+  {
+    "key": "โหลดไม่สำเร็จ",
+    "count": 1,
+    "sample": ".catch(() => { sel.innerHTML = '<option value=\"\">⚠️ โหลดไม่สำเร็จ</option>'; });"
+  },
+  {
+    "key": "โหลด channels จาก Discord API",
+    "count": 1,
+    "sample": "// โหลด channels จาก Discord API"
+  },
+  {
+    "key": "โหลด channels ไม่สำเร็จ",
+    "count": 1,
+    "sample": "if (sel) sel.innerHTML = '<option value=\"\">⚠️ โหลด channels ไม่สำเร็จ</option>';"
+  },
+  {
+    "key": "ใหม่",
+    "count": 2,
+    "sample": "<div class=\"form-hint\"><code>{level}</code> level ใหม่ &nbsp;·&nbsp; <code>{username}</code> ชื่อ</div>"
+  },
+  {
+    "key": "ให้ XP ตามเวลาที่อยู่ใน voice channel",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;color:var(--muted);margin-top:6px\">ให้ XP ตามเวลาที่อยู่ใน voice channel</div>"
+  },
+  {
+    "key": "ให้ XP และ Level จากการใช้งาน Discord",
+    "count": 1,
+    "sample": "<div style=\"font-size:12px;color:var(--muted);margin-top:2px\">ให้ XP และ Level จากการใช้งาน Discord</div>"
+  },
+  {
+    "key": "อยู่มา",
+    "count": 1,
+    "sample": "<div class=\"list-item-name\">อยู่มา <%= tier.minDays %> วันขึ้นไป</div>"
+  },
+  {
+    "key": "อยู่มาอย่างน้อย (วัน)",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>อยู่มาอย่างน้อย (วัน)</label><input type=\"number\" name=\"minDays\" min=\"0\" placeholder=\"30\" required></div>"
+  },
+  {
+    "key": "ออกจากระบบ\"",
+    "count": 1,
+    "sample": "<a href=\"/logout\" class=\"user-logout\" title=\"ออกจากระบบ\">✕</a>"
+  },
+  {
+    "key": "ออกจากระบบ",
+    "count": 1,
+    "sample": "<a href=\"/logout\">ออกจากระบบ</a>"
+  },
+  {
+    "key": "อัปเดต preview VS",
+    "count": 1,
+    "sample": "// อัปเดต preview VS"
+  },
+  {
+    "key": "อีโมจิสกุลเงิน",
+    "count": 1,
+    "sample": "<label>อีโมจิสกุลเงิน</label>"
+  },
+  {
+    "key": "อื่นๆ',       cmds:",
+    "count": 1,
+    "sample": "other:    { label: '🔧 อื่นๆ',       cmds: [] },"
+  },
+  {
+    "key": "โอกาสสำเร็จ (%)",
+    "count": 1,
+    "sample": "<div class=\"form-group\"><label>โอกาสสำเร็จ (%)</label><input type=\"number\" name=\"robSuccessChance\" value=\"<%= config.robSuccessChance||50 %>\" min=\"1\" max=\"99\"><"
+  },
+  {
+    "key": "ไอคอน Emoji",
+    "count": 1,
+    "sample": "<label>ไอคอน Emoji</label>"
+  },
+  {
+    "key": "ไอคอน Emoji (แทนรูปภาพ)",
+    "count": 1,
+    "sample": "<label>ไอคอน Emoji (แทนรูปภาพ)</label>"
+  },
+  {
+    "key": "ไอเทมในกระเป๋า",
+    "count": 1,
+    "sample": "<div style=\"font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px\">🎒 ไอเทมในกระเป๋า</div>"
+  }
+]

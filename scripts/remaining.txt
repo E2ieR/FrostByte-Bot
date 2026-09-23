@@ -1,0 +1,73 @@
+==== views/login.ejs
+==== views/selector.ejs
+245|            <button class="tab-btn active" onclick="filterTab(this,'all')">ทั้งหมด (<%= guilds.length %>)</button>
+246|            <button class="tab-btn" onclick="filterTab(this,'active')">บอทอยู่แล้ว (<%= guilds.filter(g=>g.hasBot).length %>)</button>
+247|            <button class="tab-btn" onclick="filterTab(this,'inactive')">ยังไม่มีบอท (<%= guilds.filter(g=>!g.hasBot).length %>)</button>
+==== views/betting-tab.ejs
+2|  แทนที่ส่วน <div id="tab-betting" class="tab-panel"> ... </div>
+3|  ใน manage.ejs ด้วยโค้ดด้านล่างนี้ทั้งหมด
+234|            <span class="badge badge-blurple"><%= bet.bets.length %> รายการ</span>
+268|            sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
+296|        if (diff <= 0) { el.textContent = '⏰ หมดเวลาแล้ว'; return; }
+==== views/manage.ejs
+588|             TAB: สกุลเงิน
+653|                    <span class="badge badge-blurple"><%= (config.workSituations || []).length %> ข้อความ</span>
+683|             TAB: รายได้จากยศ
+734|                    <span class="badge badge-green"><%= (config.roleIncomes || []).length %> ยศ</span>
+747|                                        <% if (role.startDate) { %><span style="color:#aaa;font-size:11px"> · เริ่ม <%= new Date(role.startDate).toLocaleString('th-TH') %></span><% } %>
+762|             TAB: ร้านค้า
+770|                    <span class="badge badge-blue"><%= (config.storeItemTypes || []).length %> ประเภท</span>
+783|                            <a href="/<%= guildId %>/delete-store-type/<%= t.typeId || t._id %>" onclick="return confirm('ลบประเภท <%= t.name %>?')" style="color:var(--danger);font-size:16px;line-height:1;text-decoration:none;margin-left:4px">×</a>
+797|                    <span class="badge badge-blue"><%= (config.storeCategories || []).length %> หมวด</span>
+810|                            <a href="/<%= guildId %>/delete-store-category/<%= cat.catId || cat._id %>" onclick="return confirm('ลบหมวด <%= cat.name %>?')" style="color:var(--danger);font-size:16px;line-height:1;text-decoration:none;margin-left:4px">×</a>
+963|                    <span class="badge badge-yellow"><%= (config.storeItems || []).length %> รายการ</span>
+985|                                        <% if (item.marketEnabled) { %>&nbsp;<span class="badge" style="background:#1a2a1a;color:#22d3ee"><%= mArrow %><%= mPct >= 0 ? '+' : '' %><%= mPct %>% ตลาด</span><% } %>
+989|                                        <% if (item.maxPerUser > 0) { %>&nbsp;· จำกัด <%= item.maxPerUser %>/คน<% } %>
+990|                                        &nbsp;· ขายคืน <%= item.sellPercent || 50 %>%
+1008|             TAB: ระบบ Level
+1596|             TAB: ระบบเดิมพัน
+1802|                        <span style="color:var(--muted)"><%= total.toLocaleString() %> <%= config.currencyEmoji||'🪙' %> · <%= (bet.bets||[]).length %> คน</span>
+1812|                        <span>💰 ขั้นต่ำ <%= (bet.minBet||1).toLocaleString() %><% if(bet.maxBet>0){%> · สูงสุด <%= bet.maxBet.toLocaleString() %><%}%> <%= config.currencyEmoji||'🪙' %></span>
+1845|                        👥 รายการผู้เดิมพัน (<%= bet.bets.length %> คน)
+2025|                                    <div class="list-item-name">อยู่มา <%= tier.minDays %> วันขึ้นไป</div>
+2026|                                    <div class="list-item-meta"><span class="badge badge-yellow">+<%= tier.amount.toLocaleString() %> <%= config.currencyEmoji||'💰' %> /วัน</span></div>
+2086|                        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Pool มีทั้งหมด <%= config.questPool.length %> ภารกิจ</div>
+2095|                                        &nbsp;เป้า <%= q.target %> &nbsp;|&nbsp;
+2111|             TAB: สมาชิก
+2150|             TAB: กีฬา & Esports
+2379|             TAB: ระบบเพลง
+2436|     MODAL: แก้ไขสมาชิก
+2476|     MODAL: แก้ไขสินค้า
+2695|                if (sel) sel.innerHTML = '<option value="">⚠️ โหลด channels ไม่สำเร็จ</option>';
+2700|        sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
+2724|        hint.textContent = opening ? 'คลิกเพื่อซ่อน ▴' : 'คลิกเพื่อโหลดแมตช์ ▾';
+2741|                listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">ไม่พบแมตช์ที่จะมาถึง<br><small>ตรวจสอบว่าเลือกลีกในหน้า Sports แล้ว หรืออาจอยู่ใน off-season</small></div>';
+2761|                    <button type="button" class="btn btn-sm btn-primary" onclick="prefillFootballBet(${i})" style="white-space:nowrap">⚽ สร้างเดิมพัน</button>
+2866|        if (title) title.textContent = `${ESP_LABEL[game]} — เลือกทีม`;
+2935|            <div style="font-size:11px;color:var(--muted);margin-bottom:7px">${activeRegion} — ${teams.length} ทีม</div>
+2971|                listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">ไม่พบแมตช์ Esports ในขณะนี้<br><small>ตรวจสอบว่าเปิดเกมในหน้า Sports แล้ว หรือลองใหม่ภายหลัง</small></div>';
+2989|                    <button type="button" class="btn btn-sm btn-primary" onclick="prefillEspBet(${i})" style="white-space:nowrap">🎮 สร้างเดิมพัน</button>
+2993|            if (loadEl) loadEl.textContent = '❌ เกิดข้อผิดพลาดในการโหลดแมตช์ Esports';
+3051|        fillSelect(selMsg,   curMsg,   '— ทุกช่องข้อความ —');
+3052|        fillSelect(selVoice, curVoice, '— ช่อง voice ที่ออก —');
+3109|                sel.innerHTML = '<option value="">— แจ้งในช่องที่พิมพ์ข้อความ —</option>';
+3118|                igCh.innerHTML = '<option value="">— เลือก channel —</option>';
+3145|                    <option value="">— เลือก Role —</option>${opts}
+3172|                <select class="form-input lv-mult-role"><option value="">— เลือก Role —</option>${opts}</select>
+3268|                <button type="button" class="btn btn-danger btn-sm" onclick="removeRcRoleStyle(${i})">ลบ</button>
+3407|                    : '<span style="color:var(--muted);font-size:11px">ไม่มียศ</span>';
+3415|                    : '<div style="font-size:11px;color:var(--muted);margin-top:6px">🎒 ไม่มีไอเทม</div>';
+3433|                            <div class="member-stat-label">💰 กระเป๋า</div>
+3437|                            <div class="member-stat-label">🏦 ธนาคาร</div>
+3441|                            <div class="member-stat-label">💎 รวม</div>
+3515|            return alert('กรุณากรอกตัวเลขที่ถูกต้อง (≥ 0)');
+3527|            showToastMsg('✅ บันทึกข้อมูลสมาชิกสำเร็จ');
+3562|            curPriceEl.textContent = `ราคาปัจจุบัน: ${(d.currentPrice || d.price).toLocaleString()} (ฐาน ${(d.basePrice || d.price).toLocaleString()}, ${pct >= 0 ? ')+' : ''}${pct}%)`;
+3610|        if (!itemName) return alert('กรุณากรอกชื่อสินค้า');
+3693|                <option value="">— เลือก Role —</option>
+3697|                <span style="font-size:12px;color:var(--muted)">หน่วงเวลา</span>
+3699|                <span style="font-size:12px;color:var(--muted)">วิ</span>
+3710|                <option value="">— เลือก Role —</option>
+3767|                <option value="">— เลือก Role —</option>
+3880|            container.innerHTML = `<div style="color:var(--red)">❌ โหลดไม่สำเร็จ: ${e.message}</div>`;
+3934|                sel.innerHTML = '<option value="">— เลือกช่องข้อความ —</option>';
