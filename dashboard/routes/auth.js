@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const { getGuild } = require('../guildData');
 const GuildConfig = require('../../models/GuildConfig');
 const discordOAuth = require('../discordOAuth');
 const activeLogins = new Set();
@@ -31,11 +31,8 @@ router.get('/manage/:guildId', async (req, res) => {
         let config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
         const guild = req.session.guilds?.find(g => g.id === guildId) || { name: guildId, id: guildId };
 
-        // ดึง roles จาก Discord API
-        const rolesResponse = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
-            headers: { Authorization: `Bot ${process.env.TOKEN}` }
-        });
-        const discordRoles = rolesResponse.data.filter(r => r.name !== '@everyone');
+        const discordRoles = getGuild(req, guildId).roles.cache
+            .filter(r => r.id !== guildId).map(r => ({ id: r.id, name: r.name, color: r.color }));
 
         res.render('manage', {
             user: req.session.user,
@@ -46,6 +43,7 @@ router.get('/manage/:guildId', async (req, res) => {
             query: req.query
         });
     } catch (err) {
+        if (err.status === 503) return res.status(503).send(err.message);
         console.error(`[Manage] failed: status=${err.response?.status} msg=${err.response?.data?.message || err.message}`);
         res.redirect('/selector');
     }

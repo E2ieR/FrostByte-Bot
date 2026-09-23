@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const axios   = require('axios');
+const { getGuild, getMembers } = require('../guildData');
 const User        = require('../../models/User');
 const GuildConfig = require('../../models/GuildConfig');
 
@@ -20,17 +20,10 @@ router.get('/api/:guildId/members', async (req, res) => {
         let discordMembers = [];
         let rolesMap = {};
         try {
-            const [mRes, rRes] = await Promise.all([
-                axios.get(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`, {
-                    headers: { Authorization: `Bot ${process.env.TOKEN}` }
-                }),
-                axios.get(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
-                    headers: { Authorization: `Bot ${process.env.TOKEN}` }
-                })
-            ]);
-            discordMembers = mRes.data;
-            rRes.data.forEach(r => {
-                if (r.name !== '@everyone')
+            const guild = getGuild(req, guildId);
+            discordMembers = await getMembers(guild);
+            guild.roles.cache.forEach(r => {
+                if (r.id !== guildId)
                     rolesMap[r.id] = { id: r.id, name: r.name, color: r.color || 0 };
             });
         } catch (e) {
@@ -225,10 +218,7 @@ router.post('/api/:guildId/level', async (req, res) => {
 router.get('/api/:guildId/channels', async (req, res) => {
     const { guildId } = req.params;
     try {
-        const r = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
-            headers: { Authorization: `Bot ${process.env.TOKEN}` }
-        });
-        res.json(r.data
+        res.json([...getGuild(req, guildId).channels.cache.values()]
             .filter(c => c.type === 0 || c.type === 5)
             .sort((a, b) => a.position - b.position)
             .map(c => ({ id: c.id, name: c.name, type: c.type }))

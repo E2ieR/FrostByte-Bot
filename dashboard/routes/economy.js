@@ -109,16 +109,13 @@ router.get('/:guildId/delete-reply/:index', async (req, res) => {
 
 // ─── Role Incomes ────────────────────────────────────────────────────────
 router.post('/:guildId/add-role-income', async (req, res) => {
-    const axios = require('axios');
+    const { getGuild } = require('../guildData');
     const { guildId } = req.params;
     let config = await GuildConfig.findOne({ guildId }) || new GuildConfig({ guildId });
 
     let roleName = req.body.roleId;
     try {
-        const rolesRes = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
-            headers: { Authorization: `Bot ${process.env.TOKEN}` }
-        });
-        const role = rolesRes.data.find(r => r.id === req.body.roleId);
+        const role = getGuild(req, guildId).roles.cache.get(req.body.roleId);
         if (role) roleName = role.name;
     } catch (e) {}
 

@@ -1,3 +1,4 @@
+const { getGuild } = require('../guildData');
 const express = require('express');
 const router  = express.Router();
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
@@ -419,8 +420,7 @@ router.get('/:guildId/betting-channels', async (req, res) => {
     const discordClient = req.app.locals.discordClient;
     if (!discordClient) return res.json([]);
     try {
-        const guild = await discordClient.guilds.fetch(req.params.guildId);
-        await guild.channels.fetch();
+        const guild = getGuild(req);
         const channels = guild.channels.cache
             .filter(c => c.isTextBased && c.isTextBased() && !c.isThread())
             .map(c => ({ id: c.id, name: c.name }))
