@@ -9,7 +9,7 @@ function fixture() {
     let now = 100000;
     const module = { exports: {} };
     vm.runInNewContext(fs.readFileSync(path.join(root, 'dashboard/guildData.js'), 'utf8'), {
-        module, Date: { now: () => now },
+        module, Date: { now: () => now }, setTimeout, clearTimeout,
     });
     return { ...module.exports, advance: () => { now += 61000; } };
 }
@@ -79,4 +79,25 @@ test('Manage renders cached roles repeatedly and returns 503 when bot is not rea
     client.isReady = () => false;
     await routes['/manage/:guildId'](req, res);
     assert.equal(res.code, 503);
+});
+
+test('slow Discord lookup returns cached profiles without duplicating the pending request', async () => {
+    const api = fixture(); let calls = 0, release;
+    const member = { id: 'u', user: { username: 'Alice' }, roles: { cache: new Map() } };
+    const guild = { members: { cache: new Map([['u', member]]), list: () => {
+        calls++; return new Promise(resolve => { release = resolve; });
+    } } };
+    const result = await api.getMemberSnapshot(guild, 5);
+    assert.equal(result.status, 'cached');
+    assert.equal(result.members[0].user.username, 'Alice');
+    await api.getMemberSnapshot(guild, 5);
+    assert.equal(calls, 1);
+    release(new Collection([['u', member]]));
+    assert.equal((await api.getMemberSnapshot(guild, 50)).status, 'fresh');
+});
+test('Discord lookup failure still returns an empty usable snapshot', async () => {
+    const api = fixture();
+    const result = await api.getMemberSnapshot({ members: { list: async () => { throw Error('429'); }, cache: new Map() } }, 5);
+    assert.equal(result.status, 'cached');
+    assert.equal(result.members.length, 0);
 });

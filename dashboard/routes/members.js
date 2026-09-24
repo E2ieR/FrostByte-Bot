@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const { getGuild, getMembers } = require('../guildData');
+const { getGuild, getMemberSnapshot } = require('../guildData');
 const User        = require('../../models/User');
 const GuildConfig = require('../../models/GuildConfig');
 
@@ -18,10 +18,13 @@ router.get('/api/:guildId/members', async (req, res) => {
 
         // ดึง members + roles จาก Discord API (best-effort)
         let discordMembers = [];
+        let profileStatus = 'unavailable';
         let rolesMap = {};
         try {
             const guild = getGuild(req, guildId);
-            discordMembers = await getMembers(guild);
+            const snapshot = await getMemberSnapshot(guild);
+            discordMembers = snapshot.members;
+            profileStatus = snapshot.status;
             guild.roles.cache.forEach(r => {
                 if (r.id !== guildId)
                     rolesMap[r.id] = { id: r.id, name: r.name, color: r.color || 0 };
@@ -64,7 +67,7 @@ router.get('/api/:guildId/members', async (req, res) => {
         const pages = Math.max(1, Math.ceil(total / limit));
         const data  = filtered.slice((page - 1) * limit, page * limit);
 
-        res.json({ members: data, total, page, pages });
+        res.json({ members: data, total, page, pages, profileStatus });
     } catch (err) {
         console.error('[Members API]', err);
         res.status(500).json({ error: 'โหลดข้อมูลล้มเหลว' });

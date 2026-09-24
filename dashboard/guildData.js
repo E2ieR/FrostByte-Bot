@@ -42,4 +42,23 @@ async function getMembers(guild) {
     })();
     return entry.pending;
 }
-module.exports = { getGuild, getMembers };
+// Limit how long a dashboard request waits; keep the shared REST request alive
+// so refreshes do not create additional requests while Discord is rate limited.
+async function getMemberSnapshot(guild, waitMs = 2500) {
+    let timer;
+    try {
+        const members = await Promise.race([
+            getMembers(guild),
+            new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Member lookup pending')), waitMs); }),
+        ]);
+        return { members, status: 'fresh' };
+    } catch {
+        const cached = new Map((memberLists.get(guild)?.data || []).map(m => [m.user.id, m]));
+        for (const m of guild.members.cache?.values() || []) {
+            cached.set(m.id, { user: { id: m.id, username: m.user.username, global_name: m.user.globalName, avatar: m.user.avatar },
+                nick: m.nickname, roles: [...m.roles.cache.keys()] });
+        }
+        return { members: [...cached.values()], status: 'cached' };
+    } finally { clearTimeout(timer); }
+}
+module.exports = { getGuild, getMembers, getMemberSnapshot };
