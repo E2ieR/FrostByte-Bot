@@ -63,7 +63,8 @@ test('Manage renders cached roles repeatedly and returns 503 when bot is not rea
             if (name === 'express') return { Router: () => ({ get: (url, fn) => { routes[url] = fn; } }) };
             if (name === '../guildData') return api;
             if (name === '../../models/GuildConfig') return { findOne: async () => ({}) };
-            if (name === '../discordOAuth') return {};
+            if (name === '../discordOAuth' || name === '../oauthStore') return {};
+            if (name === 'node:crypto') return require(name);
             throw new Error('Unexpected dependency: ' + name);
         }, module: { exports: {} }, console, process: { env: {} }, URLSearchParams,
     });

@@ -4,13 +4,47 @@ const { getGuild } = require('../guildData');
 const GuildConfig = require('../../models/GuildConfig');
 const discordOAuth = require('../discordOAuth');
 const activeLogins = new Set();
+const { randomBytes } = require('node:crypto');
+const oauthStore = require('../oauthStore');
+
+function authFailure(res, err, stage) {
+    res.set('Cache-Control', 'no-store');
+    if (err.response?.status === 429) {
+        const seconds = discordOAuth.retrySeconds(err.response);
+        const resumeAt = new Date(Date.now() + seconds * 1000).toISOString();
+        console.warn('[Auth] ' + (err.localCooldown ? 'local cooldown' : 'Discord rejected request') +
+            ' stage=' + stage + ' retry_after=' + seconds + 's resumeAt=' + resumeAt);
+        res.set('Retry-After', String(seconds));
+        return res.status(429).send('Discord จำกัดคำขอชั่วคราว กรุณารออย่างน้อย ' + seconds +
+            ' วินาที แล้วกลับหน้าแรกเพื่อเริ่ม Login ใหม่ เวลา UTC: ' + resumeAt +
+            ' — อย่ารีเฟรช callback หรือรีสตาร์ตซ้ำ');
+    }
+    // Do not log Axios request/config, authorization codes, tokens or full response bodies.
+    console.error('[Auth] failed stage=' + stage + ' status=' + (err.response?.status || err.status || 'internal'));
+    return res.status(503).send('Login is temporarily unavailable. Please return to the home page and try again later.');
+}
 
 // หน้าแรก — Login
 router.get('/', (req, res) => {
     if (req.session.user) return res.redirect('/selector');
-    const redirectUri = `${process.env.BASE_URL || 'http://localhost:3000'}/auth/discord/callback`;
-    const authorizeUrl = `https://discord.com/api/oauth2/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20guilds`;
-    res.render('login', { authorizeUrl });
+    res.render('login', { authorizeUrl: '/auth/discord' });
+});
+
+// Only a deliberate login action creates state; health checks to / do not call Discord.
+router.get('/auth/discord', async (req, res) => {
+    if (req.session.user) return res.redirect('/selector');
+    try {
+        await discordOAuth.assertAvailable();
+        const state = randomBytes(32).toString('hex');
+        await oauthStore.issueState(state, req.sessionID);
+        req.session.oauthStartedAt = Date.now();
+        await new Promise((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
+        const redirectUri = (process.env.BASE_URL || 'http://localhost:3000') + '/auth/discord/callback';
+        const params = new URLSearchParams({ client_id: process.env.CLIENT_ID,
+            redirect_uri: redirectUri, response_type: 'code', scope: 'identify guilds', state });
+        res.set('Cache-Control', 'no-store');
+        res.redirect('https://discord.com/oauth2/authorize?' + params);
+    } catch (err) { return authFailure(res, err, 'start'); }
 });
 
 // หน้าเลือก Server
@@ -64,8 +98,19 @@ router.get('/auth/discord/callback', async (req, res) => {
         return res.status(409).send('Login is already in progress. Please wait for the first request.');
     }
     activeLogins.add(req.sessionID);
-    let stage = 'token';
+    let stage = 'validation';
     try {
+        res.set('Cache-Control', 'no-store');
+        const state = req.query.state;
+        if (typeof state !== 'string' || !/^[a-f0-9]{64}$/.test(state) || code.length > 2048 ||
+            !await oauthStore.consumeState(state, req.sessionID)) {
+            return res.status(400).send('Login expired or already used. Return to the home page to start again.');
+        }
+        await discordOAuth.assertAvailable();
+        if (!await oauthStore.claimCode(code)) {
+            return res.status(400).send('This login code has already been used. Return to the home page.');
+        }
+        stage = 'token';
         const tokenResponse = await discordOAuth.request({ method: 'POST', url: 'https://discord.com/api/v10/oauth2/token', data: new URLSearchParams({
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
@@ -98,16 +143,7 @@ router.get('/auth/discord/callback', async (req, res) => {
         }));
         res.redirect('/selector');
     } catch (err) {
-        const status = err.response?.status;
-        const msg = err.response?.data?.message || err.message;
-        console.error(`[Auth] callback failed: stage=${stage} status=${status} msg=${msg}`);
-        if (status === 429) {
-            const seconds = discordOAuth.retrySeconds(err.response);
-            console.warn(`[Auth] Discord cooldown: retry_after=${seconds}s`);
-            res.set('Retry-After', String(seconds));
-            return res.status(429).send(`Discord จำกัดคำขอชั่วคราว กรุณารออย่างน้อย ${seconds} วินาที แล้วกลับหน้าแรกเพื่อเริ่ม Login ใหม่ อย่ารีเฟรชหน้า callback ซ้ำ`);
-        }
-        res.status(500).send('Auth Error');
+        return authFailure(res, err, stage);
     } finally {
         activeLogins.delete(req.sessionID);
     }
